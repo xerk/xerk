@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
   const city = decodeURIComponent(req.headers.get("x-vercel-ip-city") || "");
   const ref = String(body.referrer || "").slice(0, 300);
   const refHost = ref ? (() => { try { return new URL(ref).hostname; } catch { return ref; } })() : "direct";
-  const visit = { path: String(body.path || "/").slice(0, 200), referrer: refHost, utm_source: body.utm_source || null, utm_medium: body.utm_medium || null, country, city, lang: body.lang || null, tz: body.tz || null, ua: ua.slice(0, 200) };
+  const visit = { sid: body.sid ? String(body.sid).slice(0, 40) : null, path: String(body.path || "/").slice(0, 200), referrer: refHost, utm_source: body.utm_source || null, utm_medium: body.utm_medium || null, country, city, lang: body.lang || null, tz: body.tz || null, ua: ua.slice(0, 200) };
 
   const db = adminDb();
   if (db) await db.from("visits").insert(visit).then(() => {}, () => {});

@@ -24,12 +24,14 @@ export default async function Admin() {
   ];
   return (
     <div className="xk-container">
-      <header className="xk-page-head" data-hud="Admin"><span className="xk-label">Mission control</span><h1>Dashboard</h1><p>Traffic, leads and content for xerk.io. Stats source: {week.source}.</p></header>
+      <header className="xk-page-head" data-hud="Admin"><span className="xk-label">Mission control</span><h1>Dashboard</h1><p>Traffic, leads and content for xerk.io, from the site&apos;s own event log{week.posthog ? " and PostHog" : ""}.</p></header>
       <Section eyebrow="01 / Last 7 days" title="Traffic" scramble={false}>
-        <MetricRow items={[{ value: String(week.uniques ?? "—"), label: "Visitors" }, { value: String(week.pageviews ?? "—"), label: "Pageviews" }, { value: String(week.leads.length), label: "Leads" }, { value: String(week.events.find((e) => e.event === "cv_download")?.count ?? 0), label: "CV downloads" }]} />
+        <MetricRow items={[{ value: String(week.visitors), label: "Visitors" }, { value: String(week.pageviews), label: "Pageviews" }, { value: String(week.leads.length), label: "Leads" }, { value: String(week.events.find(([e]) => e === "cv_download")?.[1] ?? 0), label: "CV downloads" }]} />
         <div className="xk-two" style={{ marginTop: 24 }}>
-          <div className="xk-card" style={{ padding: 20 }}><span className="xk-label">Top referrers</span><ul>{week.referrers.map((r) => <li key={r.host}>{r.host || "direct"} — {r.count}</li>)}</ul></div>
-          <div className="xk-card" style={{ padding: 20 }}><span className="xk-label">Key events</span><ul>{week.events.map((e) => <li key={e.event}>{e.event} — {e.count}</li>)}</ul></div>
+          <div className="xk-card" style={{ padding: 20 }}><span className="xk-label">Top pages</span><ul>{week.pages.map(([k, n]) => <li key={k}>{n} · {k}</li>)}</ul></div>
+          <div className="xk-card" style={{ padding: 20 }}><span className="xk-label">Sources</span><ul>{week.sources.map(([k, n]) => <li key={k}>{n} · {k}</li>)}</ul></div>
+          <div className="xk-card" style={{ padding: 20 }}><span className="xk-label">Actions</span><ul>{week.events.map(([k, n]) => <li key={k}>{n} · {k.replace(/_/g, " ")}</li>)}</ul></div>
+          <div className="xk-card" style={{ padding: 20 }}><span className="xk-label">Asked my CV</span><ul>{week.questions.map((q, i) => <li key={i}>{q}</li>)}</ul></div>
         </div>
       </Section>
       <Section eyebrow="02 / Inbox" title={`Leads (${leads.length})`} scramble={false}>

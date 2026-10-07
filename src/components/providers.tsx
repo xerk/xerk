@@ -5,6 +5,7 @@ import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, type ReactNode } from "react";
+import { track, sessionId } from "@/lib/track";
 
 const KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 
@@ -12,8 +13,8 @@ function PageViews() {
   const pathname = usePathname();
   const search = useSearchParams();
   useEffect(() => {
-    if (!KEY || !posthog.__loaded) return;
-    posthog.capture("$pageview", { $current_url: window.location.href });
+    if (KEY && posthog.__loaded) posthog.capture("$pageview", { $current_url: window.location.href });
+    if (!/bot|crawl|spider|headless/i.test(navigator.userAgent)) track("pageview");
   }, [pathname, search]);
   return null;
 }
@@ -28,7 +29,7 @@ function VisitPing() {
       fetch("/api/visit", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ path: location.pathname, referrer: document.referrer, utm_source: params.get("utm_source"), utm_medium: params.get("utm_medium"), lang: navigator.language, tz: Intl.DateTimeFormat().resolvedOptions().timeZone }),
+        body: JSON.stringify({ sid: sessionId(), path: location.pathname, referrer: document.referrer, utm_source: params.get("utm_source"), utm_medium: params.get("utm_medium"), lang: navigator.language, tz: Intl.DateTimeFormat().resolvedOptions().timeZone }),
         keepalive: true,
       }).catch(() => {});
     } catch {}

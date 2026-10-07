@@ -15,8 +15,22 @@ export const ACHIEVEMENTS = {
 } as const;
 export type AchievementId = keyof typeof ACHIEVEMENTS;
 
+export function sessionId() {
+  try {
+    let id = sessionStorage.getItem("xk:sid");
+    if (!id) { id = Math.random().toString(36).slice(2, 12); sessionStorage.setItem("xk:sid", id); }
+    return id;
+  } catch { return ""; }
+}
+
+/** Sends to PostHog (if configured) and to the site's own event log in Supabase. */
 export function track(event: string, props?: Record<string, unknown>) {
   try { if (posthog.__loaded) posthog.capture(event, props); } catch {}
+  try {
+    const q = new URLSearchParams(location.search);
+    const body = JSON.stringify({ name: event, path: location.pathname, sid: sessionId(), referrer: document.referrer, utm_source: q.get("utm_source"), props });
+    if (!navigator.sendBeacon?.("/api/event", new Blob([body], { type: "application/json" }))) fetch("/api/event", { method: "POST", body, keepalive: true, headers: { "content-type": "application/json" } }).catch(() => {});
+  } catch {}
 }
 
 export function unlock(id: AchievementId) {
