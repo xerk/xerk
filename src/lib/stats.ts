@@ -1,7 +1,7 @@
 import { adminDb } from "./supabase";
 import { esc } from "./telegram";
 
-const PH_HOST = process.env.POSTHOG_API_HOST || "https://us.posthog.com";
+const PH_HOST = process.env.POSTHOG_API_HOST || (process.env.NEXT_PUBLIC_POSTHOG_REGION === "eu" ? "https://eu.posthog.com" : "https://us.posthog.com");
 const PH_KEY = process.env.POSTHOG_PERSONAL_API_KEY;
 const PH_PROJECT = process.env.POSTHOG_PROJECT_ID;
 // The PostHog project may be shared with other apps — only count this site's traffic.

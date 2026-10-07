@@ -1,12 +1,15 @@
 import type { NextConfig } from "next";
 
+// PostHog cloud region for the /ingest reverse proxy: "us" or "eu".
+const PH_REGION = process.env.NEXT_PUBLIC_POSTHOG_REGION === "eu" ? "eu" : "us";
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   // PostHog reverse proxy so analytics survive ad blockers
   async rewrites() {
     return [
-      { source: "/ingest/static/:path*", destination: "https://us-assets.i.posthog.com/static/:path*" },
-      { source: "/ingest/:path*", destination: "https://us.i.posthog.com/:path*" },
+      { source: "/ingest/static/:path*", destination: `https://${PH_REGION}-assets.i.posthog.com/static/:path*` },
+      { source: "/ingest/:path*", destination: `https://${PH_REGION}.i.posthog.com/:path*` },
     ];
   },
   skipTrailingSlashRedirect: true,
