@@ -1,10 +1,11 @@
 import { SITE_URL, experience, profile, skills } from "@/data/profile";
-import { projects } from "@/data/projects";
+import { getProjects } from "@/lib/projects";
 import { getPost, getPosts } from "@/lib/posts";
 
 export const revalidate = 3600;
 
 export async function GET() {
+  const projects = await getProjects();
   const posts = await getPosts();
   const bodies = await Promise.all(posts.map((p) => getPost(p.slug)));
   const md = `# ${profile.name} — ${profile.title}

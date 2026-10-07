@@ -1,9 +1,9 @@
 import { profile, github, experience } from "./profile";
-import { projects } from "./projects";
+import type { Project } from "./projects";
 
 export const MOTD = `xerk.os v2.0 — ${profile.years}+ years loaded\ntype \`help\` for commands`;
 
-export const terminalCommands: Record<string, string[]> = {
+export const terminalCommands = (projects: Pick<Project, "code" | "title" | "slug">[]): Record<string, string[]> => ({
   whoami: [`${profile.name} — senior full-stack & AI engineer`, `${profile.years}+ years · ${profile.location} (${profile.timezone}) · remote with US & EU teams`],
   projects: projects.map((p) => `${p.code}  ${p.title.padEnd(24)} ${p.slug}`).concat(["", "try: open ai-agent-mcp"]),
   experience: experience.map((e) => `${e.period.padEnd(20)} ${e.company} — ${e.role}`),
@@ -13,4 +13,4 @@ export const terminalCommands: Record<string, string[]> = {
   contact: [profile.email, "or run: hire"],
   hire: ["→ /hire  ·  Upwork  ·  book a call", "Reply within one working day."],
   "sudo hire-me": ["[sudo] permission granted.", "Opening /hire … achievement unlocked: Root access (+200 XP)"],
-};
+});

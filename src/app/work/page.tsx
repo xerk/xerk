@@ -1,12 +1,13 @@
 import { ProjectCard, CTABar, Button } from "@/components/xerk/ui";
 import { LevelSelect } from "@/components/xerk/client";
-import { projects } from "@/data/projects";
+import { getProjects } from "@/lib/projects";
 import { pageMeta, JsonLd, breadcrumbJsonLd } from "@/lib/seo";
 import { SITE_URL } from "@/data/profile";
 
 export const metadata = pageMeta({ title: "Case studies: real-time systems, AI agents and SaaS", description: "Case studies by Ahmed Mamdouh: a real-time platform with 100K+ concurrent connections, a production AI agent and MCP server, the Zerocash e-wallet, SweepSouth, UptimeRobot and more.", path: "/work" });
 
-export default function WorkPage() {
+export default async function WorkPage() {
+  const projects = await getProjects();
   return (
     <div className="xk-container">
       <JsonLd data={breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Work", path: "/work" }])} />

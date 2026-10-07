@@ -13,7 +13,7 @@ cp .env.example .env.local   # every integration is optional; the site works wit
 pnpm dev
 ```
 
-`pnpm build` builds the site, `pnpm typecheck` runs the type checker, and `pnpm seed` pushes projects and posts to Supabase.
+`pnpm build` builds the site, `pnpm typecheck` runs the type checker, and `pnpm seed` inserts missing projects and posts into Supabase (`pnpm seed -- --overwrite` replaces existing rows).
 
 ## Where things live
 
@@ -36,8 +36,8 @@ pnpm dev
 - `/hire` — services, process, FAQ and the lead form.
 - `/cv` — HTML CV plus the PDF.
 - `/uses` and `/now`.
-- `/admin` (password) — traffic, leads, visits and an integrations checklist.
-- `/studio` (password) — the link → video tool.
+- `/admin` (Supabase magic-link login, `ADMIN_EMAILS` only) — CMS for posts, projects (incl. demo HTML and videos), media and leads, plus traffic stats. Edits go live without a redeploy.
+- `/studio` (admin login) — the link → video tool.
 
 ## Integrations (set in Vercel → Environment Variables)
 
@@ -49,7 +49,7 @@ pnpm dev
 | Leads, visits and content in the DB | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | leads still go to Telegram |
 | Ask my CV with an LLM | `AI_GATEWAY_API_KEY` (or Vercel OIDC), `AI_MODEL` | keyword search over the CV and case studies |
 | Live GitHub heatmap | `GITHUB_TOKEN` | committed snapshot |
-| Admin and studio | `ADMIN_PASSWORD` | `/admin` returns 404 |
+| Admin CMS and studio | Supabase vars + `ADMIN_EMAILS` | `/admin` returns 404 |
 | Upwork link, booking link | `NEXT_PUBLIC_UPWORK_URL`, `NEXT_PUBLIC_BOOKING_URL` | placeholder Upwork URL, mailto |
 
 **Telegram setup (one command):** create a bot with @BotFather, send it any message, then run `bash scripts/telegram-setup.sh <BOT_TOKEN>` and redeploy.
@@ -66,7 +66,7 @@ curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook?url=https://www
 
 **Supabase setup:**
 1. Create a project, or add it from the Vercel Marketplace so the env vars sync automatically.
-2. Run `supabase/migrations/0001_init.sql`.
+2. Apply `supabase/migrations/*.sql` (`supabase db push`).
 3. Run `pnpm seed`.
 
 ## Link → video (Phase 5)

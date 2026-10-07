@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Logo, SocialLinks, Button, DockNav } from "./ui";
 import { CommandPalette, ScrollHUD, SearchTrigger, ThemeToggle, type PaletteItem } from "./client";
 import { profile, socials, bookingUrl, upworkHref } from "@/data/profile";
-import { projects } from "@/data/projects";
+import { getProjects } from "@/lib/projects";
 import { getPosts } from "@/lib/posts";
 import { getRepoStars, SITE_REPO } from "@/lib/github";
 import { Icon } from "./icon";
@@ -72,7 +72,7 @@ export function MobileDock() {
 }
 
 export async function Palette() {
-  const posts = await getPosts();
+  const [posts, projects] = await Promise.all([getPosts(), getProjects()]);
   const items: PaletteItem[] = [
     ...projects.map((p) => ({ group: "Stages", label: p.title, href: `/work/${p.slug}`, icon: p.ai ? "robot" : "game-controller", hint: p.code, ai: p.ai })),
     ...posts.slice(0, 12).map((p) => ({ group: "Blog", label: p.title, href: `/blog/${p.slug}`, icon: "pen-nib", hint: "post" })),

@@ -1,11 +1,12 @@
 import { aiStack, experience, hireFaq, profile, services, skills } from "@/data/profile";
-import { projects } from "@/data/projects";
+import { getProjects } from "@/lib/projects";
 import { getPosts } from "./posts";
 
 export type Chunk = { id: string; label: string; href: string; text: string };
 
 /** Everything "Ask my CV" may answer from. Also the body of /llms-full.txt. */
 export async function getKnowledge(): Promise<Chunk[]> {
+  const projects = await getProjects();
   const chunks: Chunk[] = [
     { id: "profile", label: "Profile", href: "/cv", text: `${profile.description} Location: ${profile.location} (${profile.timezone}). ${profile.availability}. Email ${profile.email}. Education: ${profile.education.degree}, ${profile.education.school} (${profile.education.period}). Languages: ${profile.languages.join(", ")}.` },
     { id: "skills", label: "Skills", href: "/cv", text: Object.entries(skills).map(([k, v]) => `${k}: ${v.join(", ")}`).join(". ") },

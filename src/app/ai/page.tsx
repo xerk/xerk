@@ -1,7 +1,7 @@
 import { AIStack, BentoGrid, BentoTile, Button, CTABar, FAQ, ProjectCard, Section } from "@/components/xerk/ui";
 import { AskMyCV } from "@/components/xerk/client";
 import { aiStack } from "@/data/profile";
-import { projects } from "@/data/projects";
+import { getProjects } from "@/lib/projects";
 import { pageMeta, JsonLd, faqJsonLd } from "@/lib/seo";
 
 const faq = [
@@ -12,7 +12,8 @@ const faq = [
 
 export const metadata = pageMeta({ title: "AI engineering: production agents, MCP servers and RAG", description: "AI work by Ahmed Mamdouh: a production agent on Anthropic + OpenAI with guardrails, an MCP server for secure tool access, RAG with Qdrant and evals, fine-tuning on SageMaker & Bedrock.", path: "/ai" });
 
-export default function AIPage() {
+export default async function AIPage() {
+  const projects = await getProjects();
   const ai = projects.filter((p) => p.ai || p.slug === "realtime-device-platform");
   return (
     <div className="xk-container">

@@ -1,11 +1,12 @@
 import { Badge, Button } from "@/components/xerk/ui";
 import { experience, profile, skills, socials } from "@/data/profile";
-import { projects } from "@/data/projects";
+import { getProjects } from "@/lib/projects";
 import { pageMeta } from "@/lib/seo";
 
 export const metadata = pageMeta({ title: "CV — Ahmed Mamdouh, Senior Full-Stack & AI Engineer", description: `${profile.description} Download the PDF CV.`, path: "/cv" });
 
-export default function CV() {
+export default async function CV() {
+  const projects = await getProjects();
   return (
     <div className="xk-container xk-cv">
       <header className="xk-page-head" style={{ padding: "48px 0 24px" }} data-hud="CV">

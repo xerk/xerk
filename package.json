@@ -7,11 +7,12 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "seed": "node --experimental-strip-types scripts/seed-supabase.ts"
+    "seed": "node --env-file-if-exists=.env.local --experimental-strip-types scripts/seed-supabase.ts"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
     "@phosphor-icons/react": "^2.1.10",
+    "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.117.2",
     "@types/mdx": "^2.0.13",
     "ai": "^7.0.128",

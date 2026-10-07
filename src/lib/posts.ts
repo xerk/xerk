@@ -8,7 +8,7 @@ import rehypeStringify from "rehype-stringify";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
-import { publicDb } from "./supabase";
+import { adminDb, publicDb } from "./supabase";
 import { readingTime } from "./utils";
 
 export type PostMeta = { slug: string; title: string; publishedAt: string; summary: string; tags: string[]; image?: string; video?: string; readingTime: string; source?: string };
@@ -31,7 +31,8 @@ function slugify(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9\s-]/g, "").trim().replace(/\s+/g, "-");
 }
 
-function fromFile(slug: string): Omit<Post, "html"> | null {
+/** A post from content/<slug>/index.mdx (repo fallback). */
+export function fromFile(slug: string): Omit<Post, "html"> | null {
   const file = path.join(DIR, slug, "index.mdx");
   if (!fs.existsSync(file)) return null;
   const { data, content } = matter(fs.readFileSync(file, "utf8"));
@@ -51,31 +52,55 @@ function fromFile(slug: string): Omit<Post, "html"> | null {
   };
 }
 
-async function fromDb(): Promise<Omit<Post, "html">[]> {
+type DbPosts = { published: Omit<Post, "html">[]; hidden: Set<string> };
+
+/** Published rows (RLS-bound public client) plus the slugs of rows that exist but aren't published. */
+async function fromDb(): Promise<DbPosts> {
+  const out: DbPosts = { published: [], hidden: new Set() };
   const db = publicDb();
-  if (!db) return [];
-  const { data, error } = await db.from("posts").select("slug,title,summary,tags,published_at,body_md,cover_url").eq("status", "published").order("published_at", { ascending: false });
-  if (error || !data) return [];
-  return data.map((r) => ({
-    slug: r.slug, title: r.title, summary: r.summary || "", tags: r.tags || [], publishedAt: String(r.published_at).slice(0, 10), image: r.cover_url || undefined,
-    readingTime: readingTime(r.body_md || ""), markdown: r.body_md || "", source: "supabase",
-    headings: [...(r.body_md || "").matchAll(/^##\s+(.+)$/gm)].map((m: RegExpMatchArray) => ({ id: slugify(m[1]), label: m[1].trim() })),
-  }));
+  if (!db) return out;
+  try {
+    const { data, error } = await db.from("posts").select("slug,title,summary,tags,published_at,body_md,cover_url,video_url,source").eq("status", "published").order("published_at", { ascending: false });
+    if (!error && data) {
+      out.published = data.map((r) => ({
+        slug: r.slug, title: r.title, summary: r.summary || "", tags: r.tags || [], publishedAt: r.published_at ? String(r.published_at).slice(0, 10) : "",
+        image: r.cover_url || undefined, video: r.video_url || undefined, source: r.source || "supabase",
+        readingTime: readingTime(r.body_md || ""), markdown: r.body_md || "",
+        headings: [...(r.body_md || "").matchAll(/^##\s+(.+)$/gm)].map((m: RegExpMatchArray) => ({ id: slugify(m[1]), label: m[1].trim() })),
+      }));
+    }
+    // Drafts/unpublished rows must also hide the content/ file with the same slug, or Unpublish would do nothing.
+    const admin = adminDb();
+    if (admin) {
+      const { data: rest } = await admin.from("posts").select("slug").neq("status", "published");
+      rest?.forEach((r) => out.hidden.add(r.slug));
+    }
+  } catch {
+    // Network/DB failure: fall back to content/ files.
+  }
+  return out;
+}
+
+const loadDb = cache(fromDb);
+
+export function fileSlugs(): string[] {
+  return fs.existsSync(DIR) ? fs.readdirSync(DIR).filter((d) => fs.existsSync(path.join(DIR, d, "index.mdx"))) : [];
 }
 
 export const getPosts = cache(async (): Promise<PostMeta[]> => {
-  const files = fs.existsSync(DIR) ? fs.readdirSync(DIR).map(fromFile).filter((p): p is Omit<Post, "html"> => !!p) : [];
-  const db = await fromDb();
+  const db = await loadDb();
+  const files = fileSlugs().filter((s) => !db.hidden.has(s)).map(fromFile).filter((p): p is Omit<Post, "html"> => !!p);
   const bySlug = new Map<string, Omit<Post, "html">>();
-  // Repo files are the source of truth; Supabase adds posts that only exist there (e.g. written in the dashboard).
-  [...db, ...files].forEach((p) => bySlug.set(p.slug, p));
+  // Supabase (edited in /admin) is the source of truth; content/ files fill in slugs the DB doesn't have.
+  [...files, ...db.published].forEach((p) => bySlug.set(p.slug, p));
   return [...bySlug.values()]
     .map(({ markdown: _m, headings: _h, ...meta }) => meta)
     .sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
 });
 
 export const getPost = cache(async (slug: string): Promise<Post | null> => {
-  const p = fromFile(slug) || (await fromDb()).find((x) => x.slug === slug) || null;
+  const db = await loadDb();
+  const p = db.published.find((x) => x.slug === slug) || (db.hidden.has(slug) ? null : fromFile(slug));
   if (!p) return null;
   return { ...p, html: await markdownToHtml(p.markdown) };
 });

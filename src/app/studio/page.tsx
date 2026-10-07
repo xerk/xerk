@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { Section, CodeLine } from "./parts";
-import { projects } from "@/data/projects";
+import { getProjects } from "@/lib/projects";
 import { SITE_URL } from "@/data/profile";
 
 export const metadata: Metadata = { title: "Video studio", robots: { index: false, follow: false } };
 
-export default function Studio() {
+export default async function Studio() {
+  const projects = await getProjects();
   return (
     <div className="xk-container">
       <header className="xk-page-head" data-hud="Studio"><span className="xk-label">Studio</span><h1>Link → video</h1><p>Turn any page into a short branded video and schedule it to LinkedIn / X through Postiz (post.xerk.io). Runs as the <code>link-to-video</code> Claude Code skill in this repo.</p></header>

@@ -1,7 +1,7 @@
 import { AchievementGrid, BentoGrid, BentoTile, Button, GitHubHeatmap, Marquee, PlayerCard, QuestLog, Section, SkillTree } from "@/components/xerk/ui";
 import { AskMyCV, LevelSelect, Terminal } from "@/components/xerk/client";
 import { achievements, experience, github, profile, skillTree, stats, ticker } from "@/data/profile";
-import { projects } from "@/data/projects";
+import { getProjects } from "@/lib/projects";
 import { MOTD, terminalCommands } from "@/data/terminal";
 import { getContributions } from "@/lib/github";
 import { pageMeta } from "@/lib/seo";
@@ -12,6 +12,7 @@ export const metadata = pageMeta({ title: "Play: my CV as a game", description: 
 const LOADOUT = [{ brand: "nestjs", label: "NestJS" }, { brand: "nextdotjs", label: "Next.js" }, { brand: "claude", label: "Claude" }, { brand: "graphql", label: "GraphQL" }, { brand: "kubernetes", label: "Kubernetes" }, { brand: "amazonwebservices", label: "AWS" }];
 
 export default async function Play() {
+  const projects = await getProjects();
   const contrib = await getContributions();
   const now = new Date();
   const season = Math.round(((now.getMonth() + now.getDate() / 31) / 12) * 100);
@@ -49,7 +50,7 @@ export default async function Play() {
         </Section>
         <Section id="console" eyebrow="06 / Console" title="Prefer the command line?" text="Type help. There might be a hidden command.">
           <div className="xk-two">
-            <Terminal motd={MOTD} commands={terminalCommands} boot={["whoami", "github"]} />
+            <Terminal motd={MOTD} commands={terminalCommands(projects)} boot={["whoami", "github"]} />
             <AskMyCV suggestions={["Has he shipped AI agents to production?", "How big was the real-time system?", "Is he available?"]} />
           </div>
         </Section>

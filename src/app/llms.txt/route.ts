@@ -1,11 +1,12 @@
 import { SITE_URL, profile, services, socials } from "@/data/profile";
-import { projects } from "@/data/projects";
+import { getProjects } from "@/lib/projects";
 import { getPosts } from "@/lib/posts";
 
 export const revalidate = 3600;
 
 // https://llmstxt.org — a Markdown map of the site for AI assistants.
 export async function GET() {
+  const projects = await getProjects();
   const posts = await getPosts();
   const md = `# ${profile.name} — ${profile.title}
 

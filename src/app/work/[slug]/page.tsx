@@ -2,26 +2,29 @@ import { notFound } from "next/navigation";
 import { Badge, Button, CaseStudyHeader, Callout, CTABar, FAQ, KeyTakeaways, MetricRow, RelatedProjects, SocialLinks, TableOfContents } from "@/components/xerk/ui";
 import { Icon } from "@/components/xerk/icon";
 import { ArtifactEmbed, HeroScene } from "@/components/xerk/client";
-import { getProject, projects } from "@/data/projects";
+import { getProject, getProjects } from "@/lib/projects";
 import { SITE_URL, profile, socials, upworkHref } from "@/data/profile";
 import { pageMeta, JsonLd, breadcrumbJsonLd, faqJsonLd } from "@/lib/seo";
 import { pad2 } from "@/lib/utils";
 
-export function generateStaticParams() {
-  return projects.map((p) => ({ slug: p.slug }));
+export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  return (await getProjects()).map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/work/[slug]">) {
   const { slug } = await params;
-  const p = getProject(slug);
+  const p = await getProject(slug);
   if (!p) return {};
   return pageMeta({ title: `${p.title}: ${p.summary.split(":")[0].split(".")[0]} — case study`.slice(0, 90), description: p.answer.slice(0, 160), path: `/work/${p.slug}`, type: "article", image: `/og?title=${encodeURIComponent(p.title)}&kind=Case%20study&stat=${encodeURIComponent(p.big || p.metrics[0]?.value || "")}` });
 }
 
 export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
   const { slug } = await params;
-  const p = getProject(slug);
+  const p = await getProject(slug);
   if (!p) notFound();
+  const projects = await getProjects();
   const i = projects.findIndex((x) => x.slug === p.slug);
   const related = [projects[(i + 1) % projects.length], projects[(i + 2) % projects.length]];
   const toc = [...p.sections.map((s) => ({ id: s.id, label: s.title })), ...(p.embedUrl || p.video || p.screens?.length ? [{ id: "demo", label: p.embedUrl ? "Demo" : "Screens" }] : []), ...(p.faq.length ? [{ id: "faq", label: "FAQ" }] : [])];

@@ -3,7 +3,7 @@ import { BentoGrid, BentoTile, Button, CTABar, PlayerCard, QuestLog, ProjectCard
 import { HeroScene } from "@/components/xerk/client";
 import { BlogCard } from "@/components/xerk/blog";
 import { bookingUrl, experience, profile, socials, stats, upworkHref, SITE_URL } from "@/data/profile";
-import { projects } from "@/data/projects";
+import { getProjects } from "@/lib/projects";
 import { getPosts } from "@/lib/posts";
 import { formatDate } from "@/lib/utils";
 import { JsonLd } from "@/lib/seo";
@@ -16,6 +16,7 @@ export default async function Home() {
   const posts = await getPosts();
   const now = new Date();
   const season = Math.round(((now.getMonth() + now.getDate() / 31) / 12) * 100);
+  const projects = await getProjects();
   const [featured, ...rest] = projects;
   return (
     <>
