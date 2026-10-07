@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { adminDb } from "@/lib/supabase";
-import { ADMIN_BASE } from "@/lib/admin-path";
 
 // First-party event log (pageviews + key actions) so stats work without a PostHog personal key.
 const ALLOWED = new Set(["pageview", "cv_download", "hire_click", "upwork_click", "linkedin_click", "github_click", "x_click", "book_call", "project_view", "demo_launch", "demo_cta", "video_play", "ask_cv_question", "lead_submit", "achievement_unlocked", "quests_open", "quest_go", "terminal_command", "palette_open"]);
@@ -10,9 +9,8 @@ export async function POST(req: NextRequest) {
   if (/bot|crawl|spider|preview|headless|lighthouse/i.test(ua)) return new NextResponse(null, { status: 204 });
   const b = await req.json().catch(() => null);
   if (!b || !ALLOWED.has(b.name)) return new NextResponse(null, { status: 204 });
-  // Never log the dashboard or the owner's own browsing.
-  const path = String(b.path || "");
-  if (req.cookies.get("xk_owner")?.value === "1" || path === ADMIN_BASE || path.startsWith(`${ADMIN_BASE}/`)) return new NextResponse(null, { status: 204 });
+  // Never log the owner's own browsing (xk_owner cookie, set on sign-in).
+  if (req.cookies.get("xk_owner")?.value === "1") return new NextResponse(null, { status: 204 });
   const db = adminDb();
   if (db) {
     const ref = String(b.referrer || "");

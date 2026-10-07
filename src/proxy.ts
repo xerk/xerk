@@ -40,9 +40,9 @@ export async function proxy(req: NextRequest) {
   const finish = (r: NextResponse) => {
     if (r !== res) res.cookies.getAll().forEach((c) => r.cookies.set(c)); // keep refreshed session cookies
     Object.entries(HARDEN).forEach(([k, v]) => r.headers.set(k, v));
-    // Analytics opt-out: nothing on dashboard pages is tracked, and once signed in, the owner's own
-    // visits to the public site aren't counted either (read by src/lib/track.ts and PostHog's before_send).
-    r.cookies.set("xk_nt", "1", { path: ADMIN_BASE, sameSite: "lax", secure: req.nextUrl.protocol === "https:" });
+    // Analytics: everyone is counted (sign-in page included) except the owner. Once signed in, this browser
+    // gets xk_owner and is skipped everywhere (src/lib/track.ts, PostHog before_send, /api/event).
+    if (req.cookies.has("xk_nt")) r.cookies.set("xk_nt", "", { path: ADMIN_BASE, maxAge: 0 }); // retired cookie
     if (admin) r.cookies.set("xk_owner", "1", { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax", secure: req.nextUrl.protocol === "https:" });
     return r;
   };

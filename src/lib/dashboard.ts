@@ -14,8 +14,9 @@ type LeadRow = { id: string; name: string | null; email: string; service: string
 export type Point = { t: string; label: string; visitors: number; pageviews: number; actions: number };
 export type Kpi = { key: string; label: string; value: number; prev: number; delta: number | null; series: number[]; format?: "int" | "dec" };
 
-// Dashboard traffic (current path, the old /admin, and the earlier random hq-… path) never counts as site traffic.
-const isDashboardPath = (p: string | null) => !!p && (p === ADMIN_BASE || p.startsWith(`${ADMIN_BASE}/`) || /^\/(admin|hq-[0-9a-f]{6,})(\/|$)/.test(p));
+// Dashboard pages are owner-only, so they're not site traffic. The sign-in page is: anyone can open it.
+// (Old /admin and hq-… rows were the owner testing.)
+const isDashboardPath = (p: string | null) => !!p && p !== `${ADMIN_BASE}/login` && (p === ADMIN_BASE || p.startsWith(`${ADMIN_BASE}/`) || /^\/(admin|hq-[0-9a-f]{6,})(\/|$)/.test(p));
 const CONVERSIONS = ["hire_click", "upwork_click", "book_call", "lead_submit", "contact_submit"];
 const host = (r: string) => r.replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0];
 const sourceOf = (e: Ev) => (e.utm_source ? `utm:${e.utm_source}` : e.referrer ? host(e.referrer) : "direct");
