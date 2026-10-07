@@ -78,7 +78,7 @@ export function ScrollHUD() {
     return () => { window.removeEventListener("scroll", on); io.disconnect(); window.removeEventListener("xk:achievement", sync); };
   }, [pathname]);
   return (
-    <div className="xk-hud">
+    <div className={cx("xk-hud", pathname !== "/play" && "is-thin")}>
       <div className="xk-hud-bar" style={{ width: `${prog}%` }} />
       <div className="xk-hud-row">
         <span><Icon name="map-trifold" />{section}</span>

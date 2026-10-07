@@ -823,3 +823,15 @@ button.xk-hud-ach:hover { background: var(--accent-soft); }
 .xk-cover-word { position: absolute; left: 6%; right: 6%; bottom: 8%; z-index: 1; overflow: hidden; text-overflow: clip; font: 600 min(calc(140cqw / var(--len, 8)), 120px)/1 var(--font-mono); letter-spacing: -0.05em; color: var(--c); text-transform: lowercase; white-space: nowrap; }
 
 .xk-cover-meta { position: absolute; right: 16px; top: 18px; z-index: 1; display: inline-flex; align-items: center; gap: 6px; font: 500 11px var(--font-mono); color: var(--ink-muted); }
+
+/* ---------- Minimal home ---------- */
+.xk-explist { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--border); max-width: 900px; }
+.xk-explist li { display: grid; grid-template-columns: 1fr auto 150px; gap: var(--space-4); align-items: baseline; padding: var(--space-4) 0; border-bottom: 1px solid var(--border); }
+.xk-explist strong { font: 600 16px/24px var(--font-sans); margin-right: 10px; }
+.xk-explist li > div span { color: var(--ink-muted); font-size: 15px; }
+.xk-explist-where { font-size: 13px; color: var(--ink-muted); }
+.xk-explist-period { font: 500 12px var(--font-mono); color: var(--ink-muted); text-align: right; }
+@media (max-width: 640px) { .xk-explist li { grid-template-columns: 1fr; gap: 2px; } .xk-explist-period { text-align: left; } .xk-explist-where { display: none; } }
+.xk-play-hint { margin: var(--space-6) 0 0; text-align: center; font-size: 14px; color: var(--ink-muted); }
+.xk-play-hint a { color: var(--accent-text); }
+.xk-hud.is-thin .xk-hud-row { display: none; }

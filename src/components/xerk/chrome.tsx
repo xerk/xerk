@@ -11,6 +11,7 @@ export const NAV = [
   { label: "Blog", href: "/blog" },
   { label: "Hire", href: "/hire" },
   { label: "CV", href: "/cv" },
+  { label: "Play", href: "/play" },
 ];
 
 export function SiteHeader() {
@@ -41,7 +42,7 @@ export function SiteFooter() {
         <p>Senior full-stack &amp; AI engineer. Real-time platforms, AI agents, SaaS. {profile.location}, working worldwide.</p>
         <SocialLinks links={socials} medium="footer" />
       </div>
-      <div className="xk-footer-col"><span className="xk-label">Play</span><ul><li><Link href="/work">Level select</Link></li><li><Link href="/#achievements">Achievements</Link></li><li><Link href="/#console">Terminal</Link></li><li><Link href="/ai">AI work</Link></li></ul></div>
+      <div className="xk-footer-col"><span className="xk-label">Play</span><ul><li><Link href="/play">Play mode</Link></li><li><Link href="/play#achievements">Achievements</Link></li><li><Link href="/play#console">Terminal</Link></li><li><Link href="/ai">AI work</Link></li></ul></div>
       <div className="xk-footer-col"><span className="xk-label">Hire</span><ul><li><Link href="/hire">Services</Link></li><li><a href={upworkHref} target="_blank" rel="noopener me">Upwork</a></li><li><a href={bookingUrl}>Book a call</a></li><li><Link href="/cv">CV</Link></li></ul></div>
       <div className="xk-footer-col"><span className="xk-label">More</span><ul><li><Link href="/blog">Blog</Link></li><li><Link href="/uses">Uses</Link></li><li><Link href="/now">Now</Link></li><li><a href="/llms.txt">llms.txt</a></li></ul></div>
       <div className="xk-footer-base"><span>© {year} {profile.name}</span><span className="xk-muted">Built with Next.js, Three.js, GSAP &amp; Supabase</span></div>
@@ -58,6 +59,7 @@ export function MobileDock() {
         { label: "AI", href: "/ai", icon: "sparkle" },
         { label: "Blog", href: "/blog", icon: "pen-nib" },
         { label: "Hire", href: "/hire", icon: "handshake" },
+        { label: "Play", href: "/play", icon: "game-controller" },
       ]} />
     </div>
   );
@@ -69,12 +71,13 @@ export async function Palette() {
     ...projects.map((p) => ({ group: "Stages", label: p.title, href: `/work/${p.slug}`, icon: p.ai ? "robot" : "game-controller", hint: p.code, ai: p.ai })),
     ...posts.slice(0, 12).map((p) => ({ group: "Blog", label: p.title, href: `/blog/${p.slug}`, icon: "pen-nib", hint: "post" })),
     { group: "Actions", label: "Ask my CV anything", href: "/ai#ask", icon: "sparkle", ai: true },
-    { group: "Actions", label: "Open terminal", href: "/#console", icon: "terminal-window", hint: "`" },
+    { group: "Actions", label: "Open terminal", href: "/play#console", icon: "terminal-window", hint: "`" },
     { group: "Actions", label: "View CV", href: "/cv", icon: "read-cv-logo" },
     { group: "Actions", label: "Download CV (PDF)", href: profile.cvPdf, icon: "download-simple" },
     { group: "Actions", label: "Hire me", href: "/hire", icon: "handshake" },
     { group: "Actions", label: "Hire me on Upwork", href: upworkHref, brand: "upwork" },
     { group: "Actions", label: "Email me", href: `mailto:${profile.email}`, icon: "envelope-simple" },
+    { group: "Pages", label: "Play mode", href: "/play", icon: "game-controller" },
     { group: "Pages", label: "AI work", href: "/ai", icon: "brain" },
     { group: "Pages", label: "Uses", href: "/uses", icon: "stack" },
     { group: "Pages", label: "Now", href: "/now", icon: "clock" },

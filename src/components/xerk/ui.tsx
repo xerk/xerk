@@ -389,3 +389,18 @@ export function Section({ id, eyebrow, title, text, action, children, scramble =
     </section>
   );
 }
+
+/** Compact, scannable work history for the home page. */
+export function ExperienceList({ items }: { items: Quest[] }) {
+  return (
+    <ol className="xk-explist">
+      {items.map((e) => (
+        <li key={e.company}>
+          <div><strong>{e.company}</strong><span>{e.role}</span></div>
+          <span className="xk-explist-where">{e.where}</span>
+          <span className="xk-explist-period">{e.period}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
