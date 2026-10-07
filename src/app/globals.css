@@ -4,6 +4,8 @@
 @import "../styles/admin.css";
 @import "../styles/login.css";
 @import "../styles/dashboard.css";
+@import "../styles/landing.css";
+@import "../styles/seo.css";
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 

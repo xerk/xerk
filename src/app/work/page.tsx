@@ -4,7 +4,7 @@ import { getProjects } from "@/lib/projects";
 import { pageMeta, JsonLd, breadcrumbJsonLd } from "@/lib/seo";
 import { SITE_URL } from "@/data/profile";
 
-export const metadata = pageMeta({ title: "Case studies: real-time systems, AI agents and SaaS", description: "Case studies by Ahmed Mamdouh: a real-time platform with 100K+ concurrent connections, a production AI agent and MCP server, the Zerocash e-wallet, SweepSouth, UptimeRobot and more.", path: "/work" });
+export const metadata = pageMeta({ title: "Case studies: real-time systems and AI agents", description: "Case studies by Ahmed Mamdouh: a real-time platform with 100K+ concurrent connections, a production AI agent and MCP server, the Zerocash e-wallet, SweepSouth, UptimeRobot and more.", path: "/work" });
 
 export default async function WorkPage() {
   const projects = await getProjects();

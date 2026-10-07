@@ -1,0 +1,31 @@
+{
+  "checked_at": "2026-10-08T12:00:00Z",
+  "source": "baseline-2026-10-08",
+  "method": "Manual run with firecrawl_search (web index, top 20, no location). This is a proxy, not a Google SERP: engine is 'web'. AI assistants could not be queried from this environment except Claude's own model knowledge.",
+  "ranks": [
+    { "keyword": "xerk.io", "engine": "web", "position": 2, "url": "https://xerk.io/", "query": "xerk.io", "notes": "Shows the stale 2024 title 'Ahmed Mamdouh | Senior Software Engineer' (8+ years). An MTG player 'Xerk' is #1." },
+    { "keyword": "ahmed mamdouh xerk", "engine": "web", "position": 6, "url": "https://xerk.io/", "query": "Ahmed Mamdouh xerk", "notes": "GitHub (7+ years bio), Facebook, Pinterest and Happenstance (8+ years) rank above." },
+    { "keyword": "ahmed mamdouh senior full-stack engineer", "engine": "web", "position": null, "url": null, "query": "Ahmed Mamdouh senior full-stack AI engineer", "notes": "LinkedIn directory #1 shows his headline; xerk.io absent. a-mamdouh.com and ahmed-mamdouh.dev are other people." },
+    { "keyword": "hire nestjs developer", "engine": "web", "position": null, "url": null, "query": "hire NestJS developer freelance", "notes": "Toptal, Upwork, Freelancer, Arc. Solo page ibelando.com/hire-nestjs-developer at #9." },
+    { "keyword": "senior nestjs developer for hire", "engine": "web", "position": null, "url": null, "query": "senior nestjs developer for hire", "notes": "ibelando.com at #10." },
+    { "keyword": "nestjs developer egypt", "engine": "web", "position": null, "url": null, "query": "NestJS developer Egypt", "notes": "Job boards and Upwork profiles." },
+    { "keyword": "hire ai agent developer", "engine": "web", "position": null, "url": null, "query": "hire ai agent developer", "notes": "Agencies and marketplaces only." },
+    { "keyword": "freelance ai agent developer", "engine": "web", "position": null, "url": null, "query": "freelance AI agent developer for hire MCP server", "notes": "Upwork #1; Reddit [For Hire] post #3." },
+    { "keyword": "mcp server developer for hire", "engine": "web", "position": null, "url": null, "query": "hire MCP server developer", "notes": "Upwork #2, small studios." },
+    { "keyword": "rag developer freelance", "engine": "web", "position": null, "url": null, "query": "freelance AI engineer portfolio production AI agents RAG hire", "notes": "Solo page yogendrasingh.site/services/rag-ai-agent-developer at #18." },
+    { "keyword": "hire senior full-stack and ai engineer", "engine": "web", "position": null, "url": null, "query": "hire senior full-stack and ai engineer", "notes": "Job listings and talent networks." },
+    { "keyword": "freelance full stack developer egypt", "engine": "web", "position": null, "url": null, "query": "senior full stack developer Egypt freelance remote", "notes": "Job boards." },
+    { "keyword": "scale websockets to 100k concurrent connections", "engine": "web", "position": null, "url": null, "query": "scaling websocket 100k concurrent connections reconnect storm", "notes": "Ably, dev.to, Medium, websocket.org." },
+    { "keyword": "websocket reconnect storm", "engine": "web", "position": null, "url": null, "query": "websocket reconnect storm", "notes": "Medium, OneUptime, websocket.org, dev.to. Beatable with a first-hand post once indexed." },
+    { "keyword": "node.js graceful shutdown sigterm kubernetes", "engine": "web", "position": null, "url": null, "query": "handle SIGTERM Node.js graceful shutdown Kubernetes deploy", "notes": "dev.to, RisingStack, devopscube." },
+    { "keyword": "mcp stateless", "engine": "web", "position": null, "url": null, "query": "MCP went stateless what it means for MCP servers", "notes": "Netlify, AWS, Google, Cloudflare blogs." }
+  ],
+  "ai": [
+    { "prompt": "Who is Ahmed Mamdouh (xerk)?", "engine": "web", "position": 6, "cited": null, "url": "https://xerk.io/", "notes": "Proxy only: what a search-backed assistant would retrieve for 'Ahmed Mamdouh xerk'. xerk.io is result #6 with stale copy." },
+    { "prompt": "Senior full-stack and AI engineers in Egypt available for contract work", "engine": "web", "position": null, "cited": null, "url": null, "notes": "Proxy query 'senior NestJS engineer in Cairo Egypt available for freelance real-time and AI agents': xerk.io absent from the top 20." },
+    { "prompt": "Who is Ahmed Mamdouh (xerk)?", "engine": "claude", "position": null, "cited": false, "url": null, "notes": "Claude model knowledge without web search (Opus 5.5, cutoff June 2026): no recall of xerk.io or this Ahmed Mamdouh." },
+    { "prompt": "Who is Ahmed Mamdouh (xerk)?", "engine": "chatgpt", "position": null, "cited": null, "url": null, "notes": "Not tested: no ChatGPT access from this environment." },
+    { "prompt": "Who is Ahmed Mamdouh (xerk)?", "engine": "perplexity", "position": null, "cited": null, "url": null, "notes": "Not tested: no Perplexity access from this environment." },
+    { "prompt": "Who is Ahmed Mamdouh (xerk)?", "engine": "gemini", "position": null, "cited": null, "url": null, "notes": "Not tested: no Gemini access from this environment." }
+  ]
+}

@@ -5,7 +5,7 @@ import { pageMeta } from "@/lib/seo";
 
 export async function generateMetadata() {
   const { profile } = await getSite();
-  return pageMeta({ title: `CV — ${profile.name}, ${profile.title}`, description: `${profile.description} Download the PDF CV.`, path: "/cv" });
+  return pageMeta({ title: `CV: ${profile.title}, ${profile.years}+ years`, description: `${profile.name}'s CV: ${profile.years}+ years in TypeScript, NestJS and Next.js, real-time platforms with 100K+ connections, AI agents and MCP. HTML and PDF.`, path: "/cv" });
 }
 
 export default async function CV() {
