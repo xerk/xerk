@@ -104,6 +104,7 @@ export function ProfileEditor({ initial, socials: initialSocials, updatedAt }: {
 
   return (
     <>
+      <div className="xk-admin-form-grid">
       <section className="xk-admin-panel">
         <h2>Identity</h2>
         <div className="xk-field-row is-3">
@@ -146,7 +147,7 @@ export function ProfileEditor({ initial, socials: initialSocials, updatedAt }: {
         <ListArea label="Languages" value={p.languages} onChange={(v) => set("languages", v)} rows={2} hint="One per line" />
       </section>
 
-      <section className="xk-admin-panel">
+      <section className="xk-admin-panel" style={{ gridColumn: "1 / -1" }}>
         <div className="xk-admin-panel-head">
           <h2>Social links</h2>
           <button type="button" className="xk-btn xk-btn-secondary xk-btn-sm" onClick={() => { setDirty(true); setSocials((s) => [...s, { brand: "linkedin", label: "", href: "" }]); }}><Icon name="plus" />Add link</button>
@@ -171,6 +172,7 @@ export function ProfileEditor({ initial, socials: initialSocials, updatedAt }: {
         </div>
       </section>
 
+      </div>
       <SaveBar dirty={dirty} onSave={save} onReset={reset} status={status} pending={pending} updatedAt={updatedAt} />
     </>
   );

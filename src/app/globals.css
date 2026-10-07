@@ -3,6 +3,7 @@
 @import "../styles/xerk.css";
 @import "../styles/admin.css";
 @import "../styles/login.css";
+@import "../styles/dashboard.css";
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 

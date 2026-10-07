@@ -24,7 +24,11 @@ export function sessionId() {
 }
 
 /** Sends to PostHog (if configured) and to the site's own event log in Supabase. */
+/** Dashboard pages and the site owner's browser opt out of analytics (cookies set by src/proxy.ts). */
+export const notTracked = () => typeof document !== "undefined" && /(?:^|; )(xk_nt|xk_owner)=1/.test(document.cookie);
+
 export function track(event: string, props?: Record<string, unknown>) {
+  if (notTracked()) return;
   try { if (posthog.__loaded) posthog.capture(event, props); } catch {}
   try {
     const q = new URLSearchParams(location.search);

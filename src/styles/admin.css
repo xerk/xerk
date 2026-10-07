@@ -14,7 +14,7 @@ html:has(.xk-admin) .xk-sticky, html:has(.xk-admin) .xk-skip { display: none !im
 .xk-admin {
   --dash-sidebar: 248px;
   --dash-topbar: 56px;
-  --dash-pad: 40px;
+  --dash-pad: clamp(16px, 2.6vw, 40px);
   --dash-radius: 12px;
   --dash-control: 36px;
   --dash-line: var(--border);
@@ -60,7 +60,7 @@ html:has(.xk-admin) .xk-sticky, html:has(.xk-admin) .xk-skip { display: none !im
 .xk-admin-scrim { display: none; }
 
 /* ---------- Main column / page header ---------- */
-.xk-admin-main { min-width: 0; width: 100%; max-width: 1240px; display: flex; flex-direction: column; gap: var(--space-6); padding: var(--space-8) var(--dash-pad) var(--space-24); }
+.xk-admin-main { min-width: 0; width: 100%; max-width: 1760px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--space-6); padding: var(--space-8) var(--dash-pad) var(--space-24); }
 .xk-admin-stack { display: flex; flex-direction: column; gap: var(--space-6); min-width: 0; }
 .xk-admin-head { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-4); flex-wrap: wrap; padding-bottom: var(--space-6); border-bottom: 1px solid var(--dash-line); position: relative; }
 .xk-admin-head::after { content: ""; position: absolute; left: 0; bottom: -1px; width: 48px; height: 1px; background: var(--dash-tick); }
