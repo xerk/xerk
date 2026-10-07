@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   const secret = process.env.TELEGRAM_WEBHOOK_SECRET;
   if (secret && req.headers.get("x-telegram-bot-api-secret-token") !== secret) return NextResponse.json({ ok: false }, { status: 401 });
   const update = await req.json().catch(() => ({}));
-  const msg = update.message;
+  const msg = update.message || update.channel_post; // works in a private chat or the alerts channel
   const chat = String(msg?.chat?.id || "");
   if (!msg || chat !== String(process.env.TELEGRAM_CHAT_ID)) return NextResponse.json({ ok: true });
   const cmd = String(msg.text || "").trim().split(/\s|@/)[0];
