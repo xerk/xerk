@@ -1,220 +1,27 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "../styles/tokens.css";
+@import "../styles/xerk.css";
 
-@layer base {
-    html {
-        scroll-behavior: smooth;
-        -webkit-overflow-scrolling: touch;
-        scroll-timeline: none;
-        scroll-timeline-axis: none;
-        scroll-timeline-name: none;
-        --scroll-duration: 1200ms;
-        --scroll-timing: cubic-bezier(0.45, 0.05, 0.35, 1);
-    }
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-    /* Refined scrollbar styles */
-    ::-webkit-scrollbar {
-        @apply w-1.5 h-1.5;
-    }
-
-    ::-webkit-scrollbar-track {
-        @apply bg-transparent rounded-full;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        @apply bg-gray-400/60 hover:bg-gray-500/80 rounded-full 
-        transition-all duration-300 ease-in-out;
-    }
-
-    /* Firefox */
-    * {
-        scrollbar-width: thin;
-        scrollbar-color: rgba(156, 163, 175, 0.6) transparent;
-        scroll-behavior: smooth;
-    }
-
-    /* Dark mode refinements */
-    .dark ::-webkit-scrollbar-thumb {
-        @apply bg-gray-600/60 hover:bg-gray-500/80;
-    }
-
-    .dark * {
-        scrollbar-color: rgba(75, 85, 99, 0.6) transparent;
-    }
-
-    :root {
-      --background: 0 0% 100%;
-      --foreground: 210 11.1% 3.53%;
-
-      --card: 0 0% 100%;
-      --card-foreground: 210 11.1% 3.53%;
-
-      --popover: 0 0% 100%;
-      --popover-foreground: 210 11.1% 3.53%;
-
-      --primary: 0 0% 9%;
-      --primary-foreground: 0 0% 98%;
-
-      --secondary: 0 0% 96.1%;
-      --secondary-foreground: 0 0% 9%;
-
-      --muted: 0 0% 96.1%;
-      --muted-foreground: 0 0% 45.1%;
-
-      --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-
-      --destructive: 0 84.2% 60.2%;
-      --destructive-foreground: 0 0% 98%;
-
-      --border: 0 0% 89.8%;
-      --input: 0 0% 89.8%;
-      --ring: 0 0% 3.9%;
-
-      --radius: 0.5rem;
-    }
-
-    .dark {
-      --background: 210 11.1% 3.53%;
-      --foreground: 0 0% 98%;
-
-      --card: 210 11.1% 3.53%;
-      --card-foreground: 0 0% 98%;
-
-      --popover: 210 11.1% 3.53%;
-      --popover-foreground: 0 0% 98%;
-
-      --primary: 0 0% 98%;
-      --primary-foreground: 0 0% 9%;
-
-      --secondary: 0 0% 14.9%;
-      --secondary-foreground: 0 0% 98%;
-
-      --muted: 0 0% 14.9%;
-      --muted-foreground: 0 0% 63.9%;
-
-      --accent: 0 0% 14.9%;
-      --accent-foreground: 0 0% 98%;
-
-      --destructive: 0 62.8% 30.6%;
-      --destructive-foreground: 0 0% 98%;
-
-      --border: 0 0% 14.9%;
-      --input: 0 0% 14.9%;
-      --ring: 0 0% 83.1%;
-    }
-  }
-
-  @layer base {
-    * {
-      @apply border-border;
-    }
-    body {
-      @apply bg-background text-foreground;
-    }
-  }
-
-  h3 code {
-    @apply !text-lg md:!text-xl;
-  }
-  
-  pre {
-    @apply !px-0 rounded-lg overflow-x-auto py-4
-  }
-   
-  pre [data-line] {
-    @apply px-4
-  }
-
-  code {
-    @apply text-sm md:text-base !leading-loose;
-  }
-  
-  pre > code {
-    counter-reset: line;
-  }
-  
-  code[data-theme*=" "],
-  code[data-theme*=" "] span {
-    color: var(--shiki-light);
-    background-color: var(--shiki-light-bg);
-  }
-   
-  @media (prefers-color-scheme: dark) {
-    code[data-theme*=" "],
-    code[data-theme*=" "] span {
-      color: var(--shiki-dark);
-      background-color: var(--shiki-dark-bg);
-    }
-  }
-  
-  code[data-line-numbers] {
-    counter-reset: line;
-  }
-  
-  code[data-line-numbers] > [data-line]::before {
-    counter-increment: line;
-    content: counter(line);
-    @apply inline-block w-4 mr-4 text-right text-gray-500;
-  }
- 
-  code {
-    counter-reset: line;
-  }
- 
-  code > [data-line]::before {
-  counter-increment: line;
-  content: counter(line);
- 
-  /* Other styling */
-  display: inline-block;
-  width: 1rem;
-  margin-right: 2rem;
-  text-align: right;
-  color: gray;
-}
- 
-code[data-line-numbers-max-digits="2"] > [data-line]::before {
-  width: 2rem;
-}
- 
-code[data-line-numbers-max-digits="3"] > [data-line]::before {
-  width: 3rem;
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-border: var(--border);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
+  --color-agent: var(--agent);
+  --color-agent-text: var(--agent-text);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in {
-  animation: fade-in 0.5s ease-out forwards;
-}
-
-/* Enhanced Prose Styles */
-.prose {
-  --tw-prose-headings: theme('colors.white');
-  --tw-prose-body: theme('colors.zinc.300');
-  --tw-prose-bold: theme('colors.white');
-  --tw-prose-quotes: theme('colors.zinc.300');
-  --tw-prose-code: theme('colors.white');
-  transition: all 0.3s ease-out;
-}
-
-/* Progressive Loading Animation */
-.prose > * {
-  opacity: 0;
-  animation: fade-in 0.5s ease-out forwards;
-}
-
-.prose > *:nth-child(1) { animation-delay: 0.1s; }
-.prose > *:nth-child(2) { animation-delay: 0.2s; }
-.prose > *:nth-child(3) { animation-delay: 0.3s; }
-/* ... add more if needed */
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+::selection { background: var(--accent); color: var(--on-accent); }
+.xk-container { max-width: 1200px; margin: 0 auto; }
+.xk-skip { position: absolute; left: -9999px; top: 8px; z-index: 100; padding: 8px 12px; border-radius: var(--radius-md); background: var(--accent); color: var(--on-accent); }
+.xk-skip:focus { left: 8px; }

@@ -1,0 +1,38 @@
+---
+title: "When GraphQL is worth it and when it is not"
+publishedAt: "2026-09-03"
+summary: "GraphQL pays off when many different clients need different slices of the same data; with one web client, REST usually wins on total effort."
+tags: ["graphql", "api-design", "performance", "nodejs"]
+source: "linkedin"
+---
+
+GraphQL is not dead, and REST did not win. What actually happened is more boring: GraphQL pays off when many clients need different slices of the same data, and it costs you when one frontend talks to one backend.
+
+## Where the 35 percent came from
+
+Moving to schema-first GraphQL cut client network overhead by around 35 percent. I still would not recommend it to most teams.
+
+The 35 percent was real and it came from one place: mobile clients stopped making four calls to build one screen, and stopped downloading fields they threw away. When you have several different clients wanting different slices of the same data, GraphQL earns its keep. That is the case it was designed for. The schema-first discipline made our multi-client platform manageable.
+
+## The cost that lands on the backend
+
+What the number hides is the cost that landed on the backend.
+
+- **N+1 got harder to see.** It moved from something you could see in a controller to something buried behind resolvers, so DataLoader stopped being optional.
+- **Caching got harder.** A single POST body is not something a CDN can reason about.
+- **Rate limiting by endpoint stopped meaning anything.** One query can be cheap, or it can be a join across your whole graph.
+- **You need query depth and complexity limits.** Otherwise you have shipped a denial of service endpoint with a nice type system.
+
+## The wrong shape of product
+
+I have shipped both at scale. The same GraphQL setup on a simple product would have been pure ceremony.
+
+If you have one client and it is a web app, REST with a few well-shaped endpoints will beat GraphQL on total engineering time, and it is not close. The tool was never the problem. Picking it for the wrong shape of product was.
+
+## Takeaways
+
+- GraphQL shines when several clients need different slices of the same data.
+- The savings are real, but the backend pays for them in complexity.
+- Plan for DataLoader, query cost limits, and a different caching and rate limiting story.
+- For one web client, well-shaped REST endpoints usually win.
+- Pick GraphQL for client diversity, not for elegance.

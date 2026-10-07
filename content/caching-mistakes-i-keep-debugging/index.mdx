@@ -1,0 +1,35 @@
+---
+title: "Caching mistakes I keep debugging"
+publishedAt: "2026-09-04"
+summary: "Before adding a cache, measure first, decide what invalidates it, set a TTL, and cache the expensive part rather than the whole result."
+tags: ["caching", "redis", "performance", "system-design"]
+source: "linkedin"
+---
+
+Before you add a cache, answer one question: what invalidates it? Every caching bug I have debugged came down to skipping that question or to one of three related sins.
+
+## The question to answer first
+
+If the answer to "what invalidates it?" takes longer than thirty seconds, or ends with "we will figure that out later", you are not adding a cache. You are adding a second source of truth that disagrees with the first one at an unpredictable time.
+
+Half the caching bugs I have debugged were not about the cache at all. They were about nobody deciding, on the day it shipped, when the data was allowed to go stale.
+
+## Sin one: caching before measuring
+
+The endpoint was slow because of an N+1 query. The cache hid it until traffic doubled. A cache in front of an unexplained slow path does not fix it, it postpones it.
+
+## Sin two: no TTL strategy
+
+"We will invalidate manually" is a promise your future self will break. Even if you have explicit invalidation, a TTL is the safety net for the case you forgot.
+
+## Sin three: caching the wrong thing
+
+Caching the computed result instead of the expensive part. Then one field changes and you rebuild everything. Cache the expensive piece, and assemble the cheap parts around it.
+
+## Takeaways
+
+- Decide what invalidates a cache on the day you add it.
+- Measure first; do not let a cache hide a slow query.
+- Always set a TTL, even if it is long.
+- Cache the expensive part, not the whole computed result.
+- Cache late, cache small. Boring rules, quiet pager.

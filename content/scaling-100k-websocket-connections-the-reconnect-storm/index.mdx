@@ -1,0 +1,41 @@
+---
+title: "Scaling 100k WebSocket connections: the reconnect storm"
+publishedAt: "2026-09-12"
+summary: "At 100k+ concurrent sockets, the hard part is not the count but the reconnect storm; jittered backoff, load shedding and resumable sessions fix it."
+tags: ["system-design", "nodejs", "websockets", "scaling"]
+source: "linkedin"
+---
+
+A platform I work on holds over a hundred thousand concurrent device connections. The socket count was never the hard part. What actually broke was the reconnect storm.
+
+## The socket count is tuning
+
+Node handles that many connections. Connections are cheap when they are idle, and the hard limits people worry about are mostly tuning: file descriptors, ephemeral ports, keepalive intervals. You hit them, you read a man page, you move on.
+
+## The reconnect storm
+
+A network blip drops thirty thousand devices. Every one of them reconnects. If they all retry immediately, they arrive together, and the thundering herd takes down the service that was fine two seconds ago. Then it restarts, and they all reconnect again. You have built a loop that keeps itself down.
+
+## Three fixes, none about sockets
+
+**Jittered exponential backoff on the client.** Reconnects spread over a window instead of landing at once.
+
+```ts
+function reconnectDelay(attempt: number) {
+  const base = Math.min(30_000, 1_000 * 2 ** attempt);
+  return Math.random() * base; // full jitter
+}
+```
+
+**A connection budget on the server.** When it is over budget, it sheds load rather than dying. Rejecting some connections quickly is better than accepting all of them and falling over.
+
+**Resumable sessions.** A reconnect is not a full re-auth and state rebuild, so each returning client costs far less.
+
+## Takeaways
+
+- Raw connection count is mostly an OS tuning problem.
+- The real risk is synchronized reconnects after a failure.
+- Add jittered exponential backoff on clients.
+- Shed load on the server instead of letting it crash.
+- Make reconnects cheap with resumable sessions.
+- The scaling problem is what the system does in the ten seconds after something goes wrong.

@@ -1,0 +1,34 @@
+---
+title: "Claude output is now watermarked"
+publishedAt: "2026-09-08"
+summary: "Claude output now carries watermarks and signed provenance by default; tell your users, and never treat a missing watermark as proof."
+tags: ["ai", "claude", "eu-ai-act", "software-engineering"]
+source: "linkedin"
+---
+
+If you ship a feature built on Claude, its output now carries a mark you did not add. That changes what you should tell your users, and it should not be treated as a detection tool.
+
+## What changed
+
+Since 2 August, Anthropic has been watermarking Claude output globally, not only in the EU. Text gets an invisible statistical pattern that survives copy and paste. Generated .png, .jpg and .svg files get signed provenance metadata, closer to EXIF than to a visible badge. Models launched on or after that date support it at launch, and older ones are being retrofitted.
+
+## Why it happened
+
+The driver is Article 50 of the EU AI Act, which came into force the same day. Penalties go up to 15 million euro or 3 percent of global revenue.
+
+## A product decision made above your head
+
+If your app generates copy for customers, that copy is machine-attributable by default, and you should probably tell them.
+
+## It is not proof
+
+Anthropic says plainly that metadata can be stripped by format conversion, editing or a screenshot. Absence of a watermark means nothing at all.
+
+Worth reading the actual terms before someone in your company builds a detection feature on top of it.
+
+## Takeaways
+
+- Claude output is now watermarked by default, worldwide.
+- Customer-facing generated content is machine-attributable; consider disclosing it.
+- Watermarks and metadata can be stripped, so a missing mark proves nothing.
+- Read the terms before building detection on top of it.

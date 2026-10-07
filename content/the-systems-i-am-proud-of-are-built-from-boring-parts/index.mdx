@@ -1,0 +1,28 @@
+---
+title: "The systems I am proud of are built from boring parts"
+publishedAt: "2026-09-12"
+summary: "The best systems use boring parts like Postgres, a queue and a well-defined cache; the real engineering is in the failure handling."
+tags: ["software-engineering", "architecture"]
+source: "linkedin"
+---
+
+Most of the systems I am proud of are built from boring parts. The interesting engineering was never the technology choice. It was the failure handling.
+
+## The parts list
+
+Postgres. A queue. A cache with an invalidation rule someone actually wrote down. Services small enough that one person can hold one in their head.
+
+None of that would impress anyone on a slide. All of it is well understood, well documented, and has failure modes other people have already found for you.
+
+## Where the real work is
+
+What made those systems good was what they did when things went wrong: retries that do not duplicate work, timeouts that are actually set, shutdowns that drain cleanly, and someone deciding up front when data is allowed to be stale.
+
+Nobody puts that on a slide.
+
+## Takeaways
+
+- Boring, proven technology lets you spend your effort elsewhere.
+- Write down cache invalidation rules.
+- Keep services small enough for one person to understand.
+- The engineering that matters most is failure handling.

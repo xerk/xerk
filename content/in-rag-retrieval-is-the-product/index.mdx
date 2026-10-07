@@ -1,0 +1,37 @@
+---
+title: "In RAG, retrieval is the product"
+publishedAt: "2026-09-05"
+summary: "Bad RAG answers usually come from bad retrieval, not a weak model; structural chunking, metadata filters and a small eval set fix more."
+tags: ["rag", "llm", "ai-engineering", "vector-database"]
+source: "linkedin"
+---
+
+Everyone blames the model. In my experience running a RAG system in production, the model is rarely the problem: retrieval is.
+
+## The model never saw the right context
+
+The system is a vector database, embeddings over internal docs and telemetry, and an LLM answering questions on top. When answers were bad, the instinct every time was "the model is not smart enough".
+
+Almost every time, retrieval was the real problem. The model never saw the right context, so it improvised. Garbage in, confident garbage out.
+
+Three boring fixes improved answers more than any model upgrade.
+
+## Chunk by structure, not by size
+
+Cutting documents every 500 tokens splits tables from their headers and answers from their questions. Chunking on headings fixed a whole category of wrong answers. A chunk should be a unit of meaning, not a unit of length.
+
+## Filter on metadata before vector search
+
+Half our bad answers came from retrieving the right topic in the wrong context. Vector similarity finds things that sound alike; it does not know which product, environment or time range you meant. Filter first, then search.
+
+## Keep a small eval set and run it on every change
+
+An eval set of 50 real questions with known answers. Not thousands. Fifty. Run it on every pipeline change. The number of times a "small improvement" made retrieval worse was humbling.
+
+## Takeaways
+
+- Bad RAG answers are usually a retrieval problem, not a model problem.
+- Chunk documents on their structure, such as headings, not fixed token counts.
+- Apply metadata filters before vector search.
+- A small eval set of real questions catches regressions on every change.
+- The model is the demo. Retrieval is the product.

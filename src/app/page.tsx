@@ -1,254 +1,86 @@
-import { HackathonCard } from "@/components/hackathon-card";
-import BlurFade from "@/components/magicui/blur-fade";
-import BlurFadeText from "@/components/magicui/blur-fade-text";
-import { ProjectCard } from "@/components/project-card";
-import { ResumeCard } from "@/components/resume-card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { DATA } from "@/data/resume";
-import Link from "next/link";
-import Markdown from "react-markdown";
-import { DownloadButton } from "@/components/magicui/download-button";
+import { AchievementGrid, BentoGrid, BentoTile, Button, CTABar, GitHubHeatmap, Marquee, PlayerCard, PostCard, QuestLog, Section, SkillTree, SocialLinks, StatusPill } from "@/components/xerk/ui";
+import { AskMyCV, HeroScene, LevelSelect, Terminal } from "@/components/xerk/client";
+import { achievements, bookingUrl, experience, github, profile, skillTree, socials, stats, ticker } from "@/data/profile";
+import { projects } from "@/data/projects";
+import { MOTD, terminalCommands } from "@/data/terminal";
+import { getPosts } from "@/lib/posts";
+import { getContributions } from "@/lib/github";
+import { formatDate } from "@/lib/utils";
+import { JsonLd } from "@/lib/seo";
+import { SITE_URL } from "@/data/profile";
 
-const BLUR_FADE_DELAY = 0.04;
+export const revalidate = 3600;
 
-export default function Page() {
+const LOADOUT = [{ brand: "nestjs", label: "NestJS" }, { brand: "nextdotjs", label: "Next.js" }, { brand: "claude", label: "Claude" }, { brand: "graphql", label: "GraphQL" }, { brand: "kubernetes", label: "Kubernetes" }, { brand: "amazonwebservices", label: "AWS" }];
+
+export default async function Home() {
+  const [posts, contrib] = await Promise.all([getPosts(), getContributions()]);
+  const now = new Date();
+  const season = Math.round(((now.getMonth() + now.getDate() / 31) / 12) * 100);
   return (
-    <main className="flex flex-col min-h-[100dvh] space-y-10">
-      <section id="hero">
-        <div className="mx-auto w-full max-w-2xl space-y-8">
-          <div className="gap-2 flex justify-between">
-            <div className="flex-col flex flex-1 space-y-1.5">
-              <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
-                <BlurFadeText
-                  delay={BLUR_FADE_DELAY}
-                  yOffset={8}
-                  text={`Hi, I'm ${DATA.name.split(" ")[0]} 👋`}
-                />
-              </h1>
-              <BlurFadeText
-                className="max-w-[600px] md:text-xl"
-                delay={BLUR_FADE_DELAY}
-                text={DATA.description}
-              />
-              <nav className="flex gap-4 pt-4">
-                <Link href="#projects" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Projects
-                </Link>
-                <Link href="#work" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Experience
-                </Link>
-                <Link href="#contact" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Contact
-                </Link>
-              </nav>
+    <>
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "ProfilePage", url: SITE_URL, mainEntity: { "@id": `${SITE_URL}/#person` } }} />
+      <div className="xk-container">
+        <section className="xk-gamehero">
+          <div className="xk-gamehero-copy">
+            <div className="xk-hero-top"><StatusPill href="/hire">{profile.availability}</StatusPill></div>
+            <h1 data-split="">{profile.headline}</h1>
+            <p className="xk-hero-intro">{profile.intro}</p>
+            <div className="xk-hero-actions">
+              <Button variant="primary" size="lg" iconRight="arrow-right" href="/hire" magnetic track="hire_click">Start a mission</Button>
+              <Button size="lg" icon="game-controller" href="#stages">Select a project</Button>
+              <Button variant="agent" size="lg" icon="sparkle" href="#console">Ask my CV</Button>
             </div>
-            <BlurFade delay={BLUR_FADE_DELAY}>
-              <Avatar className="size-28 border">
-                <AvatarImage alt={DATA.name} src={DATA.avatarUrl} />
-                <AvatarFallback>{DATA.initials}</AvatarFallback>
-              </Avatar>
-            </BlurFade>
+            <div className="xk-hero-meta"><SocialLinks links={socials} medium="hero" /><span className="xk-label">{profile.location} · {profile.timezone}</span></div>
+            <span className="xk-press">Press <kbd className="xk-kbd">⌘K</kbd> to explore</span>
           </div>
-        </div>
-      </section>
-      <section id="about">
-        <BlurFade delay={BLUR_FADE_DELAY * 3}>
-          <h2 className="text-xl font-bold">About</h2>
-        </BlurFade>
-        <BlurFade delay={BLUR_FADE_DELAY * 4}>
-          <Markdown className="prose max-w-full text-pretty font-sans text-sm text-muted-foreground dark:prose-invert">
-            {DATA.summary}
-          </Markdown>
-        </BlurFade>
-      </section>
-      <section id="work">
-        <div className="flex min-h-0 flex-col gap-y-3">
-          <BlurFade delay={BLUR_FADE_DELAY * 5}>
-            <h2 className="text-xl font-bold">Professional Experience</h2>
-          </BlurFade>
-          {DATA.work.map((work, id) => (
-            <BlurFade
-              key={work.company}
-              delay={BLUR_FADE_DELAY * 6 + id * 0.05}
-            >
-              <ResumeCard
-                key={work.company}
-                logoUrl={work.logoUrl}
-                altText={work.company}
-                title={work.company}
-                subtitle={work.title}
-                href={work.href}
-                badges={work.badges}
-                period={`${work.start} - ${work.end ?? "Present"}`}
-                description={work.description}
-              />
-            </BlurFade>
-          ))}
-        </div>
-
-        {DATA.resumeUrl && <div className="flex justify-center pt-4">
-          <BlurFade delay={BLUR_FADE_DELAY * 6 + DATA.work.length * 0.05}>
-            <DownloadButton href={DATA.resumeUrl} blank={true}>
-              Download Resume
-            </DownloadButton>
-          </BlurFade>
-        </div>}
-
-      </section>
-      <section id="education">
-        <div className="flex min-h-0 flex-col gap-y-3">
-          <BlurFade delay={BLUR_FADE_DELAY * 7}>
-            <h2 className="text-xl font-bold">Education</h2>
-          </BlurFade>
-          {DATA.education.map((education, id) => (
-            <BlurFade
-              key={education.school}
-              delay={BLUR_FADE_DELAY * 8 + id * 0.05}
-            >
-              <ResumeCard
-                key={education.school}
-                href={education.href}
-                logoUrl={education.logoUrl}
-                altText={education.school}
-                title={education.school}
-                subtitle={education.degree}
-                period={`${education.start} - ${education.end}`}
-              />
-            </BlurFade>
-          ))}
-        </div>
-      </section>
-      <section id="skills">
-        <div className="flex min-h-0 flex-col gap-y-3">
-          <BlurFade delay={BLUR_FADE_DELAY * 9}>
-            <h2 className="text-xl font-bold">Skills</h2>
-          </BlurFade>
-          <div className="flex flex-wrap gap-1">
-            {DATA.skills.map((skill, id) => (
-              <BlurFade key={skill} delay={BLUR_FADE_DELAY * 10 + id * 0.05}>
-                <Badge key={skill}>{skill}</Badge>
-              </BlurFade>
-            ))}
-          </div>
-        </div>
-      </section>
-      <section id="projects">
-        <div className="space-y-12 w-full py-12">
-          <BlurFade delay={BLUR_FADE_DELAY * 11}>
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <div className="inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm">
-                  My Projects
-                </div>
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                  Check out my latest work
-                </h2>
-                <p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  I&apos;ve worked on a variety of projects, from simple
-                  websites to complex web applications. Here are a few of my
-                  favorites.
-                </p>
-              </div>
-            </div>
-          </BlurFade>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 max-w-[800px] mx-auto">
-            {DATA.projects.filter(project => project.active).map((project, id) => (
-              <BlurFade
-                  key={project.title}
-                  delay={BLUR_FADE_DELAY * 12 + id * 0.05}
-                >
-                  <ProjectCard
-                    href={project.href}
-                    key={project.title}
-                    title={project.title}
-                    description={project.description}
-                    dates={project?.dates}
-                    tags={project.technologies}
-                    image={project.image}
-                    video={project.video}
-                    links={project.links}
-                  />
-                </BlurFade>
-            ))}
-          </div>
-        </div>
-      </section>
-      {DATA.hackathons.length > 0 && (
-        <section id="hackathons">
-          <div className="space-y-12 w-full py-12">
-            <BlurFade delay={BLUR_FADE_DELAY * 13}>
-            <div className="flex flex-col items-center justify-center space-y-4 text-center">
-              <div className="space-y-2">
-                <div className="inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm">
-                  Hackathons
-                </div>
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                  I like building things
-                </h2>
-                <p className="text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                  During my time in university, I attended{" "}
-                  {DATA.hackathons.length}+ hackathons. People from around the
-                  country would come together and build incredible things in 2-3
-                  days. It was eye-opening to see the endless possibilities
-                  brought to life by a group of motivated and passionate
-                  individuals.
-                </p>
-              </div>
-            </div>
-          </BlurFade>
-          {/* <BlurFade delay={BLUR_FADE_DELAY * 14}>
-            <ul className="mb-4 ml-4 divide-y divide-dashed border-l">
-              {DATA.hackathons.map((project, id) => (
-                <BlurFade
-                  key={project.title + project.dates}
-                  delay={BLUR_FADE_DELAY * 15 + id * 0.05}
-                >
-                  <HackathonCard
-                    title={project.title}
-                    description={project.description}
-                    location={project.location}
-                    dates={project.dates}
-                    image={project.image}
-                    links={project.links}
-                  />
-                </BlurFade>
-              ))}
-            </ul>
-          </BlurFade> */}
-        </div>
+          <div className="xk-gamehero-scene"><HeroScene /></div>
         </section>
-      )}
-      <section id="contact">
-        <div className="grid items-center justify-center gap-4 px-4 text-center md:px-6 w-full py-12">
-          <BlurFade delay={BLUR_FADE_DELAY * 16}>
-            <div className="space-y-3">
-              <div className="inline-block rounded-lg bg-foreground text-background px-3 py-1 text-sm">
-                Contact
-              </div>
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                Get in Touch
-              </h2>
-              <p className="mx-auto max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                Want to chat? Just shoot me a dm{" "}
-                <Link
-                  href={DATA.contact.social.X.url}
-                  className="text-blue-500 hover:underline"
-                >
-                  with a direct question on twitter
-                </Link>{" "}
-                and I&apos;ll respond whenever I can. I will ignore all
-                soliciting.
-              </p>
-              {DATA.resumeUrl && <div className="pt-4">
-                <DownloadButton href={DATA.resumeUrl} blank={true}>
-                  Download Resume
-                </DownloadButton>
-              </div>}
-            </div>
-          </BlurFade>
-        </div>
-      </section>
-    </main>
+      </div>
+      <Marquee items={ticker} />
+      <div className="xk-container">
+        <Section id="player" eyebrow="01 / Player" title="Player 1 has entered the game" text={`${profile.years}+ years, five teams, three continents. Every number below is real.`}>
+          <div className="xk-two-lr">
+            <PlayerCard name={profile.name} level={profile.years} className="Senior full-stack · AI engineer" avatar={profile.avatar} status="Online · open to co-op missions" xp={{ label: `Season ${now.getFullYear()}`, value: season, text: `${now.toLocaleString("en-US", { month: "short" })} · ${season}%` }} stats={stats} loadout={LOADOUT} />
+            <BentoGrid>
+              <BentoTile span={2} tone="accent" icon="broadcast" eyebrow="ALTO" value="100K+" title="Concurrent device connections" />
+              <BentoTile span={2} tone="agent" icon="robot" eyebrow="AI" value="MCP" title="Agent + tool server in production" />
+              <BentoTile span={2} icon="users-three" eyebrow="UptimeRobot" value="2.1M+" title="Users served" />
+              <BentoTile span={2} icon="lightning" eyebrow="Microservices" value="−40%" title="p95 latency" />
+            </BentoGrid>
+          </div>
+        </Section>
+        <Section id="stages" eyebrow="02 / Level select" title="Choose a stage" text="Every project opens as a case study with the architecture behind it — and a playable demo where there is one." action={<Button variant="ghost" iconRight="arrow-right" href="/work">All work</Button>}>
+          <LevelSelect levels={projects.map(({ slug, code, title, world, period, summary, boss, image, big, bigLabel, stack, ai, embedUrl }) => ({ slug, code, title, world, period, summary, boss, image, big, bigLabel, stack, ai, embedUrl }))} />
+        </Section>
+        <Section id="achievements" eyebrow="03 / Achievements" title="Achievements unlocked" text="8 unlocked from real work. The 9th is yours.">
+          <AchievementGrid items={achievements} />
+        </Section>
+        <Section id="skills" eyebrow="04 / Skill tree" title="Every skill has a receipt">
+          <SkillTree root="Full-stack core" rootNote="TypeScript · SQL · Python" branches={skillTree} />
+        </Section>
+        <Section id="quests" eyebrow="05 / Quest log" title="Main story" action={<Button icon="read-cv-logo" href="/cv">Full CV</Button>}>
+          <div style={{ maxWidth: 860 }}><QuestLog quests={experience.map((e) => ({ ...e, objectives: e.objectives.slice(0, 4) }))} /></div>
+        </Section>
+        <Section id="console" eyebrow="06 / Console" title="Prefer the command line?" text="Type help. There might be a hidden command.">
+          <div className="xk-two">
+            <Terminal motd={MOTD} commands={terminalCommands} boot={["whoami", "github"]} />
+            <AskMyCV suggestions={["Has he shipped AI agents to production?", "How big was the real-time system?", "Is he available?"]} />
+          </div>
+        </Section>
+        <Section id="activity" eyebrow="07 / Activity" title="Still shipping, every week">
+          <GitHubHeatmap user={github.user} weeks={contrib.weeks} total={contrib.total} stats={[{ value: String(github.activeDays), label: "active days" }, { value: String(github.bestStreak), label: "day best streak" }, { value: String(github.publicRepos), label: "public repos" }]} />
+        </Section>
+        <Section id="notes" eyebrow="08 / Notes" title="Field notes" text="Short, practical notes on real-time systems, AI engineering and the boring parts that matter." action={<Button variant="ghost" iconRight="arrow-right" href="/blog">All notes</Button>}>
+          <div>{posts.slice(0, 5).map((p) => <PostCard key={p.slug} href={`/blog/${p.slug}`} date={formatDate(p.publishedAt)} readingTime={p.readingTime} title={p.title} excerpt={p.summary} />)}</div>
+        </Section>
+        <section className="xk-section">
+          <CTABar tone="accent" eyebrow="Co-op mode" title="Ready player two?" text="Freelance or contract — real-time systems, AI agents, full-stack products. I reply within one working day.">
+            <Button variant="primary" icon="calendar-dots" href={bookingUrl} track="book_call">Book a call</Button>
+            <Button brand="upwork" iconRight="arrow-up-right" href={socials[0].href} track="upwork_click">Hire on Upwork</Button>
+          </CTABar>
+        </section>
+      </div>
+    </>
   );
 }
