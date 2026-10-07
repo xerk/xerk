@@ -1,8 +1,9 @@
 import snapshot from "@/data/github-weeks.json";
-import { github } from "@/data/profile";
+import { getSite } from "@/lib/content";
 
 /** Contribution calendar: live from GitHub when GITHUB_TOKEN is set (cached daily), else the committed snapshot. */
 export async function getContributions(): Promise<{ weeks: number[][]; total: number }> {
+  const { github } = await getSite();
   const token = process.env.GITHUB_TOKEN;
   if (token) {
     try {

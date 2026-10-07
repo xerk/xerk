@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "../styles/tokens.css";
 @import "../styles/xerk.css";
+@import "../styles/admin.css";
+@import "../styles/login.css";
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 

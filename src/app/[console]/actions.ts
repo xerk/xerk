@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { adminDb } from "@/lib/supabase";
 import { getAdminUser } from "@/lib/supabase/server";
 import { markdownToHtml } from "@/lib/posts";
+import { adminHref } from "@/lib/admin-path";
 import type { Project } from "@/data/projects";
 
 // Every write in /admin goes through here: verify the session belongs to an admin, then use the service role.
@@ -32,13 +33,13 @@ async function run<T>(fn: () => Promise<T>, message?: string): Promise<ActionRes
   }
 }
 
-const PUBLIC_PATHS = ["/", "/blog", "/work", "/ai", "/play", "/cv", "/studio", "/sitemap.xml", "/llms.txt", "/llms-full.txt", "/rss.xml"];
+const PUBLIC_PATHS = ["/", "/blog", "/work", "/ai", "/play", "/cv", "/sitemap.xml", "/llms.txt", "/llms-full.txt", "/rss.xml"];
 
 /** Make edits live: every listing/feed page, the affected detail pages, and the root layout (the ⌘K palette lists posts and projects). */
 function revalidatePublic(extra: string[] = []) {
   [...PUBLIC_PATHS, ...extra].forEach((p) => revalidatePath(p));
   revalidatePath("/", "layout");
-  revalidatePath("/admin", "layout");
+  revalidatePath(adminHref(), "layout");
 }
 
 const hasContentFile = (slug: string) => SLUG_RE.test(slug) && fs.existsSync(path.join(process.cwd(), "content", slug, "index.mdx"));
@@ -270,7 +271,7 @@ export async function deleteMedia(filePath: string): Promise<ActionResult> {
     assertMediaPath(filePath);
     const { error } = await db.storage.from(MEDIA_BUCKET).remove([filePath]);
     if (error) throw new Error(error.message);
-    revalidatePath("/admin/media");
+    revalidatePath(adminHref("/media"));
     return undefined;
   }, "Deleted");
 }
@@ -283,8 +284,61 @@ export async function setLeadStatus(id: string, status: string): Promise<ActionR
     if (!(LEAD_STATUSES as readonly string[]).includes(status)) throw new Error("Bad status.");
     const { error } = await db.from("leads").update({ status }).eq("id", id);
     if (error) throw new Error(error.message);
-    revalidatePath("/admin/leads");
-    revalidatePath("/admin");
+    revalidatePath(adminHref("/leads"));
+    revalidatePath(adminHref());
     return undefined;
   }, "Saved");
+}
+
+/* ---------------- Site content (profile, experience, skills…) ---------------- */
+
+const CONTENT_SHAPES: Record<string, "object" | "array"> = {
+  profile: "object", github: "object", skills: "object",
+  socials: "array", stats: "array", ticker: "array", achievements: "array", experience: "array", skillTree: "array", aiStack: "array", services: "array", process: "array", hireFaq: "array",
+};
+
+function checkContent(key: string, value: unknown) {
+  const shape = CONTENT_SHAPES[key];
+  if (!shape) throw new Error(`Unknown section "${key}".`);
+  if (shape === "array" ? !Array.isArray(value) : !value || typeof value !== "object" || Array.isArray(value)) throw new Error(`"${key}" must be a JSON ${shape}.`);
+  if (JSON.stringify(value).length > 200_000) throw new Error("That's too big to save.");
+  if (key === "profile") {
+    const p = value as Record<string, unknown>;
+    for (const f of ["name", "title", "headline", "email"]) if (!String(p[f] || "").trim()) throw new Error(`Profile ${f} is required.`);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(p.email))) throw new Error("Profile email isn't valid.");
+    if (!Number.isFinite(Number(p.years))) throw new Error("Years must be a number.");
+  }
+  if (key === "experience") {
+    (value as Record<string, unknown>[]).forEach((e, i) => {
+      for (const f of ["company", "role", "period"]) if (!String(e[f] || "").trim()) throw new Error(`Experience #${i + 1}: ${f} is required.`);
+      for (const f of ["objectives", "loot", "stack"]) if (!Array.isArray(e[f])) throw new Error(`Experience #${i + 1}: ${f} must be a list.`);
+    });
+  }
+  if (key === "socials") {
+    (value as Record<string, unknown>[]).forEach((s, i) => { if (!/^https?:\/\//.test(String(s.href || ""))) throw new Error(`Link #${i + 1} needs a full https:// URL.`); });
+  }
+}
+
+/** Save one site_content section; every public page reads it, so revalidate the whole site. */
+export async function saveContent(key: string, value: unknown): Promise<ActionResult> {
+  return run(async () => {
+    const { db } = await requireAdmin();
+    checkContent(key, value);
+    const { error } = await db.from("site_content").upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: "key" });
+    if (error) throw new Error(error.message);
+    revalidatePublic(["/hire", "/uses", "/now", "/cv"]);
+    return undefined;
+  }, "Saved. The site is updating.");
+}
+
+/** Drop a section's row so the site falls back to the defaults in src/data/profile.ts. */
+export async function resetContent(key: string): Promise<ActionResult> {
+  return run(async () => {
+    const { db } = await requireAdmin();
+    if (!CONTENT_SHAPES[key]) throw new Error(`Unknown section "${key}".`);
+    const { error } = await db.from("site_content").delete().eq("key", key);
+    if (error) throw new Error(error.message);
+    revalidatePublic(["/hire", "/uses", "/now", "/cv"]);
+    return undefined;
+  }, "Reset to the built-in defaults.");
 }

@@ -1,5 +1,6 @@
 import { MediaLibrary, type MediaFile } from "@/components/admin/media-library";
 import { adminDb } from "@/lib/supabase";
+import { PageHeader } from "@/components/admin/ui";
 
 export const metadata = { title: "Media" };
 export const dynamic = "force-dynamic";
@@ -29,9 +30,7 @@ export default async function AdminMedia() {
   const files = db ? (await walk(db)).sort((a, b) => b.updated.localeCompare(a.updated)) : [];
   return (
     <>
-      <div className="xk-admin-head">
-        <div><span className="xk-label">Library</span><h1>Media</h1><p>Everything in the public <code>media</code> bucket: post covers, project covers, previews, screens and uploads.</p></div>
-      </div>
+      <PageHeader eyebrow="Library" title="Media" description={<>Everything in the public <code>media</code> bucket: post covers, project covers, previews, screens and uploads.</>} />
       <MediaLibrary files={files} />
     </>
   );

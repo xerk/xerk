@@ -2,10 +2,11 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { deleteMedia } from "@/app/admin/actions";
+import { deleteMedia } from "@/app/[console]/actions";
 import { Icon } from "@/components/xerk/icon";
 import { ConfirmButton, StatusText, uploadFile, type Status } from "./shared";
 import { cx } from "@/lib/utils";
+import { EmptyState } from "./ui";
 
 export type MediaFile = { path: string; url: string; size: number; type: string; updated: string };
 
@@ -57,17 +58,19 @@ export function MediaLibrary({ files }: { files: MediaFile[] }) {
         onDragLeave={() => setOver(false)}
         onDrop={(e) => { e.preventDefault(); setOver(false); upload(e.dataTransfer.files); }}
       >
-        <Icon name="images" />
+        <Icon name="upload-simple" />
         <strong>Drop files here or click to upload</strong>
         <span>Images, videos, PDFs, HTML. Goes straight to Supabase Storage (media/uploads/), no size cap from Vercel.</span>
         <input ref={input} type="file" multiple hidden onChange={(e) => upload(e.target.files)} />
       </div>
-      <div className="xk-admin-actions" style={{ justifyContent: "space-between" }}>
-        <label className="xk-field" style={{ flex: 1, maxWidth: 360 }}><input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter by path…" aria-label="Filter files" /></label>
-        <StatusText status={state} />
-        <span className="xk-muted" style={{ fontSize: 13 }}>{shown.length} file{shown.length === 1 ? "" : "s"}</span>
+      <div className="xk-admin-toolbar">
+        <label className="xk-field xk-admin-search"><Icon name="magnifying-glass" /><input value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="Filter by path…" aria-label="Filter files" /></label>
+        <div className="xk-admin-toolbar-end">
+          <StatusText status={state} />
+          <span className="xk-admin-count">{shown.length} file{shown.length === 1 ? "" : "s"}</span>
+        </div>
       </div>
-      {shown.length === 0 ? <p className="xk-muted">No files yet.</p> : (
+      {shown.length === 0 ? <EmptyState icon="images" title={files.length ? "No files match" : "No files yet"} ticks={!files.length}>{files.length ? "Try a different path filter." : "Uploads, post covers and project media land here."}</EmptyState> : (
         <div className="xk-media-grid">
           {shown.map((f) => {
             const img = /^image\//.test(f.type) || /\.(png|jpe?g|webp|gif|avif|svg)$/i.test(f.path);
@@ -79,7 +82,7 @@ export function MediaLibrary({ files }: { files: MediaFile[] }) {
                 </a>
                 <div className="xk-media-tile-body">
                   <span className="xk-media-tile-name" title={f.path}>{f.path}</span>
-                  <span className="xk-muted">{fmt(f.size)}{f.updated && ` · ${f.updated.slice(0, 10)}`}</span>
+                  <span className="xk-media-tile-meta">{fmt(f.size)}{f.updated && ` · ${f.updated.slice(0, 10)}`}</span>
                   <div className="xk-media-tile-actions">
                     <button type="button" className="xk-btn xk-btn-secondary xk-btn-sm" onClick={() => copy(f.url)}><Icon name={copied === f.url ? "check" : "copy"} />{copied === f.url ? "Copied" : "Copy URL"}</button>
                     <ConfirmButton label="Delete" question="Delete?" confirmLabel="Yes" onConfirm={() => remove(f.path)} />

@@ -1,11 +1,13 @@
 import { Button, FAQ, PlatformProof, ProcessSteps, Section, ServiceCard, SocialLinks, StatusPill } from "@/components/xerk/ui";
 import { AskMyCV, ContactForm } from "@/components/xerk/client";
-import { bookingUrl, hireFaq, process_, profile, services, socials, SITE_URL, upworkHref, socialHref } from "@/data/profile";
+import { SITE_URL } from "@/data/profile";
+import { getSite } from "@/lib/content";
 import { pageMeta, JsonLd, faqJsonLd } from "@/lib/seo";
 
 export const metadata = pageMeta({ title: "Hire a senior full-stack and AI engineer (NestJS, Next.js, AI agents)", description: "Hire Ahmed Mamdouh (10+ years) for AI agents, real-time platforms and SaaS — fixed-scope builds or a fractional tech lead. Work directly or through Upwork.", path: "/hire" });
 
-export default function Hire() {
+export default async function Hire() {
+  const { bookingUrl, hireFaq, process: process_, profile, services, links: socials, upworkHref, socialHref } = await getSite();
   return (
     <div className="xk-container">
       <JsonLd data={{ "@context": "https://schema.org", "@type": "ProfessionalService", name: `${profile.name} — software engineering`, url: `${SITE_URL}/hire`, provider: { "@id": `${SITE_URL}/#person` }, areaServed: "Worldwide", makesOffer: services.map((s) => ({ "@type": "Offer", name: s.title, description: s.text, itemOffered: { "@type": "Service", name: s.title } })) }} />

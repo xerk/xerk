@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { generateText } from "ai";
 import { getKnowledge, rank } from "@/lib/knowledge";
-import { profile } from "@/data/profile";
+import { getSite } from "@/lib/content";
 
 export const maxDuration = 30;
 
@@ -18,6 +18,7 @@ function limited(ip: string) {
 }
 
 export async function POST(req: NextRequest) {
+  const { profile } = await getSite();
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0] || "local";
   if (limited(ip)) return NextResponse.json({ answer: "Too many questions in a minute. Give it a moment.", sources: [] }, { status: 429 });
   const body = await req.json().catch(() => ({}));

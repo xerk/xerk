@@ -1,6 +1,6 @@
 import { AchievementGrid, BentoGrid, BentoTile, Button, GitHubHeatmap, Marquee, PlayerCard, QuestLog, Section, SkillTree } from "@/components/xerk/ui";
 import { AskMyCV, LevelSelect, Terminal } from "@/components/xerk/client";
-import { achievements, experience, github, profile, skillTree, stats, ticker } from "@/data/profile";
+import { getSite } from "@/lib/content";
 import { getProjects } from "@/lib/projects";
 import { MOTD, terminalCommands } from "@/data/terminal";
 import { getContributions } from "@/lib/github";
@@ -12,6 +12,7 @@ export const metadata = pageMeta({ title: "Play: my CV as a game", description: 
 const LOADOUT = [{ brand: "nestjs", label: "NestJS" }, { brand: "nextdotjs", label: "Next.js" }, { brand: "claude", label: "Claude" }, { brand: "graphql", label: "GraphQL" }, { brand: "kubernetes", label: "Kubernetes" }, { brand: "amazonwebservices", label: "AWS" }];
 
 export default async function Play() {
+  const { achievements, experience, github, profile, skillTree, stats, ticker } = await getSite();
   const projects = await getProjects();
   const contrib = await getContributions();
   const now = new Date();

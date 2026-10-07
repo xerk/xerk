@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { SITE_URL, profile, socials, experience, skills } from "@/data/profile";
+import { SITE_URL } from "@/data/profile";
+import type { Site } from "@/lib/content";
 
 export function pageMeta({ title, description, path = "/", image, type = "website", publishedTime }: { title: string; description: string; path?: string; image?: string; type?: "website" | "article"; publishedTime?: string }): Metadata {
   const og = image || `/og?title=${encodeURIComponent(title)}&kind=${type === "article" ? "Article" : "Profile"}`;
@@ -12,7 +13,7 @@ export function pageMeta({ title, description, path = "/", image, type = "websit
   };
 }
 
-export function personJsonLd() {
+export function personJsonLd({ profile, links: socials, experience, skills }: Site) {
   return {
     "@context": "https://schema.org",
     "@type": "Person",
@@ -26,7 +27,7 @@ export function personJsonLd() {
     email: `mailto:${profile.email}`,
     address: { "@type": "PostalAddress", addressLocality: "Cairo", addressCountry: "EG" },
     sameAs: [...new Set(socials.map((s) => s.href).concat(["https://github.com/xerk"]))],
-    worksFor: { "@type": "Organization", name: experience[0].company },
+    worksFor: { "@type": "Organization", name: experience[0]?.company },
     alumniOf: [{ "@type": "CollegeOrUniversity", name: profile.education.school }],
     knowsAbout: Object.values(skills).flat().slice(0, 40),
     knowsLanguage: ["ar", "en"],

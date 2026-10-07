@@ -5,10 +5,13 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import { SiteHeader, SiteFooter, MobileDock, Palette } from "@/components/xerk/chrome";
 import { AchievementToaster, MotionRoot, QuestPanel } from "@/components/xerk/client";
-import { SITE_URL, profile } from "@/data/profile";
+import { SITE_URL } from "@/data/profile";
+import { getSite } from "@/lib/content";
 import { JsonLd, personJsonLd, websiteJsonLd } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export async function generateMetadata(): Promise<Metadata> {
+  const { profile } = await getSite();
+  return {
   metadataBase: new URL(SITE_URL),
   title: { default: `${profile.name} — ${profile.title}`, template: `%s | ${profile.name}` },
   description: profile.description,
@@ -21,16 +24,18 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
   alternates: { canonical: "/", types: { "application/rss+xml": "/rss.xml" } },
   verification: { google: "RB2dzZGLiNJe7uPzE0s-vpARRoG0ZGv_6mOFsIlFAf4" },
-};
+  };
+}
 
 export const viewport: Viewport = { themeColor: [{ media: "(prefers-color-scheme: dark)", color: "#0a0b0d" }, { media: "(prefers-color-scheme: light)", color: "#fafaf9" }], colorScheme: "dark light" };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const site = await getSite();
   return (
     <html lang="en" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
-        <JsonLd data={personJsonLd()} />
+        <JsonLd data={personJsonLd(site)} />
         <JsonLd data={websiteJsonLd()} />
       </head>
       <body>

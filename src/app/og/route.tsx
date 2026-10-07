@@ -1,10 +1,11 @@
 import { ImageResponse } from "next/og";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { profile } from "@/data/profile";
+import { getSite } from "@/lib/content";
 
 // Dynamic OG image in the xerk brand: /og?title=...&kind=Case%20study&stat=100K%2B
 export async function GET(req: Request) {
+  const { profile } = await getSite();
   const { searchParams } = new URL(req.url);
   const title = (searchParams.get("title") || `${profile.name} — ${profile.title}`).slice(0, 110);
   const kind = (searchParams.get("kind") || "Profile").slice(0, 30);

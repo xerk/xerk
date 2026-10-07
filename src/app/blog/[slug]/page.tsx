@@ -4,7 +4,8 @@ import { BlogCard, PostCover, PostVideo } from "@/components/xerk/blog";
 import { getPost, getPosts } from "@/lib/posts";
 import { formatDate } from "@/lib/utils";
 import { pageMeta, JsonLd, breadcrumbJsonLd } from "@/lib/seo";
-import { SITE_URL, profile, socials } from "@/data/profile";
+import { SITE_URL } from "@/data/profile";
+import { getSite } from "@/lib/content";
 
 export const revalidate = 3600;
 
@@ -20,6 +21,7 @@ export async function generateMetadata({ params }: PageProps<"/blog/[slug]">) {
 }
 
 export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
+  const { profile, links: socials } = await getSite();
   const { slug } = await params;
   const post = await getPost(slug);
   if (!post) notFound();

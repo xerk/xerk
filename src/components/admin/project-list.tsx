@@ -3,15 +3,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { reorderProjects, setProjectPublished } from "@/app/admin/actions";
+import { reorderProjects, setProjectPublished } from "@/app/[console]/actions";
 import { StatusText, useAction } from "./shared";
+import { useAdminHref } from "@/components/admin/base";
 import { cx } from "@/lib/utils";
+import { Icon } from "@/components/xerk/icon";
 
 export type ProjectListItem = { slug: string; code: string; title: string; world: string; image?: string; published: boolean };
 
 /** Drag (desktop) or ↑/↓ (anywhere) to reorder; each change saves `sort` right away. */
 export function ProjectList({ initial }: { initial: ProjectListItem[] }) {
   const router = useRouter();
+  const ah = useAdminHref();
   const [items, setItems] = useState(initial);
   const [drag, setDrag] = useState<number | null>(null);
   const { status, pending, exec } = useAction();
@@ -36,8 +39,9 @@ export function ProjectList({ initial }: { initial: ProjectListItem[] }) {
   };
 
   return (
+    <>
+    {status.kind !== "idle" && <div className="xk-admin-toolbar"><StatusText status={status} /></div>}
     <div className="xk-order">
-      <StatusText status={status} />
       {items.map((p, i) => (
         <div
           key={p.slug}
@@ -48,19 +52,20 @@ export function ProjectList({ initial }: { initial: ProjectListItem[] }) {
           onDrop={() => { if (drag === null || drag === i) return; const n = [...items]; const [m] = n.splice(drag, 1); n.splice(i, 0, m); setDrag(null); persist(n); }}
           onDragEnd={() => setDrag(null)}
         >
-          <span className="xk-order-handle" aria-hidden title="Drag to reorder">⠿</span>
-          {p.image ? <img src={p.image} alt="" /> : <span />}
+          <span className="xk-order-handle" aria-hidden title="Drag to reorder"><Icon name="dots-six-vertical" /></span>
+          {p.image ? <img src={p.image} alt="" /> : <span className="xk-order-thumb" />}
           <div className="xk-order-title">
-            <Link href={`/admin/projects/${p.slug}`}>{p.title}</Link>
-            <span>{p.code} · {p.world} · /work/{p.slug}</span>
+            <Link href={ah(`/projects/${p.slug}`)}>{p.title}</Link>
+            <span><b className="xk-order-code">{p.code}</b>{p.world} · /work/{p.slug}</span>
           </div>
-          <div className="xk-admin-actions">
+          <div className="xk-order-side">
             <label className="xk-switch"><input type="checkbox" checked={p.published} disabled={pending} onChange={(e) => toggle(p.slug, e.target.checked)} />{p.published ? "Live" : "Hidden"}</label>
-            <button type="button" className="xk-iconbtn-sm" aria-label={`Move ${p.title} up`} disabled={i === 0 || pending} onClick={() => move(i, -1)}>↑</button>
-            <button type="button" className="xk-iconbtn-sm" aria-label={`Move ${p.title} down`} disabled={i === items.length - 1 || pending} onClick={() => move(i, 1)}>↓</button>
+            <button type="button" className="xk-iconbtn-sm" aria-label={`Move ${p.title} up`} disabled={i === 0 || pending} onClick={() => move(i, -1)}><Icon name="arrow-up" /></button>
+            <button type="button" className="xk-iconbtn-sm" aria-label={`Move ${p.title} down`} disabled={i === items.length - 1 || pending} onClick={() => move(i, 1)}><Icon name="arrow-down" /></button>
           </div>
         </div>
       ))}
     </div>
+    </>
   );
 }

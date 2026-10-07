@@ -1,4 +1,4 @@
-// Seed Supabase from the repo (src/data/projects.ts + content/*/index.mdx).
+// Seed Supabase from the repo (src/data/projects.ts, src/data/profile.ts, content/*/index.mdx).
 // Supabase is the source of truth once the /admin CMS is in use, so by default this only INSERTS rows that are
 // missing and never touches rows that already exist (your CMS edits are safe).
 //   pnpm seed                 # insert missing projects/posts only
@@ -9,6 +9,7 @@ import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import matter from "gray-matter";
 import { projects } from "../src/data/projects.ts";
+import * as site from "../src/data/profile.ts";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
@@ -39,3 +40,14 @@ const posts = fs.readdirSync(dir).filter((d) => fs.existsSync(path.join(dir, d, 
 });
 const { data: po, error: e2 } = await db.from("posts").upsert(posts, { onConflict: "slug", ignoreDuplicates: !overwrite }).select("slug");
 console.log(e2 ? `posts: ${e2.message}` : `posts: ${po?.length ?? 0} ${overwrite ? "upserted" : "inserted (existing rows left alone)"}`);
+
+// Site copy: one site_content row per section (same keys as src/lib/content.ts).
+const contentRows = Object.entries({
+  profile: { ...site.profile, upworkUrl: site.upworkUrl || "", bookingUrl: process.env.NEXT_PUBLIC_BOOKING_URL || "" },
+  socials: site.socials.filter((s) => s.brand !== "upwork"),
+  stats: site.stats, ticker: site.ticker, achievements: site.achievements, experience: site.experience,
+  skillTree: site.skillTree, skills: site.skills, aiStack: site.aiStack, services: site.services,
+  process: site.process_, hireFaq: site.hireFaq, github: site.github,
+}).map(([key, value]) => ({ key, value }));
+const { data: sc, error: e3 } = await db.from("site_content").upsert(contentRows, { onConflict: "key", ignoreDuplicates: !overwrite }).select("key");
+console.log(e3 ? `site_content: ${e3.message}` : `site_content: ${sc?.length ?? 0} ${overwrite ? "upserted" : "inserted (existing rows left alone)"}`);

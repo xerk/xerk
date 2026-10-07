@@ -1,5 +1,6 @@
 import { adminDb } from "./supabase";
 import { esc } from "./telegram";
+import { ADMIN_BASE } from "./admin-path";
 
 const PH_HOST = process.env.POSTHOG_API_HOST || (process.env.NEXT_PUBLIC_POSTHOG_REGION === "eu" ? "https://eu.posthog.com" : "https://us.posthog.com");
 const PH_KEY = process.env.POSTHOG_PERSONAL_API_KEY;
@@ -99,7 +100,7 @@ export function statsKeyboard(days: number, view: View = "summary") {
     inline_keyboard: [
       [b("24h", `s:1:${view}`), b("7 days", `s:7:${view}`), b("30 days", `s:30:${view}`)],
       [b("Summary", `s:${days}:summary`), b("Pages", `s:${days}:pages`), b("Sources", `s:${days}:sources`)],
-      [b("Leads", `s:${days}:leads`), b("Live", `s:${days}:live`), { text: "Dashboard ↗", url: `${site}/admin` }],
+      [b("Leads", `s:${days}:leads`), b("Live", `s:${days}:live`), { text: "Dashboard ↗", url: `${site}${ADMIN_BASE}` }],
     ],
   };
 }

@@ -3,7 +3,8 @@ import { Badge, Button, CaseStudyHeader, Callout, CTABar, FAQ, KeyTakeaways, Met
 import { Icon } from "@/components/xerk/icon";
 import { ArtifactEmbed, HeroScene } from "@/components/xerk/client";
 import { getProject, getProjects } from "@/lib/projects";
-import { SITE_URL, profile, socials, upworkHref } from "@/data/profile";
+import { SITE_URL } from "@/data/profile";
+import { getSite } from "@/lib/content";
 import { pageMeta, JsonLd, breadcrumbJsonLd, faqJsonLd } from "@/lib/seo";
 import { pad2 } from "@/lib/utils";
 
@@ -21,6 +22,7 @@ export async function generateMetadata({ params }: PageProps<"/work/[slug]">) {
 }
 
 export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
+  const { profile, links: socials, upworkHref } = await getSite();
   const { slug } = await params;
   const p = await getProject(slug);
   if (!p) notFound();

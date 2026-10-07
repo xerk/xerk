@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { adminHref } from "@/lib/admin-path";
 import { redirect } from "next/navigation";
 import { AdminFlag, AdminNav } from "@/components/admin/shared";
 import { getAdminUser } from "@/lib/supabase/server";
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   // The proxy already gates /admin; this is defence in depth (and gives us the email for the nav).
   const user = await getAdminUser();
-  if (!user) redirect("/admin/login");
+  if (!user) redirect(adminHref("/login"));
   return (
     <div className="xk-admin">
       <AdminFlag />

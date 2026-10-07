@@ -2,7 +2,8 @@ import Link from "next/link";
 import { BentoGrid, BentoTile, Button, CTABar, PlayerCard, QuestLog, ProjectCard, Section, SocialLinks, StatusPill } from "@/components/xerk/ui";
 import { HeroScene } from "@/components/xerk/client";
 import { BlogCard } from "@/components/xerk/blog";
-import { bookingUrl, experience, profile, socials, stats, upworkHref, SITE_URL } from "@/data/profile";
+import { SITE_URL } from "@/data/profile";
+import { getSite } from "@/lib/content";
 import { getProjects } from "@/lib/projects";
 import { getPosts } from "@/lib/posts";
 import { formatDate } from "@/lib/utils";
@@ -13,6 +14,7 @@ export const revalidate = 3600;
 const LOADOUT = [{ brand: "nestjs", label: "NestJS" }, { brand: "nextdotjs", label: "Next.js" }, { brand: "claude", label: "Claude" }, { brand: "graphql", label: "GraphQL" }, { brand: "kubernetes", label: "Kubernetes" }, { brand: "amazonwebservices", label: "AWS" }];
 
 export default async function Home() {
+  const { bookingUrl, experience, profile, links: socials, stats, upworkHref } = await getSite();
   const posts = await getPosts();
   const now = new Date();
   const season = Math.round(((now.getMonth() + now.getDate() / 31) / 12) * 100);

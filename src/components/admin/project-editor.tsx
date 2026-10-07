@@ -3,8 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Project } from "@/data/projects";
-import { deleteProject, importDemo, saveProject } from "@/app/admin/actions";
+import { deleteProject, importDemo, saveProject } from "@/app/[console]/actions";
 import { Icon } from "@/components/xerk/icon";
+import { useAdminHref } from "@/components/admin/base";
+import Link from "next/link";
+import { Chip, PageHeader, TagPreview } from "./ui";
 import { ConfirmButton, MediaField, StatusText, slugify, uploadFile, useAction, type Status } from "./shared";
 
 type SectionForm = { id: string; title: string; body: string };
@@ -51,6 +54,7 @@ const Area = ({ label, value, onChange, hint, rows = 3, placeholder, mono }: { l
 
 export function ProjectEditor({ initial, isNew, published: initialPublished, inDb }: { initial: Project; isNew: boolean; published: boolean; inDb: boolean }) {
   const router = useRouter();
+  const ah = useAdminHref();
   const [f, setF] = useState<Form>(() => toForm(initial));
   const [published, setPublished] = useState(initialPublished);
   const [savedSlug, setSavedSlug] = useState<string | undefined>(isNew ? undefined : initial.slug);
@@ -81,14 +85,14 @@ export function ProjectEditor({ initial, isNew, published: initialPublished, inD
     const r = await exec(() => saveProject({ originalSlug: savedSlug, project: toProject(f), published }));
     if (r.ok && r.data) {
       setDirty(false);
-      if (r.data.slug !== savedSlug) { setSavedSlug(r.data.slug); router.replace(`/admin/projects/${r.data.slug}`); } else router.refresh();
+      if (r.data.slug !== savedSlug) { setSavedSlug(r.data.slug); router.replace(ah(`/projects/${r.data.slug}`)); } else router.refresh();
     }
   };
 
   const remove = async () => {
     if (!savedSlug) return;
     const r = await exec(() => deleteProject(savedSlug), "Deleting…");
-    if (r.ok) { setDirty(false); router.push("/admin/projects"); }
+    if (r.ok) { setDirty(false); router.push(ah("/projects")); }
   };
 
   const uploadDemo = async (file?: File) => {
@@ -128,22 +132,25 @@ export function ProjectEditor({ initial, isNew, published: initialPublished, inD
   const move = <T,>(list: T[], i: number, d: number) => { const n = [...list]; const j = i + d; if (j < 0 || j >= n.length) return n; [n[i], n[j]] = [n[j], n[i]]; return n; };
 
   return (
-    <div className="xk-admin-main" style={{ paddingBottom: 0 }}>
-      <div className="xk-admin-head">
-        <div>
-          <span className="xk-label">{!savedSlug ? "New project" : `Stage ${f.code}`}{savedSlug && !inDb && " · static data (saving copies it to Supabase)"}</span>
-          <h1>{f.title || "Untitled project"}</h1>
-        </div>
-        <div className="xk-admin-actions">
-          {savedSlug && published && <a className="xk-btn xk-btn-ghost xk-btn-sm" href={`/work/${savedSlug}`} target="_blank" rel="noopener">View on site ↗</a>}
-        </div>
-      </div>
+    <div className="xk-admin-stack">
+      <PageHeader
+        eyebrow={<><Link href={ah("/projects")} className="xk-admin-crumb">Projects</Link> / {!savedSlug ? "New" : `Stage ${f.code}`}</>}
+        title={f.title || "Untitled project"}
+        meta={<>
+          <Chip dot tone={published ? "accent" : "warning"}>{published ? "live" : "hidden"}</Chip>
+          {f.featured && <Chip icon="star">featured</Chip>}
+          {f.ai && <Chip tone="agent" icon="sparkle">ai</Chip>}
+          {savedSlug && !inDb && <Chip dot tone="agent" title="Saving copies it to Supabase">static data</Chip>}
+          {f.slug && <Chip outline>/work/{f.slug}</Chip>}
+        </>}
+        actions={savedSlug && published ? <a className="xk-btn xk-btn-secondary xk-btn-sm" href={`/work/${savedSlug}`} target="_blank" rel="noopener"><Icon name="arrow-square-out" />View on site</a> : undefined}
+      />
 
       <section className="xk-admin-panel">
-        <h2>Basics</h2>
+        <div className="xk-admin-panel-head"><div><h2>Basics</h2><p>Identity, where it sits in the level select, and the story in brief.</p></div></div>
         <Text label="Title" value={f.title} onChange={(v) => set("title", v)} />
         <div className="xk-field-row is-3">
-          <label className="xk-field"><span>Slug</span><input className="is-mono" value={f.slug} onChange={(e) => { setSlugTouched(true); set("slug", slugify(e.target.value) + (e.target.value.endsWith("-") ? "-" : "")); }} /><span className="xk-field-hint">/work/{f.slug || "…"}</span></label>
+          <label className="xk-field"><span>Slug</span><span className="xk-admin-affix"><span>/work/</span><input className="is-mono" value={f.slug} onChange={(e) => { setSlugTouched(true); set("slug", slugify(e.target.value) + (e.target.value.endsWith("-") ? "-" : "")); }} /></span></label>
           <Text label="Code" value={f.code} onChange={(v) => set("code", v)} placeholder="1-7" mono hint="Stage number in the level select" />
           <Text label="World" value={f.world} onChange={(v) => set("world", v)} placeholder="Enterprise · AI" />
         </div>
@@ -160,12 +167,12 @@ export function ProjectEditor({ initial, isNew, published: initialPublished, inD
           <Text label="Big number" value={f.big} onChange={(v) => set("big", v)} placeholder="100K+" />
           <Text label="Big number label" value={f.bigLabel} onChange={(v) => set("bigLabel", v)} placeholder="concurrent devices" />
         </div>
-        <Text label="Stack" value={f.stack} onChange={(v) => set("stack", v)} hint="Comma separated" />
+        <label className="xk-field"><span>Stack</span><input value={f.stack} onChange={(e) => set("stack", e.target.value)} /><TagPreview value={f.stack} /><span className="xk-field-hint">Comma separated</span></label>
         <Area label="Metrics" value={f.metrics} onChange={(v) => set("metrics", v)} rows={3} mono hint="One per line: value | label | hint (hint optional)" placeholder="100K+ | Concurrent connections" />
         <div className="xk-field-row">
           <Text label="Live site URL (optional)" value={f.url} onChange={(v) => set("url", v)} placeholder="https://…" />
           <div className="xk-field"><span>Flags</span>
-            <div className="xk-admin-actions">
+            <div className="xk-admin-switches">
               <label className="xk-switch"><input type="checkbox" checked={published} onChange={(e) => { setDirty(true); setPublished(e.target.checked); }} />Published</label>
               <label className="xk-switch"><input type="checkbox" checked={f.featured} onChange={(e) => set("featured", e.target.checked)} />Featured</label>
               <label className="xk-switch"><input type="checkbox" checked={f.ai} onChange={(e) => set("ai", e.target.checked)} />AI project</label>
@@ -175,7 +182,7 @@ export function ProjectEditor({ initial, isNew, published: initialPublished, inD
       </section>
 
       <section className="xk-admin-panel">
-        <h2>Media</h2>
+        <div className="xk-admin-panel-head"><div><h2>Media</h2><p>Cover, preview loop, interactive demo and screenshots. Uploads go to media/projects/&lt;slug&gt;/.</p></div></div>
         <div className="xk-field-row">
           <MediaField label="Cover image" value={f.image} onChange={(v) => set("image", v)} folder={folder} fixedName="cover" disabledReason={needSlug} hint="media/projects/<slug>/cover.*" />
           <MediaField label="Preview video" kind="video" accept="video/mp4,video/webm" value={f.video} onChange={(v) => set("video", v)} folder={folder} fixedName="preview" disabledReason={needSlug} hint="Short muted loop (mp4). media/projects/<slug>/preview.*" />
@@ -185,8 +192,8 @@ export function ProjectEditor({ initial, isNew, published: initialPublished, inD
           <div className="xk-admin-upload-row">
             <input type="text" value={f.embedUrl} onChange={(e) => set("embedUrl", e.target.value)} placeholder="https://claude.site/… or /demos/… or upload an .html file" />
             <input ref={demoInput} type="file" accept=".html,.htm,text/html" hidden onChange={(e) => uploadDemo(e.target.files?.[0])} />
-            <button type="button" className="xk-btn xk-btn-secondary xk-btn-sm" disabled={!!needSlug || demo.kind === "busy"} onClick={() => demoInput.current?.click()}>{demo.kind === "busy" ? "Uploading…" : "Upload .html"}</button>
-            {f.embedUrl && <a className="xk-btn xk-btn-ghost xk-btn-sm" href={f.embedUrl} target="_blank" rel="noopener">Open ↗</a>}
+            <button type="button" className="xk-btn xk-btn-secondary xk-btn-sm" disabled={!!needSlug || demo.kind === "busy"} onClick={() => demoInput.current?.click()}><Icon name="upload-simple" />{demo.kind === "busy" ? "Uploading…" : "Upload .html"}</button>
+            {f.embedUrl && <a className="xk-btn xk-btn-ghost xk-btn-sm" href={f.embedUrl} target="_blank" rel="noopener"><Icon name="arrow-square-out" />Open</a>}
             {f.embedUrl && <button type="button" className="xk-btn xk-btn-ghost xk-btn-sm" onClick={() => set("embedUrl", "")}>Clear</button>}
           </div>
           <span className="xk-field-hint">Embed URL, or upload a self-contained demo/artifact HTML. Uploaded demos are served from /demos/&lt;slug&gt; in a sandbox.</span>
@@ -194,15 +201,15 @@ export function ProjectEditor({ initial, isNew, published: initialPublished, inD
         </div>
         <div className="xk-field">
           <span>Screens</span>
-          <div className="xk-repeat">
+          <div className="xk-order is-plain">
             {f.screens.map((s, i) => (
-              <div key={i} className="xk-order-item" style={{ gridTemplateColumns: "56px minmax(0,1fr) auto" }}>
+              <div key={i} className="xk-order-item is-screen">
                 <img src={s.src} alt="" />
-                <input value={s.alt} onChange={(e) => set("screens", f.screens.map((x, k) => (k === i ? { ...x, alt: e.target.value } : x)))} placeholder="Alt text" style={{ padding: "6px 10px", border: "1px solid var(--border-strong)", borderRadius: 8, background: "var(--bg)", color: "var(--ink)" }} />
+                <input value={s.alt} onChange={(e) => set("screens", f.screens.map((x, k) => (k === i ? { ...x, alt: e.target.value } : x)))} placeholder="Alt text" aria-label={`Alt text for screen ${i + 1}`} className="xk-admin-input" />
                 <div className="xk-admin-actions">
-                  <button type="button" className="xk-iconbtn-sm" aria-label="Move up" disabled={i === 0} onClick={() => set("screens", move(f.screens, i, -1))}>↑</button>
-                  <button type="button" className="xk-iconbtn-sm" aria-label="Move down" disabled={i === f.screens.length - 1} onClick={() => set("screens", move(f.screens, i, 1))}>↓</button>
-                  <button type="button" className="xk-iconbtn-sm" aria-label="Remove" onClick={() => set("screens", f.screens.filter((_, k) => k !== i))}><Icon name="x" /></button>
+                  <button type="button" className="xk-iconbtn-sm" aria-label="Move up" disabled={i === 0} onClick={() => set("screens", move(f.screens, i, -1))}><Icon name="arrow-up" /></button>
+                  <button type="button" className="xk-iconbtn-sm" aria-label="Move down" disabled={i === f.screens.length - 1} onClick={() => set("screens", move(f.screens, i, 1))}><Icon name="arrow-down" /></button>
+                  <button type="button" className="xk-iconbtn-sm is-danger" aria-label="Remove" onClick={() => set("screens", f.screens.filter((_, k) => k !== i))}><Icon name="trash" /></button>
                 </div>
               </div>
             ))}
@@ -216,16 +223,16 @@ export function ProjectEditor({ initial, isNew, published: initialPublished, inD
       </section>
 
       <section className="xk-admin-panel">
-        <h2>Sections</h2>
+        <div className="xk-admin-panel-head"><div><h2>Sections</h2><p>The case study body. Paragraphs are separated by a blank line.</p></div></div>
         <div className="xk-repeat">
           {f.sections.map((s, i) => (
             <div key={i} className="xk-repeat-item">
               <div className="xk-repeat-head">
-                <span className="xk-label">Section {i + 1}</span>
+                <span className="xk-repeat-index"><b>{String(i + 1).padStart(2, "0")}</b>Section</span>
                 <div className="xk-admin-actions">
-                  <button type="button" className="xk-iconbtn-sm" aria-label="Move up" disabled={i === 0} onClick={() => set("sections", move(f.sections, i, -1))}>↑</button>
-                  <button type="button" className="xk-iconbtn-sm" aria-label="Move down" disabled={i === f.sections.length - 1} onClick={() => set("sections", move(f.sections, i, 1))}>↓</button>
-                  <button type="button" className="xk-iconbtn-sm" aria-label="Remove section" onClick={() => set("sections", f.sections.filter((_, k) => k !== i))}><Icon name="x" /></button>
+                  <button type="button" className="xk-iconbtn-sm" aria-label="Move up" disabled={i === 0} onClick={() => set("sections", move(f.sections, i, -1))}><Icon name="arrow-up" /></button>
+                  <button type="button" className="xk-iconbtn-sm" aria-label="Move down" disabled={i === f.sections.length - 1} onClick={() => set("sections", move(f.sections, i, 1))}><Icon name="arrow-down" /></button>
+                  <button type="button" className="xk-iconbtn-sm is-danger" aria-label="Remove section" onClick={() => set("sections", f.sections.filter((_, k) => k !== i))}><Icon name="trash" /></button>
                 </div>
               </div>
               <div className="xk-field-row">
@@ -235,38 +242,38 @@ export function ProjectEditor({ initial, isNew, published: initialPublished, inD
               <Area label="Body" value={s.body} onChange={(v) => set("sections", f.sections.map((x, k) => (k === i ? { ...x, body: v } : x)))} rows={5} hint="Paragraphs separated by a blank line" />
             </div>
           ))}
-          <div><button type="button" className="xk-btn xk-btn-secondary xk-btn-sm" onClick={() => set("sections", [...f.sections, { id: "", title: "", body: "" }])}><Icon name="plus" />Add section</button></div>
+          <div className="xk-repeat-add"><button type="button" className="xk-btn xk-btn-secondary xk-btn-sm" onClick={() => set("sections", [...f.sections, { id: "", title: "", body: "" }])}><Icon name="plus" />Add section</button></div>
         </div>
       </section>
 
       <section className="xk-admin-panel">
-        <h2>FAQ</h2>
+        <div className="xk-admin-panel-head"><div><h2>FAQ</h2><p>Shown at the end of the case study and as FAQ structured data.</p></div></div>
         <div className="xk-repeat">
           {f.faq.map((q, i) => (
             <div key={i} className="xk-repeat-item">
               <div className="xk-repeat-head">
-                <span className="xk-label">Question {i + 1}</span>
+                <span className="xk-repeat-index"><b>{String(i + 1).padStart(2, "0")}</b>Question</span>
                 <div className="xk-admin-actions">
-                  <button type="button" className="xk-iconbtn-sm" aria-label="Move up" disabled={i === 0} onClick={() => set("faq", move(f.faq, i, -1))}>↑</button>
-                  <button type="button" className="xk-iconbtn-sm" aria-label="Move down" disabled={i === f.faq.length - 1} onClick={() => set("faq", move(f.faq, i, 1))}>↓</button>
-                  <button type="button" className="xk-iconbtn-sm" aria-label="Remove question" onClick={() => set("faq", f.faq.filter((_, k) => k !== i))}><Icon name="x" /></button>
+                  <button type="button" className="xk-iconbtn-sm" aria-label="Move up" disabled={i === 0} onClick={() => set("faq", move(f.faq, i, -1))}><Icon name="arrow-up" /></button>
+                  <button type="button" className="xk-iconbtn-sm" aria-label="Move down" disabled={i === f.faq.length - 1} onClick={() => set("faq", move(f.faq, i, 1))}><Icon name="arrow-down" /></button>
+                  <button type="button" className="xk-iconbtn-sm is-danger" aria-label="Remove question" onClick={() => set("faq", f.faq.filter((_, k) => k !== i))}><Icon name="trash" /></button>
                 </div>
               </div>
               <Text label="Question" value={q.q} onChange={(v) => set("faq", f.faq.map((x, k) => (k === i ? { ...x, q: v } : x)))} />
               <Area label="Answer" value={q.a} onChange={(v) => set("faq", f.faq.map((x, k) => (k === i ? { ...x, a: v } : x)))} rows={2} />
             </div>
           ))}
-          <div><button type="button" className="xk-btn xk-btn-secondary xk-btn-sm" onClick={() => set("faq", [...f.faq, { q: "", a: "" }])}><Icon name="plus" />Add question</button></div>
+          <div className="xk-repeat-add"><button type="button" className="xk-btn xk-btn-secondary xk-btn-sm" onClick={() => set("faq", [...f.faq, { q: "", a: "" }])}><Icon name="plus" />Add question</button></div>
         </div>
       </section>
 
       <div className="xk-admin-bar">
         <div className="xk-admin-actions">
-          <button type="button" className="xk-btn xk-btn-primary xk-btn-sm" disabled={pending} onClick={save}>{savedSlug ? "Save project" : "Create project"}</button>
+          <button type="button" className="xk-btn xk-btn-primary xk-btn-sm" disabled={pending} onClick={save}><Icon name="check" />{savedSlug ? "Save project" : "Create project"}</button>
           {savedSlug && inDb && <ConfirmButton label="Delete" question="Delete this project?" onConfirm={remove} disabled={pending} />}
         </div>
         <div className="xk-admin-actions">
-          {dirty && status.kind !== "busy" && <span className="xk-admin-msg">Unsaved changes</span>}
+          {dirty && status.kind !== "busy" && <span className="xk-admin-msg is-dirty">Unsaved changes</span>}
           <StatusText status={status} />
         </div>
       </div>

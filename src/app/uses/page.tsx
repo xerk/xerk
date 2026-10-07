@@ -1,10 +1,11 @@
 import { AIStack, Section } from "@/components/xerk/ui";
-import { aiStack, skills } from "@/data/profile";
+import { getSite } from "@/lib/content";
 import { pageMeta } from "@/lib/seo";
 
 export const metadata = pageMeta({ title: "Uses: my tools and stack", description: "The languages, frameworks, AI tools and infrastructure Ahmed Mamdouh uses to ship real-time platforms and AI agents.", path: "/uses" });
 
-export default function Uses() {
+export default async function Uses() {
+  const { aiStack, skills } = await getSite();
   return (
     <div className="xk-container">
       <header className="xk-page-head" data-hud="Uses"><span className="xk-label">Loadout</span><h1 data-split="">What I use to ship</h1><p>The stack behind the case studies — chosen because it&apos;s boring, reliable and fast to work with.</p></header>

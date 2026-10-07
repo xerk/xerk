@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Logo, SocialLinks, Button, DockNav } from "./ui";
 import { CommandPalette, ScrollHUD, SearchTrigger, ThemeToggle, type PaletteItem } from "./client";
-import { profile, socials, bookingUrl, upworkHref } from "@/data/profile";
+import { getSite } from "@/lib/content";
 import { getProjects } from "@/lib/projects";
 import { getPosts } from "@/lib/posts";
 import { getRepoStars, SITE_REPO } from "@/lib/github";
@@ -39,7 +39,8 @@ export async function SiteHeader() {
   );
 }
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const { profile, links: socials, bookingUrl, upworkHref } = await getSite();
   const year = new Date().getFullYear();
   return (
     <footer className="xk-footer xk-container">
@@ -72,6 +73,7 @@ export function MobileDock() {
 }
 
 export async function Palette() {
+  const { profile, upworkHref } = await getSite();
   const [posts, projects] = await Promise.all([getPosts(), getProjects()]);
   const items: PaletteItem[] = [
     ...projects.map((p) => ({ group: "Stages", label: p.title, href: `/work/${p.slug}`, icon: p.ai ? "robot" : "game-controller", hint: p.code, ai: p.ai })),
