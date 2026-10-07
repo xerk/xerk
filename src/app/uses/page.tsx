@@ -2,7 +2,7 @@ import { AIStack, Section } from "@/components/xerk/ui";
 import { aiStack, skills } from "@/data/profile";
 import { pageMeta } from "@/lib/seo";
 
-export const metadata = pageMeta({ title: "Uses — tools and stack", description: "The languages, frameworks, AI tools and infrastructure Ahmed Mamdouh uses to ship real-time platforms and AI agents.", path: "/uses" });
+export const metadata = pageMeta({ title: "Uses: my tools and stack", description: "The languages, frameworks, AI tools and infrastructure Ahmed Mamdouh uses to ship real-time platforms and AI agents.", path: "/uses" });
 
 export default function Uses() {
   return (

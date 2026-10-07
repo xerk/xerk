@@ -1,28 +1,21 @@
 ---
 title: "The systems I am proud of are built from boring parts"
 publishedAt: "2026-09-12"
-summary: "The best systems use boring parts like Postgres, a queue and a well-defined cache; the real engineering is in the failure handling."
+summary: "The systems I'm proudest of use Postgres, a queue and a cache with a written invalidation rule. The real engineering was in the failure handling."
 tags: ["software-engineering", "architecture"]
 source: "linkedin"
 ---
 
-Most of the systems I am proud of are built from boring parts. The interesting engineering was never the technology choice. It was the failure handling.
+Most of the systems I'm proud of are built from boring parts. The technology choices were the easy bit. The engineering I'd actually defend went into failure handling.
 
 ## The parts list
 
-Postgres. A queue. A cache with an invalidation rule someone actually wrote down. Services small enough that one person can hold one in their head.
+Postgres. A queue. A cache with an invalidation rule someone actually wrote down. Services small enough that one person can hold any one of them in their head.
 
-None of that would impress anyone on a slide. All of it is well understood, well documented, and has failure modes other people have already found for you.
+None of that would impress anyone on a slide. All of it is well understood and well documented, and other people have already found its failure modes for you, which frees up your effort for the parts that are specific to your system.
 
 ## Where the real work is
 
-What made those systems good was what they did when things went wrong: retries that do not duplicate work, timeouts that are actually set, shutdowns that drain cleanly, and someone deciding up front when data is allowed to be stale.
+What made those systems good was how they behaved when things went wrong. Retries didn't duplicate work. Timeouts were actually set. Shutdowns drained cleanly. And someone had decided up front when data was allowed to be stale.
 
-Nobody puts that on a slide.
-
-## Takeaways
-
-- Boring, proven technology lets you spend your effort elsewhere.
-- Write down cache invalidation rules.
-- Keep services small enough for one person to understand.
-- The engineering that matters most is failure handling.
+Nobody puts that on a slide either, which is a shame, because it's the part I'd want to see before trusting a design.

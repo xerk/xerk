@@ -1,16 +1,16 @@
 ---
 title: "Use satisfies before you reach for as in TypeScript"
 publishedAt: "2026-09-01"
-summary: "Every `as` in TypeScript tells the compiler to stop checking; `satisfies` checks the shape and keeps the narrow type, so use it first."
+summary: "Every `as` in TypeScript tells the compiler to stop checking. `satisfies` checks the shape and keeps the narrow type, so try it first."
 tags: ["typescript", "nodejs", "code-review"]
 source: "linkedin"
 ---
 
-The TypeScript keyword I see misused most is `as`. Most of the time you wanted `satisfies`, which checks the shape and keeps the narrow type.
+The TypeScript keyword I see misused most is `as`. Most of the time the author wanted `satisfies`, which checks the shape and keeps the narrow type.
 
 ## What as actually does
 
-Every `as SomeType` is you telling the compiler to stop checking. Sometimes you need that. Usually you do not.
+Every `as SomeType` tells the compiler to stop checking that expression. Sometimes you need that. Usually you don't.
 
 ```ts
 type Config = { port: number; host: string };
@@ -24,7 +24,7 @@ const b = { port: 3000 } satisfies Config;
 
 ## What satisfies gives you
 
-`satisfies` validates the value against the type and leaves the inferred type alone. You get the check and you keep the precise literal types, instead of widening everything to the annotation.
+`satisfies` validates the value against the type and leaves the inferred type alone. You get the check, and you keep the precise literal types instead of widening everything to the annotation.
 
 ```ts
 const routes = {
@@ -37,13 +37,6 @@ routes.home; // still known to exist, typed as string
 
 ## The rule I give my team
 
-If you write `as`, write a comment explaining why the compiler is wrong. If you cannot write that comment, the compiler is not wrong.
+If you write `as`, add a comment explaining why the compiler is wrong. If you can't write that comment, the compiler isn't wrong.
 
-The codebase got noticeably safer after we started enforcing that one habit in review.
-
-## Takeaways
-
-- `as` turns off type checking for that expression.
-- `satisfies` checks the shape and keeps the narrow inferred type.
-- Every `as` should come with a comment explaining why the compiler is wrong.
-- Enforcing this in review is a cheap, effective safety habit.
+The codebase got noticeably safer once we started enforcing that one habit in review.

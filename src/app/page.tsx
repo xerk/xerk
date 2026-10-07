@@ -1,9 +1,10 @@
-import { AchievementGrid, BentoGrid, BentoTile, Button, CTABar, GitHubHeatmap, Marquee, PlayerCard, PostCard, QuestLog, Section, SkillTree, SocialLinks, StatusPill } from "@/components/xerk/ui";
-import { AskMyCV, HeroScene, LevelSelect, Terminal } from "@/components/xerk/client";
+import { AchievementGrid, BentoGrid, BentoTile, Button, CTABar, GitHubHeatmap, Marquee, PlayerCard, QuestLog, Section, SkillTree, SocialLinks, StatusPill } from "@/components/xerk/ui";
+import { AskMyCV, HeroScene, LevelSelect, QuestList, Terminal } from "@/components/xerk/client";
 import { achievements, bookingUrl, experience, github, profile, skillTree, socials, stats, ticker, upworkHref } from "@/data/profile";
 import { projects } from "@/data/projects";
 import { MOTD, terminalCommands } from "@/data/terminal";
 import { getPosts } from "@/lib/posts";
+import { BlogCard } from "@/components/xerk/blog";
 import { getContributions } from "@/lib/github";
 import { formatDate } from "@/lib/utils";
 import { JsonLd } from "@/lib/seo";
@@ -39,22 +40,25 @@ export default async function Home() {
       </div>
       <Marquee items={ticker} />
       <div className="xk-container">
-        <Section id="player" eyebrow="01 / Player" title="Player 1 has entered the game" text={`${profile.years}+ years, five teams, three continents. Every number below is real.`}>
+        <Section id="player" eyebrow="01 / Player" title="Player 1 has entered the game" text={`${profile.years}+ years across five teams. Every number here comes from my CV or GitHub.`}>
           <div className="xk-two-lr">
             <PlayerCard name={profile.name} level={profile.years} className="Senior full-stack · AI engineer" avatar={profile.avatar} status="Online · open to co-op missions" xp={{ label: `Season ${now.getFullYear()}`, value: season, text: `${now.toLocaleString("en-US", { month: "short" })} · ${season}%` }} stats={stats} loadout={LOADOUT} />
             <BentoGrid>
-              <BentoTile span={2} tone="accent" icon="broadcast" eyebrow="ALTO" value="100K+" title="Concurrent device connections" />
+              <BentoTile span={2} tone="accent" icon="broadcast" eyebrow="Real-time" value="100K+" title="Concurrent device connections" />
               <BentoTile span={2} tone="agent" icon="robot" eyebrow="AI" value="MCP" title="Agent + tool server in production" />
               <BentoTile span={2} icon="users-three" eyebrow="UptimeRobot" value="2.1M+" title="Users served" />
               <BentoTile span={2} icon="lightning" eyebrow="Microservices" value="−40%" title="p95 latency" />
             </BentoGrid>
           </div>
         </Section>
-        <Section id="stages" eyebrow="02 / Level select" title="Choose a stage" text="Every project opens as a case study with the architecture behind it — and a playable demo where there is one." action={<Button variant="ghost" iconRight="arrow-right" href="/work">All work</Button>}>
+        <Section id="stages" eyebrow="02 / Level select" title="Choose a stage" text="Every project opens as a case study with the architecture behind it, and some have a demo you can play." action={<Button variant="ghost" iconRight="arrow-right" href="/work">All work</Button>}>
           <LevelSelect levels={projects.map(({ slug, code, title, world, period, summary, boss, image, big, bigLabel, stack, ai, embedUrl }) => ({ slug, code, title, world, period, summary, boss, image, big, bigLabel, stack, ai, embedUrl }))} />
         </Section>
-        <Section id="achievements" eyebrow="03 / Achievements" title="Achievements unlocked" text="8 unlocked from real work. The 9th is yours.">
+        <Section id="achievements" eyebrow="03 / Achievements" title="Achievements unlocked" text="Eight from real work. The ninth is the project we do together.">
           <AchievementGrid items={achievements} />
+        </Section>
+        <Section id="quests-side" eyebrow="03b / Side quests" title="Your turn" text="Explore the site and unlock these. Each one tells you where to go next.">
+          <div className="xk-sq-card"><QuestList /></div>
         </Section>
         <Section id="skills" eyebrow="04 / Skill tree" title="Every skill has a receipt">
           <SkillTree root="Full-stack core" rootNote="TypeScript · SQL · Python" branches={skillTree} />
@@ -71,11 +75,11 @@ export default async function Home() {
         <Section id="activity" eyebrow="07 / Activity" title="Still shipping, every week">
           <GitHubHeatmap user={github.user} weeks={contrib.weeks} total={contrib.total} stats={[{ value: String(github.activeDays), label: "active days" }, { value: String(github.bestStreak), label: "day best streak" }, { value: String(github.publicRepos), label: "public repos" }]} />
         </Section>
-        <Section id="notes" eyebrow="08 / Notes" title="Field notes" text="Short, practical notes on real-time systems, AI engineering and the boring parts that matter." action={<Button variant="ghost" iconRight="arrow-right" href="/blog">All notes</Button>}>
-          <div>{posts.slice(0, 5).map((p) => <PostCard key={p.slug} href={`/blog/${p.slug}`} date={formatDate(p.publishedAt)} readingTime={p.readingTime} title={p.title} excerpt={p.summary} />)}</div>
+        <Section id="blog" eyebrow="08 / Blog" title="From the blog" text="Practical posts on real-time systems, AI engineering and the unglamorous parts that keep software running." action={<Button variant="ghost" iconRight="arrow-right" href="/blog">All posts</Button>}>
+          <div className="xk-blog-grid">{posts.slice(0, 3).map((p) => <BlogCard key={p.slug} post={p} date={formatDate(p.publishedAt)} />)}</div>
         </Section>
         <section className="xk-section">
-          <CTABar tone="accent" eyebrow="Co-op mode" title="Ready player two?" text="Freelance or contract — real-time systems, AI agents, full-stack products. I reply within one working day.">
+          <CTABar tone="accent" eyebrow="Co-op mode" title="Ready player two?" text="Freelance or contract work on real-time systems, AI agents and full-stack products. I reply within one working day.">
             <Button variant="primary" icon="calendar-dots" href={bookingUrl} track="book_call">Book a call</Button>
             <Button brand="upwork" iconRight="arrow-up-right" href={upworkHref} track="upwork_click">Hire on Upwork</Button>
           </CTABar>

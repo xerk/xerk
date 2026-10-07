@@ -225,25 +225,25 @@ var CTX={kind:'memory',label:'memory',title:'memory.load',ms:18,
   args:{session:'op-demo'},result:{role:'support_l2',tenant_scope:['acme'],last_device:null}};
 
 var FLOWS=[
-{id:'buffer',chip:'Why is STB-4821 buffering?',short:'STB-4821 buffering?',tag:'read',
- q:'Why is device STB-4821 buffering?',
+{id:'buffer',chip:'Why is DEV-4821 buffering?',short:'DEV-4821 buffering?',tag:'read',
+ q:'Why is device DEV-4821 buffering?',
  steps:[
   CTX,
   {kind:'plan',label:'llm · plan',ms:640,desc:'Fetch device state and last-hour telemetry, then look up known buffering causes in the docs.'},
-  {kind:'pass',label:'policy',title:'read-only · in tenant scope',ms:4,note:'devices.get, telemetry.query, docs.search are read tools. Device STB-4821 belongs to tenant <strong>acme</strong> (in scope). <strong>Pass.</strong>'},
-  {kind:'tool',label:'tool call',title:'devices.get',ms:118,args:{id:'STB-4821'},
-   result:{id:'STB-4821',tenant:'acme',status:'online',firmware:'4.2.1',firmware_latest:'4.2.1',link:'wifi'}},
+  {kind:'pass',label:'policy',title:'read-only · in tenant scope',ms:4,note:'devices.get, telemetry.query, docs.search are read tools. Device DEV-4821 belongs to tenant <strong>acme</strong> (in scope). <strong>Pass.</strong>'},
+  {kind:'tool',label:'tool call',title:'devices.get',ms:118,args:{id:'DEV-4821'},
+   result:{id:'DEV-4821',tenant:'acme',status:'online',firmware:'4.2.1',firmware_latest:'4.2.1',link:'wifi'}},
   {kind:'tool',label:'tool call',title:'telemetry.query',ms:342,
-   args:{device:'STB-4821',metrics:['wifi_rssi_dbm','bitrate_kbps','rebuffer_events'],window:'1h'},
+   args:{device:'DEV-4821',metrics:['wifi_rssi_dbm','bitrate_kbps','rebuffer_events'],window:'1h'},
    result:{wifi_rssi_dbm:{avg:-78},bitrate_kbps:{avg:1850,min:620},rebuffer_events:14}},
-  {kind:'rag',label:'rag · qdrant',title:'docs.search',ms:96,args:{query:'set-top box buffering weak wifi',k:3},
+  {kind:'rag',label:'rag · qdrant',title:'docs.search',ms:96,args:{query:'edge device buffering weak wifi',k:3},
    chunks:[
     {s:.89,t:'Troubleshooting: playback buffering',x:'Signal below about -70 dBm commonly causes rebuffering; prefer Ethernet or move the box closer to the access point.',d:'kb/playback-buffering#wifi'},
     {s:.84,t:'Network requirements',x:'Stable HD playback needs a sustained connection; adaptive bitrate will step down when throughput drops.',d:'kb/network-requirements'},
     {s:.77,t:'Firmware release notes 4.2',x:'Improved buffer handling on reconnect. Devices on 4.2.x already include this fix.',d:'docs/releases/4.2'}]},
   {kind:'answer',label:'llm · answer',ms:820,desc:'Grounded in 3 tool results + 3 retrieved chunks.'}
  ],
- answer:'STB-4821 is online, but its Wi-Fi signal is weak (avg -78 dBm) and it logged 14 rebuffer events in the last hour, with bitrate dropping as low as 620 kbps [1][2]. That matches the weak-signal case in the buffering guide [3]. Firmware is already current (4.2.1), so an update won’t help [4].\n\nNext steps: switch the box to Ethernet or move it closer to the access point, then ask me to re-check telemetry.',
+ answer:'DEV-4821 is online, but its Wi-Fi signal is weak (avg -78 dBm) and it logged 14 rebuffer events in the last hour, with bitrate dropping as low as 620 kbps [1][2]. That matches the weak-signal case in the buffering guide [3]. Firmware is already current (4.2.1), so an update won’t help [4].\n\nNext steps: switch the box to Ethernet or move it closer to the access point, then ask me to re-check telemetry.',
  sources:[['devices.get',3],['telemetry.query',4],['kb · playback buffering',5],['release notes 4.2',5]]
 },
 {id:'restart',chip:'Restart all offline devices in tenant acme',short:'Restart all offline',tag:'action',
@@ -252,33 +252,33 @@ var FLOWS=[
   CTX,
   {kind:'plan',label:'llm · plan',ms:580,desc:'List offline devices in acme, then call devices.restart on them. Restart is an action tool.'},
   {kind:'tool',label:'tool call',title:'devices.list',ms:164,args:{tenant:'acme',status:'offline'},
-   result:{count:3,ids:['STB-1093','STB-2210','STB-4417']}},
+   result:{count:3,ids:['DEV-1093','DEV-2210','DEV-4417']}},
   {kind:'wait',label:'policy · approval',title:'devices.restart',ms:3,
    note:'Action tool on <strong>3 devices</strong> (bulk). Policy requires a human to approve before the call is made.',approval:true},
   {kind:'tool',label:'tool call',title:'devices.restart',ms:231,
-   args:{ids:['STB-1093','STB-2210','STB-4417'],approved_by:'operator',reason:'operator request'},
+   args:{ids:['DEV-1093','DEV-2210','DEV-4417'],approved_by:'operator',reason:'operator request'},
    result:{job_id:'job_8c21',queued:3,status:'accepted'},onlyIf:'approved'},
   {kind:'deny',label:'policy',title:'action cancelled',ms:1,note:'Operator denied approval. <strong>devices.restart was not called.</strong>',onlyIf:'denied'},
   {kind:'answer',label:'llm · answer',ms:540,desc:'Summarise outcome; offer follow-up.'}
  ],
- answer:{approved:'Done. I queued a restart for the 3 offline devices in acme (STB-1093, STB-2210, STB-4417) as job job_8c21 [1][2]. They’ll show as online once they reconnect; ask me to check their status in a few minutes.',
-         denied:'Understood, no devices were restarted. The 3 offline devices in acme are STB-1093, STB-2210 and STB-4417 [1] if you want to handle them individually.'},
+ answer:{approved:'Done. I queued a restart for the 3 offline devices in acme (DEV-1093, DEV-2210, DEV-4417) as job job_8c21 [1][2]. They’ll show as online once they reconnect; ask me to check their status in a few minutes.',
+         denied:'Understood, no devices were restarted. The 3 offline devices in acme are DEV-1093, DEV-2210 and DEV-4417 [1] if you want to handle them individually.'},
  sources:{approved:[['devices.list',2],['devices.restart',4]],denied:[['devices.list',2],['approval: denied',5]]}
 },
-{id:'reset',chip:'How do I reset a set-top box to factory settings?',short:'Factory-reset how-to',tag:'rag',
- q:'How do I reset a set-top box to factory settings?',
+{id:'reset',chip:'How do I reset an edge device to factory settings?',short:'Factory-reset how-to',tag:'rag',
+ q:'How do I reset an edge device to factory settings?',
  steps:[
   CTX,
   {kind:'plan',label:'llm · plan',ms:520,desc:'How-to question. Answer from support docs only; no device action needed.'},
   {kind:'pass',label:'policy',title:'informational · no action tools',ms:3,note:'Only docs.search will be used. The agent explains the steps; it does not trigger a reset. <strong>Pass.</strong>'},
-  {kind:'rag',label:'rag · qdrant',title:'docs.search',ms:88,args:{query:'factory reset set-top box',k:3,collection:'support_docs'},
+  {kind:'rag',label:'rag · qdrant',title:'docs.search',ms:88,args:{query:'factory reset edge device',k:3,collection:'support_docs'},
    chunks:[
     {s:.91,t:'Factory reset from the Settings menu',x:'Settings > System > Reset > Factory reset. Confirm with the device PIN; the box restarts into first-time setup.',d:'kb/factory-reset#menu'},
     {s:.86,t:'Factory reset via recovery mode',x:'If the menu is unreachable, hold the front power button while connecting power until the LED blinks, then release.',d:'kb/factory-reset#recovery'},
     {s:.79,t:'Before you reset: what gets erased',x:'A reset removes local recordings, Wi-Fi credentials and user profiles. Account and subscription are kept.',d:'kb/factory-reset#data'}]},
   {kind:'answer',label:'llm · answer',ms:760,desc:'Grounded in 3 retrieved chunks.'}
  ],
- answer:'Two ways to factory-reset a set-top box:\n\n1. From the menu: Settings > System > Reset > Factory reset, then confirm with the device PIN. It restarts into first-time setup [1].\n2. If the menu is unreachable: hold the front power button while plugging the box in until the LED blinks, then release [2].\n\nHeads-up: a reset erases local recordings, Wi-Fi credentials and profiles; the account itself is kept [3].',
+ answer:'Two ways to factory-reset an edge device:\n\n1. From the menu: Settings > System > Reset > Factory reset, then confirm with the device PIN. It restarts into first-time setup [1].\n2. If the menu is unreachable: hold the front power button while plugging the box in until the LED blinks, then release [2].\n\nHeads-up: a reset erases local recordings, Wi-Fi credentials and profiles; the account itself is kept [3].',
  sources:[['kb · reset from menu',3],['kb · recovery mode',3],['kb · what gets erased',3]]
 },
 {id:'delete',chip:'Delete all device logs',short:'Delete all logs',tag:'blocked',
@@ -402,7 +402,7 @@ async function stream(m,text,sources,id){
 
 function askApproval(id){
   var m=addMsg('agent','');
-  m.querySelector('p').innerHTML='Approval needed: <span class="mono">devices.restart</span> on 3 devices in tenant acme (STB-1093, STB-2210, STB-4417).';
+  m.querySelector('p').innerHTML='Approval needed: <span class="mono">devices.restart</span> on 3 devices in tenant acme (DEV-1093, DEV-2210, DEV-4417).';
   var row=el('div','appr');
   var a=el('button','btn pri','Approve restart');a.type='button';
   var d=el('button','btn deny','Deny');d.type='button';

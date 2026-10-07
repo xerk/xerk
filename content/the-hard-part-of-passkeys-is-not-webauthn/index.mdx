@@ -1,38 +1,25 @@
 ---
 title: "The hard part of passkeys is not WebAuthn"
 publishedAt: "2026-09-04"
-summary: "Implementing WebAuthn is the easy part of passkeys; the real work is account recovery and deciding whether a password fallback stays."
+summary: "WebAuthn was the easy part of shipping passkeys. Account recovery and deciding whether a password fallback stays took the real work."
 tags: ["webauthn", "passkeys", "security", "authentication"]
 source: "linkedin"
 ---
 
-I implemented passkeys for the first time, and my honest reaction is that the hard part is not WebAuthn. It is everything around it, especially account recovery.
+I implemented passkeys for the first time, and WebAuthn turned out to be the easy part. Everything around it was harder, account recovery most of all.
 
 ## The API is a weekend of work
 
-Registration ceremony, authentication ceremony, verify the signature, store the credential. The spec is dense, but the libraries are good now. On the server, you generate a challenge, the browser asks the authenticator to sign it with a private key that never leaves the device, and you verify that signature against the public key you stored at registration.
-
-That part is well understood and well supported.
+Registration ceremony, authentication ceremony, verify the signature, store the credential. The spec is dense, but the libraries are good now. The server generates a challenge, the browser asks the authenticator to sign it with a private key that never leaves the device, and you verify that signature against the public key you stored at registration. That part is well understood and well supported.
 
 ## Then the real project starts
 
-What happens when the user loses the device? What does account recovery look like when there is no password to reset? Do you keep the password as a fallback, and if you do, did you actually improve security or just add a second door to the same room?
+What happens when the user loses the device? What does account recovery look like when there's no password to reset? Do you keep the password as a fallback, and if you do, did you improve security or just add a second door to the same room?
 
-That last question ate two weeks of design discussion. A passkey next to a weak password fallback is a strong lock on a door with a broken window. Attackers will always go for the weakest way in, so your security is only as good as your worst login path.
+That last question ate two weeks of design discussion. A passkey next to a weak password fallback is a strong lock on a house with a broken window. Attackers go for the weakest way in, so you're only as secure as your worst login path.
 
 ## Where we landed
 
-- Passkeys first.
-- Email magic link as recovery.
-- Password gone entirely for new accounts.
+We went passkeys first, with an email magic link for recovery, and dropped passwords entirely for new accounts.
 
-Support tickets about logins dropped. Nobody asked where the password field went. Users adapt faster than product managers fear.
-
-If you are still all passwords in 2026, the blocker is probably not technical.
-
-## Takeaways
-
-- WebAuthn itself is a small, well-supported piece of work.
-- Account recovery is the real design problem.
-- A weak password fallback undoes much of the security a passkey adds.
-- Passkeys first with a magic link for recovery worked well for us.
+Support tickets about logins went down, and nobody asked where the password field went. Users adapt faster than product managers fear. If you're still all passwords in 2026, the blocker probably isn't technical.

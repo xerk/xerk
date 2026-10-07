@@ -1,78 +1,72 @@
 ---
 title: "Multi-tenancy with Laravel"
 publishedAt: "2024-12-25"
-summary: "Multi-tenancy is a software architecture in which a single instance of a software application serves multiple customers, called tenants. In the context of Laravel, multi-tenancy refers to the ability of a Laravel application to serve multiple tenants, each with their own separate database."
+summary: "One way to run a multi-tenant Laravel app: a database per tenant, a connection per database, a Tenant model, and middleware that switches connections."
 author: "Ahmed Mamdouh"
 keywords: ["laravel", "multi-tenancy", "database", "tenants", "architecture"]
 image: "/content/multi-tenancy-with-laravel/multi-tenant.png"
 category: "Laravel"
 ---
 
-Multi-tenancy is a software architecture in which a single instance of a software application serves multiple customers, called tenants. In the context of Laravel, multi-tenancy refers to the ability of a Laravel application to serve multiple tenants, each with their own separate database.
+In a multi-tenant application, one running instance of the software serves several customers, called tenants. In Laravel that usually means one app serving many tenants, and in the setup below each tenant gets its own database.
 
 ![Multi-tenant Architecture](/content/multi-tenancy-with-laravel/multi-tenant.png)
 
-One way to implement multi-tenancy in Laravel is to use dynamic database connections. This involves setting up a database for each tenant and then switching between these databases at runtime based on the current tenant.
+The approach I'll walk through uses dynamic database connections. You create a database for each tenant, and at runtime the app switches to whichever database belongs to the current tenant.
 
-## To set up dynamic database connections in Laravel, you will need to do the following:
+## The steps
 
 1. Set up a database for each tenant.
-2. Create a database connection for each tenant in your `config/database.php` file.
-3. Create a Tenant model to represent each tenant in your application.
-4. Use a middleware to switch the database connection based on the current tenant.
+2. Add a connection for each tenant in `config/database.php`.
+3. Create a Tenant model to represent each tenant.
+4. Use middleware to switch the database connection based on the current tenant.
 
-### Set up a database for each tenant:
+## Set up a database for each tenant
 
-To set up a database for each tenant in a multi-tenancy application, you will need to do the following:
-1. Create a new database for each tenant. This can be done using a tool like PHPMyAdmin or the MySQL command line interface.
-2. Grant the appropriate permissions to the user that will be used to connect to the tenant's database. This will typically involve creating a new user and granting them access to the tenant's database.
-3. Update your Laravel application's `config/database.php` file to include a connection for each tenant's database.
-4. Here is an example of what the connections array in the `config/database.php` file might look like for a multi-tenancy application with two tenants:
+For each tenant you create a new database, using PHPMyAdmin or the MySQL command line. You then give the database user the app connects with the right permissions on that database, which usually means creating a new user per tenant. Finally, you add a connection for the tenant to `config/database.php`. There's an example config for two tenants further down.
 
-### To create a new database using PHPMyAdmin, follow these steps:
+### Creating the database in PHPMyAdmin
 
-1. Open PHPMyAdmin in your web browser.
-2. On the left-hand side of the page, click the "Databases" tab.
-3. In the "Create database" field, enter the name of the database you want to create.
-4. Select the desired character set and collation from the dropdown menus.
-5. Click the "Create" button.
+1. Open PHPMyAdmin in your browser.
+2. Click the "Databases" tab on the left-hand side.
+3. Enter the database name in the "Create database" field.
+4. Pick the character set and collation from the dropdowns.
+5. Click "Create".
 
-### To create a new database using the MySQL command line interface, follow these steps:
+### Creating the database from the MySQL command line
 
 1. Open the MySQL command line interface.
-2. Connect to the MySQL server using the `mysql -u username -p` command, replacing "username" with your MySQL username.
+2. Connect with `mysql -u username -p`, replacing "username" with your MySQL username.
 3. Enter your password when prompted.
-4. Create a new database using the `CREATE DATABASE database_name` command, replacing "database_name" with the name of the database you want to create.
+4. Run `CREATE DATABASE database_name`, replacing "database_name" with the name you want.
 
-### To grant permissions to a user in MySQL, you can use the `GRANT` command.
+### Granting permissions with `GRANT`
 
-For example, to grant all privileges on a database to a user, you can use the following command:
+To give a user all privileges on a database:
 
 ```sql
 GRANT ALL PRIVILEGES ON database_name.* TO 'username'@'localhost';
 ```
 
-This will grant the user with the username "username" all privileges on the database with the name "database_name".
+That gives the user "username" every privilege on the database "database_name".
 
-You can also specify specific privileges instead of using `ALL PRIVILEGES`. For example, to grant a user select, insert, and update privileges on a database, you can use the following command:
+You can list specific privileges instead of `ALL PRIVILEGES`. This one allows only select, insert and update:
 
 ```sql
 GRANT SELECT, INSERT, UPDATE ON database_name.* TO 'username'@'localhost' IDENTIFIED BY 'password';
 ```
 
-To create a new user and grant them access to a database in one step, you can use the following command:
+And to create the user and grant access in one step:
 
 ```sql
 GRANT ALL PRIVILEGES ON database_name.* TO 'username'@'localhost' IDENTIFIED BY 'password';
 ```
 
-This will create a new user with the username "username" and the password "password", and it will grant the user all privileges on the database with the name "database_name".
+This creates a user called "username" with the password "password" and gives it all privileges on "database_name".
 
-### Update your Laravel application's `config/database.php` file to include a connection for each tenant's database
+## Add a connection per tenant in `config/database.php`
 
-To update your Laravel application's `config/database.php` file to include a connection for each tenant's database, you will need to add an array for each tenant's database to the `connections` array in the file.
-
-The format of each connection array will depend on the type of database you are using (e.g., MySQL, PostgreSQL, SQLite). Here is an example of what a connection array for a MySQL database might look like:
+Each tenant needs its own entry in the `connections` array. The exact fields depend on the database driver (MySQL, PostgreSQL, SQLite and so on). For MySQL it looks like this:
 
 ```php
 'connections' => [
@@ -103,23 +97,19 @@ The format of each connection array will depend on the type of database you are 
 ],
 ```
 
-Each tenant's connection array will have a unique key (e.g., 'tenant1' and 'tenant2'). The values in the array will specify the details of the connection, such as the driver, host, database name, username, and password.
+Every tenant connection has a unique key, here `tenant1` and `tenant2`, and the values hold the connection details: driver, host, database name, username and password.
 
-### Create a Tenant model to represent each tenant in your application.
+## Create a Tenant model
 
-In a multi-tenancy application, it is often useful to have a Tenant model to represent each tenant. The Tenant model can be used to store information about each tenant, such as the tenant's name, contact information, and database connection details.
-
-To create a Tenant model in Laravel, you can use the following Artisan command:
+A Tenant model gives you one place to store what you know about each tenant: its name, contact details, and which database connection it uses. Generate it with Artisan:
 
 ```bash
 php artisan make:model Tenant
 ```
 
-This will create a new Tenant model class in your application's `app` directory.
+That creates the `Tenant` class in your `app` directory.
 
-You can then define the attributes of the Tenant model by adding them as columns in the corresponding database table. For example, you might have a name column to store the tenant's `name`, a `db_connection` column to store the tenant's database connection string, and a `contact_email` column to store the tenant's contact email address.
-
-Here is an example of what the Tenant model class might look like:
+The attributes come from the columns of the tenants table. For example, a `name` column for the tenant's name, a `db_connection` column for its database connection, and a `contact_email` column for its contact address. The model might look like this:
 
 ```php
 class Tenant extends Model
@@ -132,22 +122,19 @@ class Tenant extends Model
 }
 ```
 
-This model class defines the `name`, `db_connection`, and `contact_email` attributes as fillable, which means they can be mass-assigned using the model's `create` or `update` methods.
+Marking `name`, `db_connection` and `contact_email` as fillable lets you mass-assign them through `create` or `update`.
 
-### Use a middleware to switch the database connection based on the current tenant.
+## Switch the connection in middleware
 
-In a multi-tenancy application, you can use a middleware to switch the database connection based on the current tenant. The middleware will inspect the current request and determine the appropriate tenant based on some criteria (e.g., a tenant ID passed as a request parameter). It will then set the appropriate database connection for the request based on the tenant.
+The middleware looks at the incoming request, works out which tenant it belongs to (for example from a tenant ID passed as a request parameter), and sets the database connection for that tenant before the request goes any further.
 
-To create a middleware in Laravel, you can use the following Artisan command:
+Generate it with Artisan:
 
 ```bash
 php artisan make:middleware TenantMiddleware
 ```
 
-This will create a new `TenantMiddleware`` class in your application's `app/Http/Middleware` directory.
-
-You can then define the logic for switching the database connection in the middleware's `handle` method. Here is an example of how the `handle` method might look:
-
+This puts a `TenantMiddleware` class in `app/Http/Middleware`. The switching logic goes in its `handle` method:
 
 ```php
 class TenantMiddleware
@@ -165,8 +152,6 @@ class TenantMiddleware
 }
 ```
 
-This middleware will find the current `tenant` based on the tenant request parameter (e.g., `$request->tenant`), and it will set the default database connection to the connection specified in the tenant's `db_connection` attribute (e.g., `$tenant->db_connection`).
+It looks up the tenant from the `tenant` request parameter (`$request->tenant`) and sets the default database connection to whatever is stored in that tenant's `db_connection` attribute (`$tenant->db_connection`).
 
-You can then assign this middleware to routes that should use the tenant's database connection by adding it to the `$routeMiddleware` array in your application's `app/Http/Kernel.php` file.
-
-
+To use it, register the middleware in the `$routeMiddleware` array in `app/Http/Kernel.php` and attach it to the routes that should run against the tenant's database.

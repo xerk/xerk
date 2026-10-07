@@ -5,10 +5,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useTheme } from "next-themes";
 import { Icon } from "./icon";
+import iconData from "./icon-data.json";
 import { Badge, Button, XPBar } from "./ui";
 import { cx } from "@/lib/utils";
 import { intro, reduced } from "@/lib/motion";
-import { track, unlock, ACHIEVEMENTS, type AchievementId } from "@/lib/track";
+import { track, unlock, unlockedList, openQuests, ACHIEVEMENTS, type AchievementId } from "@/lib/track";
 
 /* ---------- Motion root: runs the GSAP intro on every route ---------- */
 export function MotionRoot() {
@@ -82,7 +83,7 @@ export function ScrollHUD() {
       <div className="xk-hud-row">
         <span><Icon name="map-trifold" />{section}</span>
         <span>XP <b>{prog}</b>%</span>
-        <span className="xk-hud-ach"><Icon name="trophy" />{unlocked}/{Object.keys(ACHIEVEMENTS).length}</span>
+        <button type="button" className="xk-hud-ach" onClick={openQuests} aria-label="Open side quests"><Icon name="trophy" />{unlocked}/{Object.keys(ACHIEVEMENTS).length} quests</button>
       </div>
     </div>
   );
@@ -120,7 +121,7 @@ export function AchievementToaster() {
     <div className="xk-toast-wrap" key={toast.key}>
       <div className="xk-toast" role="status">
         <div className="xk-toast-icon"><Icon name={a.icon} /></div>
-        <div><span className="xk-label">Achievement unlocked</span><strong>{a.title}</strong><p>{a.text}</p></div>
+        <button type="button" className="xk-toast-body" onClick={() => { setToast(null); openQuests(); }}><span className="xk-label">Achievement unlocked</span><strong>{a.title}</strong><p>{a.text} · see all quests</p></button>
         <span className="xk-toast-xp">+{a.xp} XP</span>
         <button className="xk-toast-x" aria-label="Dismiss" onClick={() => setToast(null)}><Icon name="x" /></button>
       </div>
@@ -164,7 +165,7 @@ export function CommandPalette({ items }: { items: PaletteItem[] }) {
       <div className="xk-cmd" role="dialog" aria-modal="true" aria-label="Command palette" onClick={(e) => e.stopPropagation()}>
         <div className="xk-cmd-input">
           <Icon name="magnifying-glass" />
-          <input autoFocus placeholder="Search stages, notes, or type a command…" value={q} aria-label="Search"
+          <input autoFocus placeholder="Search projects, blog posts, or commands" value={q} aria-label="Search"
             onChange={(e) => { setQ(e.target.value); setIdx(0); }}
             onKeyDown={(e) => {
               if (e.key === "ArrowDown") { e.preventDefault(); setIdx((i) => Math.min(i + 1, list.length - 1)); }
@@ -263,6 +264,34 @@ function mountNetwork(T: typeof import("three"), el: HTMLDivElement, opts: { nod
     const ring = new T.LineLoop(new T.BufferGeometry().setFromPoints(pts), new T.LineBasicMaterial({ transparent: true, opacity: 0.22 }));
     ring.rotation.x = rx; ring.rotation.z = rz; scene.add(ring); return ring;
   });
+  // Tech-stack badges riding on the globe: textures drawn at runtime from the brand SVG paths (no downloaded assets).
+  const BRANDS = ["nestjs", "nextdotjs", "react", "typescript", "nodedotjs", "graphql", "socketdotio", "docker", "kubernetes", "amazonwebservices", "postgresql", "mongodb", "redis", "laravel", "claude", "openai", "langchain", "tailwindcss", "angular", "vuedotjs"];
+  const brandPaths = (iconData as { brands: Record<string, (string | number)[][]> }).brands;
+  const logoCount = small ? 10 : 16;
+  const logoSprites: import("three").Sprite[] = [];
+  const badgeTexture = (name: string) => {
+    const c = document.createElement("canvas"); c.width = c.height = 128;
+    const g = c.getContext("2d")!;
+    g.beginPath(); g.arc(64, 64, 58, 0, Math.PI * 2);
+    g.fillStyle = cssVar("--surface", "#111316"); g.fill();
+    g.lineWidth = 4; g.strokeStyle = cssVar("--border-strong", "#61666f"); g.stroke();
+    g.save(); g.translate(34, 34); g.scale(60 / 24, 60 / 24); g.fillStyle = cssVar("--ink", "#f2f3f5");
+    (brandPaths[name] || []).forEach((d) => g.fill(new Path2D(String(d[0]))));
+    g.restore();
+    const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; t.anisotropy = 4; return t;
+  };
+  const ga2 = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < logoCount; i++) {
+    const name = BRANDS[i % BRANDS.length];
+    const y = 1 - ((i + 0.5) / logoCount) * 2, r = Math.sqrt(1 - y * y), th = ga2 * i * 7.3;
+    const sp = new T.Sprite(new T.SpriteMaterial({ map: badgeTexture(name), transparent: true, depthWrite: false }));
+    sp.position.set(Math.cos(th) * r * R * 1.16, y * R * 1.16, Math.sin(th) * r * R * 1.16);
+    sp.scale.setScalar(small ? 0.42 : 0.36);
+    sp.userData.name = name;
+    world.add(sp); logoSprites.push(sp);
+  }
+  const repaintLogos = () => logoSprites.forEach((sp) => { const m = sp.material as import("three").SpriteMaterial; m.map?.dispose(); m.map = badgeTexture(sp.userData.name); m.needsUpdate = true; });
+  const tmp = new T.Vector3();
   type P = { a: number; b: number; t: number; s: number };
   const launch = (p: P, from: number) => { p.a = from; p.b = nb[from][Math.floor(Math.random() * nb[from].length)]; p.t = 0; p.s = 0.008 + Math.random() * 0.02; };
   const pk: P[] = Array.from({ length: M }, () => { const p = { a: 0, b: 0, t: 0, s: 0 }; launch(p, Math.floor(Math.random() * N)); p.t = Math.random(); return p; });
@@ -277,7 +306,7 @@ function mountNetwork(T: typeof import("three"), el: HTMLDivElement, opts: { nod
     rings.forEach((r, n) => ((r.material as import("three").LineBasicMaterial).color = n ? ag : acc));
   };
   paint();
-  const mo = new MutationObserver(() => requestAnimationFrame(paint));
+  const mo = new MutationObserver(() => requestAnimationFrame(() => { paint(); repaintLogos(); }));
   mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "class", "style"] });
   let tx = 0, ty = 0, raf = 0, clock = 0, visible = true;
   const onMove = (e: PointerEvent) => { const r = el.getBoundingClientRect(); tx = (e.clientX - r.left) / r.width - 0.5; ty = (e.clientY - r.top) / r.height - 0.5; };
@@ -291,6 +320,7 @@ function mountNetwork(T: typeof import("three"), el: HTMLDivElement, opts: { nod
     world.rotation.z += (-tx * 0.25 - world.rotation.z) * 0.04;
     rings[0].rotation.y += 0.002; rings[1].rotation.y -= 0.0014;
     pm.size = 0.045 + Math.sin(clock * 2) * 0.006;
+    logoSprites.forEach((sp) => { sp.getWorldPosition(tmp); const front = (tmp.z / (R * 1.16) + 1) / 2; (sp.material as import("three").SpriteMaterial).opacity = 0.12 + front * 0.88; sp.renderOrder = front > 0.5 ? 2 : 0; });
     renderer.render(scene, cam);
     if (!still && visible) raf = requestAnimationFrame(frame);
   };
@@ -301,6 +331,7 @@ function mountNetwork(T: typeof import("three"), el: HTMLDivElement, opts: { nod
   ro.observe(el);
   return () => {
     cancelAnimationFrame(raf); ro.disconnect(); vis.disconnect(); mo.disconnect(); window.removeEventListener("pointermove", onMove);
+    logoSprites.forEach((sp) => { (sp.material as import("three").SpriteMaterial).map?.dispose(); sp.material.dispose(); });
     pg.dispose(); lg.dispose(); kg.dispose(); pm.dispose(); lm.dispose(); km.dispose(); renderer.dispose(); renderer.domElement.remove();
   };
 }
@@ -402,9 +433,9 @@ export function AskMyCV({ suggestions = [], initial = [] }: { suggestions?: stri
     try {
       const res = await fetch("/api/ask", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question: q, history: history.slice(-6) }) });
       const data = await res.json();
-      setMsgs((m) => [...m, { role: "ai", text: data.answer || "Sorry — I couldn't answer that.", sources: data.sources }]);
+      setMsgs((m) => [...m, { role: "ai", text: data.answer || "Sorry, I couldn't answer that.", sources: data.sources }]);
     } catch {
-      setMsgs((m) => [...m, { role: "ai", text: "The AI is offline right now — try the terminal or the CV page." }]);
+      setMsgs((m) => [...m, { role: "ai", text: "The AI is offline right now. Try the terminal or the CV page." }]);
     } finally { setBusy(false); }
   };
   return (
@@ -446,7 +477,7 @@ export function ContactForm({ budgets = ["< $2k", "$2k–5k", "$5k–15k", "$15k
       track("lead_submit", { budget, service });
       unlock("party");
       setState("done");
-    } catch { setState("idle"); setError("Something went wrong — email me at gm.xerk@gmail.com instead."); }
+    } catch { setState("idle"); setError("Something went wrong. Email me at gm.xerk@gmail.com instead."); }
   };
   if (state === "done") return <div className="xk-form xk-form-done"><Icon name="check-circle" /><h3>Message sent</h3><p>I reply within one working day.</p></div>;
   return (
@@ -515,6 +546,61 @@ export function BootScreen() {
         <XPBar label="Loading" value={Math.round((n / lines.length) * 100)} />
         <button className="xk-boot-start" onClick={() => setN(-1)}>Skip intro</button>
       </div>
+    </div>
+  );
+}
+
+/* ---------- Side quests (visitor achievements) ---------- */
+export function QuestPanel() {
+  const [open, setOpen] = useState(false);
+  const [got, setGot] = useState<string[]>([]);
+  useEffect(() => {
+    const sync = () => setGot(unlockedList());
+    const show = () => { sync(); setOpen(true); track("quests_open"); };
+    const key = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    sync();
+    window.addEventListener("xk:quests", show); window.addEventListener("xk:achievement", sync); window.addEventListener("keydown", key);
+    return () => { window.removeEventListener("xk:quests", show); window.removeEventListener("xk:achievement", sync); window.removeEventListener("keydown", key); };
+  }, []);
+  if (!open) return null;
+  return (
+    <div className="xk-palette-backdrop" onClick={() => setOpen(false)}>
+      <div className="xk-quests-panel" role="dialog" aria-modal="true" aria-label="Side quests" onClick={(e) => e.stopPropagation()}>
+        <QuestList got={got} onGo={() => setOpen(false)} />
+      </div>
+    </div>
+  );
+}
+
+export function QuestList({ got: initial, onGo }: { got?: string[]; onGo?: () => void }) {
+  const [got, setGot] = useState<string[]>(initial || []);
+  useEffect(() => {
+    if (initial) { setGot(initial); return; }
+    const sync = () => setGot(unlockedList()); sync();
+    window.addEventListener("xk:achievement", sync); return () => window.removeEventListener("xk:achievement", sync);
+  }, [initial]);
+  const ids = Object.keys(ACHIEVEMENTS) as AchievementId[];
+  const total = ids.reduce((n, id) => n + ACHIEVEMENTS[id].xp, 0);
+  const xp = ids.filter((id) => got.includes(id)).reduce((n, id) => n + ACHIEVEMENTS[id].xp, 0);
+  const next = ids.find((id) => !got.includes(id));
+  return (
+    <div className="xk-sq">
+      <div className="xk-sq-head">
+        <div><span className="xk-label">Side quests</span><strong>{got.length}/{ids.length} unlocked</strong></div>
+        <XPBar label="XP" value={Math.round((xp / total) * 100)} text={`${xp} / ${total} XP`} />
+      </div>
+      <ol className="xk-sq-list">
+        {ids.map((id) => {
+          const a = ACHIEVEMENTS[id]; const done = got.includes(id);
+          return (
+            <li key={id} className={cx("xk-sq-item", done && "is-done", id === next && "is-next")}>
+              <span className="xk-sq-icon"><Icon name={done ? "check" : a.icon} /></span>
+              <div><strong>{a.title}<em>+{a.xp} XP</em></strong><span>{done ? a.text : a.hint}</span></div>
+              {done ? <span className="xk-sq-state">Done</span> : <Link href={a.href} className={cx("xk-btn", id === next ? "xk-btn-primary" : "xk-btn-secondary", "xk-btn-sm")} onClick={() => { track("quest_go", { quest: id }); onGo?.(); }}>{a.cta}<Icon name="arrow-right" className="xk-btn-trail" /></Link>}
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }

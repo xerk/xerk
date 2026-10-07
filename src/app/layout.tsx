@@ -4,7 +4,7 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { SiteHeader, SiteFooter, MobileDock, Palette } from "@/components/xerk/chrome";
-import { AchievementToaster, BootScreen, MotionRoot } from "@/components/xerk/client";
+import { AchievementToaster, BootScreen, MotionRoot, QuestPanel } from "@/components/xerk/client";
 import { SITE_URL, profile } from "@/data/profile";
 import { JsonLd, personJsonLd, websiteJsonLd } from "@/lib/seo";
 
@@ -43,6 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <MobileDock />
           <Palette />
           <AchievementToaster />
+          <QuestPanel />
           <MotionRoot />
         </Providers>
       </body>

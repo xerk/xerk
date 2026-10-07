@@ -42,7 +42,7 @@ export default async function Admin() {
         {visits.length === 0 ? <p className="xk-muted">No visits logged in Supabase yet.</p> : <ul className="xk-prose">{visits.map((v: Record<string, string>) => <li key={v.id}>{v.created_at?.slice(0, 16).replace("T", " ")} · {v.country} {v.city} · {v.path} · {v.utm_source || v.referrer}</li>)}</ul>}
       </Section>
       <Section eyebrow="04 / Content" title="Content" scramble={false}>
-        <p>{projects.length} case studies · {posts.length} field notes. Edit case studies in <code>src/data/projects.ts</code> (or the Supabase <code>projects</code> table); notes in <code>content/</code> or the <code>posts</code> table.</p>
+        <p>{projects.length} case studies · {posts.length} blog posts. Edit case studies in <code>src/data/projects.ts</code> (or the Supabase <code>projects</code> table); notes in <code>content/</code> or the <code>posts</code> table.</p>
         <Button href="/studio" icon="video-camera">Open video studio</Button>
       </Section>
       <Section eyebrow="05 / Integrations" title="Setup checklist" scramble={false}>

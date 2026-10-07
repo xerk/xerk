@@ -1,28 +1,21 @@
 ---
 title: "Mongo or Postgres is the wrong first question"
 publishedAt: "2026-09-06"
-summary: "Pick a database by your known access patterns; if you do not know them yet, pick Postgres, because it forgives wrong guesses best."
+summary: "Pick a database by your known access patterns. If you don't know them yet, pick Postgres, because it forgives wrong guesses best."
 tags: ["mongodb", "postgresql", "databases"]
 source: "linkedin"
 ---
 
-"Should we use Mongo or Postgres" is almost never the real question. The real question is: do you know your access patterns yet?
+"Should we use Mongo or Postgres?" is almost never the question that matters. The one that does is whether you know your access patterns yet.
 
 ## If you know your access patterns
 
-Pick the database that makes your top three queries cheap and your consistency rules enforceable. Write those queries down before you choose. If they are mostly fetching one self-contained document by key, a document store fits. If they join across entities or depend on constraints and transactions, a relational database fits.
+Pick the database that makes your top three queries cheap and lets you enforce your consistency rules. Write those queries down before you choose. If they mostly fetch one self-contained document by key, a document store fits. If they join across entities or depend on constraints and transactions, a relational database fits.
 
-## If you do not know them yet
+## If you don't know them yet
 
-Pick Postgres, because it forgives wrong guesses better than anything else. You can add indexes, reshape tables, introduce new relationships and even store JSON when you need flexibility, without having bet the whole data model on a guess.
+Pick Postgres, because it forgives wrong guesses better than anything else. You can add indexes, reshape tables, introduce new relationships and store JSON when you need flexibility, and none of that requires betting the whole data model on a guess.
 
-## Where the regrets actually come from
+## Where the regrets came from
 
-I have run both in production for years. The regrets never came from the database. They came from choosing before understanding what we were building.
-
-## Takeaways
-
-- Start from access patterns, not database brands.
-- Choose for your top three queries and the consistency rules you must enforce.
-- When the patterns are unknown, Postgres is the safest default.
-- Database regret usually comes from deciding too early, not from the database.
+I've run both in production for years. The regrets never came from the database. They came from choosing one before we understood what we were building.

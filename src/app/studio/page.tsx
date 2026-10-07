@@ -11,7 +11,7 @@ export default function Studio() {
       <header className="xk-page-head" data-hud="Studio"><span className="xk-label">Studio</span><h1>Link → video</h1><p>Turn any page into a short branded video and schedule it to LinkedIn / X through Postiz (post.xerk.io). Runs as the <code>link-to-video</code> Claude Code skill in this repo.</p></header>
       <Section title="Run it">
         <p>In Claude Code, from the repo root:</p>
-        <CodeLine cmd={`/link-to-video ${SITE_URL}/work/alto`} />
+        <CodeLine cmd={`/link-to-video ${SITE_URL}/work/realtime-device-platform`} />
         <p className="xk-muted">Options: <code>--target linkedin|x|both</code> · <code>--length 15|30|60</code> · <code>--aspect 16:9|9:16|1:1</code>. The skill scrapes the page, writes a script from real numbers, renders with HyperFrames, attaches the MP4 to the project and asks before scheduling.</p>
       </Section>
       <Section title="Case studies">

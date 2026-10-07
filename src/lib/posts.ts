@@ -11,7 +11,7 @@ import { unified } from "unified";
 import { publicDb } from "./supabase";
 import { readingTime } from "./utils";
 
-export type PostMeta = { slug: string; title: string; publishedAt: string; summary: string; tags: string[]; image?: string; readingTime: string; source?: string };
+export type PostMeta = { slug: string; title: string; publishedAt: string; summary: string; tags: string[]; image?: string; video?: string; readingTime: string; source?: string };
 export type Post = PostMeta & { html: string; markdown: string; headings: { id: string; label: string }[] };
 
 const DIR = path.join(process.cwd(), "content");
@@ -43,6 +43,7 @@ function fromFile(slug: string): Omit<Post, "html"> | null {
     summary: data.summary || "",
     tags: data.tags || data.keywords || (data.category ? [data.category] : []),
     image: data.image,
+    video: data.video,
     source: data.source,
     readingTime: readingTime(content),
     markdown: content,

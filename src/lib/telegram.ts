@@ -16,6 +16,7 @@ export async function sendTelegram(html: string, chatId = CHAT) {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ chat_id: chatId, text: html.slice(0, 4000), parse_mode: "HTML", disable_web_page_preview: true }),
     });
+    if (!res.ok) console.error("telegram: sendMessage failed", res.status, (await res.text()).slice(0, 300));
     return { ok: res.ok };
   } catch {
     return { ok: false };

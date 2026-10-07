@@ -19,7 +19,7 @@ function limited(ip: string) {
 
 export async function POST(req: NextRequest) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0] || "local";
-  if (limited(ip)) return NextResponse.json({ answer: "Too many questions in a minute — give it a moment.", sources: [] }, { status: 429 });
+  if (limited(ip)) return NextResponse.json({ answer: "Too many questions in a minute. Give it a moment.", sources: [] }, { status: 429 });
   const body = await req.json().catch(() => ({}));
   const question = String(body.question || "").slice(0, 300).trim();
   if (!question) return NextResponse.json({ answer: "Ask me something about Ahmed's work.", sources: [] });
@@ -45,6 +45,6 @@ export async function POST(req: NextRequest) {
   // Extractive fallback: best matching sentences from the top sources.
   const qt = question.toLowerCase().split(/\W+/).filter((w) => w.length > 3);
   const sentences = context.slice(0, 1).flatMap((c) => c.text.split(/(?<=[.!?])\s+/)).map((s) => ({ s, score: qt.filter((w) => s.toLowerCase().includes(w)).length })).sort((a, b) => b.score - a.score);
-  const answer = top.length && sentences[0]?.score ? sentences[0].s : `I don't have that in my notes. Try the CV page, or email ${profile.email}.`;
+  const answer = top.length && sentences[0]?.score ? sentences[0].s : `I don't have that on the site. Try the CV page, or email ${profile.email}.`;
   return NextResponse.json({ answer, sources: top.length ? sources : [{ label: "CV", href: "/cv" }], mode: "search" });
 }

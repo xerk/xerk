@@ -9,9 +9,9 @@ export const profile = {
   title: "Senior Full-Stack & AI Engineer",
   headline: "I build real-time platforms and AI agents that ship.",
   intro:
-    "Senior full-stack & AI engineer with 10+ years in TypeScript, NestJS and Next.js — from 100K-connection IoT backends to production LLM agents and MCP servers.",
+    "I'm a senior full-stack and AI engineer. I've spent 10+ years building products in TypeScript, NestJS and Next.js, and lately I build real-time backends that hold 100K+ connections and LLM agents that run in production.",
   description:
-    "Ahmed Mamdouh is a senior full-stack & AI engineer in Cairo, Egypt with 10+ years shipping production systems in TypeScript, Node.js, NestJS, React and Next.js — real-time platforms at 100K+ concurrent connections, fintech transaction systems, and production AI agents, MCP servers and RAG pipelines.",
+    "Ahmed Mamdouh is a senior full-stack and AI engineer in Cairo, Egypt, with 10+ years of production work in TypeScript, Node.js, NestJS, React and Next.js. He has built real-time platforms with 100K+ concurrent connections, fintech transaction systems, and AI agents, MCP servers and RAG pipelines that run in production.",
   location: "Cairo, Egypt",
   timezone: "UTC+3",
   years: 10,
@@ -61,11 +61,11 @@ export const ticker = [
 export type Achievement = { rarity?: "legendary" | "epic" | "rare"; icon?: string; value?: string; title: string; text: string; source?: string; locked?: boolean };
 
 export const achievements: Achievement[] = [
-  { rarity: "legendary", icon: "broadcast", value: "100K+", title: "concurrent connections", text: "ALTO device platform on NestJS + Socket.io.", source: "Netsync" },
+  { rarity: "legendary", icon: "broadcast", value: "100K+", title: "concurrent connections", text: "A real-time device platform on NestJS and Socket.io.", source: "Current role" },
   { rarity: "legendary", icon: "users-three", value: "2.1M+", title: "users served", text: "UptimeRobot monitoring SaaS.", source: "Itrinity" },
-  { rarity: "epic", icon: "robot", value: "MCP", title: "server in production", text: "LLM tools into DB, telemetry and internal services.", source: "Netsync" },
-  { rarity: "epic", icon: "brain", value: "RAG", title: "pipelines on AWS", text: "Qdrant, embeddings, evals; fine-tuning on SageMaker & Bedrock.", source: "Netsync" },
-  { rarity: "legendary", icon: "lightning", value: "−40%", title: "p95 latency", text: "Monolith split into NestJS services on Kubernetes.", source: "Netsync" },
+  { rarity: "epic", icon: "robot", value: "MCP", title: "server in production", text: "Gives LLM clients controlled access to internal systems.", source: "Current role" },
+  { rarity: "epic", icon: "brain", value: "RAG", title: "pipelines on AWS", text: "Retrieval over embeddings, with eval harnesses.", source: "Current role" },
+  { rarity: "legendary", icon: "lightning", value: "−40%", title: "p95 latency", text: "After splitting a monolith into NestJS services.", source: "Current role" },
   { rarity: "rare", icon: "trend-up", value: "~45%", title: "faster endpoints", text: "Redis caching, N+1 cleanup, indexed queries.", source: "Technocloud" },
   { rarity: "rare", icon: "users", value: "7+", title: "engineers led", text: "Code reviews, design docs, sprint planning, hiring.", source: "2 teams" },
   { rarity: "rare", icon: "git-branch", value: "5,559", title: "contributions", text: "On GitHub in the last 12 months, 268 active days.", source: "GitHub" },
@@ -77,14 +77,11 @@ export type Quest = { status?: "active"; company: string; role: string; where: s
 export const experience: Quest[] = [
   {
     status: "active", company: "Netsync Network Solutions", role: "Senior Software Engineer", where: "Remote, US", period: "Feb 2023 — Now", start: "2023-02", url: "https://www.netsync.com",
-    summary: "IT solutions provider: cloud infrastructure, cybersecurity and IPTV device management for enterprise clients.",
+    summary: "IT solutions provider for enterprise clients. Product details are under NDA.",
     objectives: [
-      "Shipped a production AI agent on the Anthropic and OpenAI APIs with tool use, memory and guardrails",
-      "Designed an MCP server that gives LLM clients secure tools into the database, telemetry and internal services",
-      "Built RAG pipelines on AWS with Qdrant and eval harnesses; ran fine-tuning on SageMaker and Bedrock",
-      "Designed ALTO's real-time device management on NestJS, Socket.io and MongoDB for 100,000+ concurrent devices",
-      "Split a monolith into NestJS services on Docker and Kubernetes, cutting p95 latency by ~40%",
-      "Led 7+ engineers across Node.js, NestJS and Angular; owned CI/CD on Jenkins and AWS EKS",
+      "Built a real-time device platform that holds more than 100,000 concurrent connections",
+      "Shipped a production AI agent and an MCP server on the Anthropic and OpenAI APIs",
+      "Lead a team of 7+ engineers and own CI/CD and deploys on AWS",
     ],
     loot: ["100K+ concurrent", "p95 −40%", "millions of events/day"],
     stack: ["TypeScript", "NestJS", "Python", "LangChain", "MCP", "Anthropic API", "OpenAI API", "Qdrant", "GraphQL", "Socket.io", "MongoDB", "PostgreSQL", "AWS", "Kubernetes"],
@@ -120,8 +117,8 @@ export const experience: Quest[] = [
 ];
 
 export const skillTree = [
-  { name: "Backend", icon: "cpu", nodes: [{ name: "Node.js · NestJS", brand: "nestjs", proof: "ALTO, SweepSouth, UptimeRobot" }, { name: "GraphQL", brand: "graphql", proof: "Schema-first APIs, −35% overhead" }, { name: "Real-time", brand: "socketdotio", proof: "100K+ concurrent sockets" }, { name: "Laravel · PHP", brand: "laravel", proof: "Zerocash, Schoolver" }] },
-  { name: "Frontend", icon: "monitor", nodes: [{ name: "React · Next.js", brand: "nextdotjs", proof: "Mall of Arabia, xerk.io" }, { name: "Vue · Nuxt", brand: "vuedotjs", proof: "SweepSouth, Schoolver LMS" }, { name: "Angular", brand: "angular", proof: "Netsync, SweepSouth" }, { name: "Tailwind", brand: "tailwindcss", proof: "Every recent UI" }] },
+  { name: "Backend", icon: "cpu", nodes: [{ name: "Node.js · NestJS", brand: "nestjs", proof: "SweepSouth, UptimeRobot, current role" }, { name: "GraphQL", brand: "graphql", proof: "Schema-first APIs, −35% overhead" }, { name: "Real-time", brand: "socketdotio", proof: "100K+ concurrent sockets" }, { name: "Laravel · PHP", brand: "laravel", proof: "Zerocash, Schoolver" }] },
+  { name: "Frontend", icon: "monitor", nodes: [{ name: "React · Next.js", brand: "nextdotjs", proof: "Mall of Arabia, xerk.io" }, { name: "Vue · Nuxt", brand: "vuedotjs", proof: "SweepSouth, Schoolver LMS" }, { name: "Angular", brand: "angular", proof: "SweepSouth, current role" }, { name: "Tailwind", brand: "tailwindcss", proof: "Every recent UI" }] },
   { name: "AI / LLM", icon: "brain", ai: true, nodes: [{ name: "Agents", brand: "claude", proof: "Anthropic + OpenAI, tool use" }, { name: "MCP servers", icon: "link", proof: "Secure tools for LLMs" }, { name: "RAG", brand: "langchain", proof: "Qdrant, embeddings, evals" }, { name: "Fine-tuning", icon: "chart-line-up", proof: "SageMaker, Bedrock" }] },
   { name: "Cloud & Ops", icon: "planet", nodes: [{ name: "AWS", brand: "amazonwebservices", proof: "EKS, ECS, Lambda, S3" }, { name: "Kubernetes", brand: "kubernetes", proof: "Microservices on EKS" }, { name: "CI/CD", brand: "githubactions", proof: "Jenkins, GitHub Actions" }, { name: "Data", brand: "postgresql", proof: "Postgres, Mongo, Redis" }] },
 ];
@@ -149,9 +146,9 @@ export const aiStack = [
 ];
 
 export const services = [
-  { slug: "ai-agent", icon: "robot-duo", ai: true, featured: true, title: "AI agent & automation", text: "An agent or AI feature inside your product or ops — tool use, RAG on your data, guardrails and evals.", price: process.env.NEXT_PUBLIC_PRICE_AI || "Fixed quote", unit: "per milestone", timeline: "2–4 weeks", features: ["Claude / OpenAI via AI SDK or LangChain", "RAG on your docs and data", "MCP server or tool calls into your APIs", "Evals, usage & cost tracking"] },
-  { slug: "realtime-saas", icon: "broadcast-duo", title: "Real-time platform or SaaS", text: "From spec to production: NestJS/Next.js, WebSockets, queues, payments and a dashboard.", price: process.env.NEXT_PUBLIC_PRICE_SAAS || "Fixed quote", unit: "per milestone", timeline: "4–8 weeks", features: ["NestJS + GraphQL or REST", "Socket.io at scale", "Stripe / Paymob billing", "Docker, K8s or Vercel deploy"] },
-  { slug: "tech-lead", icon: "handshake-duo", title: "Fractional tech lead", text: "Senior hands on your team: architecture, reviews, CI/CD, hiring — while still writing code.", price: process.env.NEXT_PUBLIC_PRICE_LEAD || "Hourly", unit: "10–20 h / week", timeline: "Ongoing", features: ["Architecture & design docs", "Code review & mentoring", "CI/CD on AWS", "Weekly written updates"] },
+  { slug: "ai-agent", icon: "robot-duo", ai: true, featured: true, title: "AI agent & automation", text: "An agent or AI feature inside your product or your ops, with tool use, retrieval over your data, guardrails and evals.", timeline: "2–4 weeks", features: ["Claude / OpenAI via AI SDK or LangChain", "RAG on your docs and data", "MCP server or tool calls into your APIs", "Evals, usage & cost tracking"] },
+  { slug: "realtime-saas", icon: "broadcast-duo", title: "Real-time platform or SaaS", text: "From spec to production with NestJS or Next.js, WebSockets, queues, payments and an admin dashboard.", timeline: "4–8 weeks", features: ["NestJS + GraphQL or REST", "Socket.io at scale", "Stripe / Paymob billing", "Docker, K8s or Vercel deploy"] },
+  { slug: "tech-lead", icon: "handshake-duo", title: "Fractional tech lead", text: "A senior engineer on your team for architecture, code review, CI/CD and hiring, who still writes code.", timeline: "Ongoing", features: ["Architecture & design docs", "Code review & mentoring", "CI/CD on AWS", "Weekly written updates"] },
 ];
 
 export const process_ = [
@@ -164,8 +161,8 @@ export const process_ = [
 export const hireFaq = [
   { q: "Do you work through Upwork or directly?", a: "Both. Upwork gives you escrow and reviews; a direct contract suits longer engagements." },
   { q: "Which time zones do you cover?", a: "I'm in Cairo (UTC+3) and work remotely with teams in the US and Europe, overlapping US and EU hours." },
-  { q: "Can you join an existing codebase?", a: "Yes — most of my work has been inside existing Node.js/NestJS, Laravel, Angular and Vue codebases, including splitting a monolith into services." },
-  { q: "Do you build AI features into existing products?", a: "Yes. I've shipped a production AI agent with tool use and guardrails, an MCP server and RAG pipelines with evals at Netsync." },
+  { q: "Can you join an existing codebase?", a: "Yes. Most of my work has been inside existing Node.js, NestJS, Laravel, Angular and Vue codebases, including splitting a monolith into services." },
+  { q: "Do you build AI features into existing products?", a: "Yes. In my current role I shipped a production AI agent with tool use and guardrails, an MCP server, and retrieval pipelines with evals." },
 ];
 
 export const github = { user: "xerk", total: 5559, activeDays: 268, bestStreak: 20, publicRepos: 48 };

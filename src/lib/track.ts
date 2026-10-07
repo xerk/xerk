@@ -3,15 +3,15 @@ import posthog from "posthog-js";
 
 // Visitor achievements — fun for visitors, and each unlock is an analytics event.
 export const ACHIEVEMENTS = {
-  explorer: { title: "Explorer", text: "Started the game", icon: "game-controller", xp: 50 },
-  scout: { title: "Scout", text: "Opened 3 case studies", icon: "map-trifold", xp: 150 },
-  player: { title: "Hands-on", text: "Launched a live demo", icon: "cursor-click", xp: 100 },
-  hacker: { title: "Hacker", text: "Opened the terminal", icon: "terminal-window", xp: 75 },
-  root: { title: "Root access", text: "Found sudo hire-me", icon: "skull", xp: 200 },
-  curious: { title: "Curious", text: "Asked my CV a question", icon: "sparkle", xp: 75 },
-  reader: { title: "Reader", text: "Opened a field note", icon: "book-open-text", xp: 50 },
-  recruiter: { title: "Recruiter", text: "Visited the hire page", icon: "handshake", xp: 50 },
-  party: { title: "Party formed", text: "Sent a message", icon: "trophy", xp: 500 },
+  explorer: { title: "Explorer", text: "Started the game", hint: "Open the site. You already did this one.", href: "/", cta: "Home", icon: "game-controller", xp: 50 },
+  scout: { title: "Scout", text: "Opened 3 case studies", hint: "Open any three stages from the level select.", href: "/work", cta: "Pick a stage", icon: "map-trifold", xp: 150 },
+  player: { title: "Hands-on", text: "Launched a live demo", hint: "Press Launch demo on the real-time platform case study.", href: "/work/realtime-device-platform#demo", cta: "Play the demo", icon: "cursor-click", xp: 100 },
+  hacker: { title: "Hacker", text: "Opened the terminal", hint: "Click into the console on the home page, or press ` anywhere.", href: "/#console", cta: "Open console", icon: "terminal-window", xp: 75 },
+  root: { title: "Root access", text: "Found sudo hire-me", hint: "There is a hidden command in the console. Try sudo with something.", href: "/#console", cta: "Find it", icon: "skull", xp: 200 },
+  curious: { title: "Curious", text: "Asked my CV a question", hint: "Ask the AI anything about my work.", href: "/ai#ask", cta: "Ask my CV", icon: "sparkle", xp: 75 },
+  reader: { title: "Reader", text: "Read a blog post", hint: "Open any post on the blog.", href: "/blog", cta: "Read a post", icon: "book-open-text", xp: 50 },
+  recruiter: { title: "Recruiter", text: "Visited the hire page", hint: "See the services and how we would work together.", href: "/hire", cta: "Open hire page", icon: "handshake", xp: 50 },
+  party: { title: "Party formed", text: "Sent a message", hint: "Tell me about your project with the contact form.", href: "/hire#contact", cta: "Send a message", icon: "trophy", xp: 500 },
 } as const;
 export type AchievementId = keyof typeof ACHIEVEMENTS;
 
@@ -28,4 +28,12 @@ export function unlock(id: AchievementId) {
     track("achievement_unlocked", { achievement: id });
     window.dispatchEvent(new CustomEvent("xk:achievement", { detail: id }));
   } catch {}
+}
+
+export function unlockedList(): string[] {
+  try { return JSON.parse(localStorage.getItem("xk:ach") || "[]"); } catch { return []; }
+}
+
+export function openQuests() {
+  window.dispatchEvent(new Event("xk:quests"));
 }

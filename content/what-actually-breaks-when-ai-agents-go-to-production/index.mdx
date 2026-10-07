@@ -1,39 +1,31 @@
 ---
 title: "What actually breaks when AI agents go to production"
 publishedAt: "2026-09-08"
-summary: "Production agents fail on state, partial failure and knowing when to stop, which are distributed systems problems, not prompt problems."
+summary: "Production agents fail on state, partial failure and knowing when to stop. Those are distributed systems problems, and prompts won't fix them."
 tags: ["ai", "agents", "mcp", "distributed-systems"]
 source: "linkedin"
 ---
 
-The gap between an agent demo and an agent in production is not the prompt. It is what happens on the third tool call, when the API returns a 500 and the agent has already written half a row to your database.
+The gap between an agent demo and an agent in production shows up on the third tool call, when the API returns a 500 and the agent has already written half a row to your database.
 
 ## Demos are one happy path
 
-Demos are one happy path. Production is partial failure, retries that must not double-charge anyone, and a clear answer to the question of when the agent stops and asks a person.
+A demo shows one happy path. Production means partial failure, retries that must not double-charge anyone, and a clear rule for when the agent stops and asks a person.
 
-I keep seeing agent architecture diagrams. I rarely see anyone talk about the three things that actually break.
+I see plenty of agent architecture diagrams. I rarely see anyone talk about the three things that actually break.
 
 ## State
 
-An agent that runs for ninety seconds and calls six tools is a long-running transaction with no transaction manager. If it dies on step four, something has to know that steps one to three happened. Most demos keep this in memory and hope.
+An agent that runs for ninety seconds and calls six tools is a long-running transaction with no transaction manager. If it dies on step four, something has to know that steps one to three happened. Most demos keep that in memory and hope. In production the progress needs to be persisted somewhere a restarted run can read it.
 
 ## Partial failure
 
-A tool call times out. Did it not run, or did it run and lose the response? Those need different handling, and the agent usually cannot tell them apart. So every side-effecting tool needs an idempotency key, the same way every queue consumer does.
+A tool call times out. Maybe it never ran, or maybe it ran and the response got lost. Those need different handling, and the agent usually can't tell them apart, so treat a timeout as an unknown outcome. That's why every side-effecting tool needs an idempotency key, the same way every queue consumer does.
 
 ## Knowing when to stop
 
-This is the hard one. An agent that asks a human too often is a slow form. An agent that never asks is a liability. The threshold is a product decision, not a prompt, and it belongs in code where you can test it.
+This one is the hardest. An agent that asks a human too often is a slow form, and an agent that never asks is a liability. Where the threshold sits is a product decision. It belongs in code where you can test it, and a line in the prompt is a poor place to keep it.
 
 ## Nothing new
 
-None of this is new. It is retries, idempotency and backpressure, which backend engineers have been doing for twenty years. It is ordinary distributed systems work wearing a new hat. The model is the easy part.
-
-## Takeaways
-
-- Persist agent progress so a crash mid-run can be recovered.
-- Give every side-effecting tool an idempotency key.
-- Treat timeouts as "unknown outcome", not "did not run".
-- Put the human-escalation threshold in testable code, not in the prompt.
-- Agent reliability is distributed systems engineering.
+None of this is new. It's retries, idempotency and backpressure, which backend engineers have been doing for twenty years, applied to a new kind of caller. In my experience the model is the easy part.

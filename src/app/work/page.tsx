@@ -4,7 +4,7 @@ import { projects } from "@/data/projects";
 import { pageMeta, JsonLd, breadcrumbJsonLd } from "@/lib/seo";
 import { SITE_URL } from "@/data/profile";
 
-export const metadata = pageMeta({ title: "Work — case studies in real-time systems, AI agents and SaaS", description: "Case studies by Ahmed Mamdouh: ALTO (100K+ concurrent connections), a production AI agent + MCP server, the Zerocash e-wallet, SweepSouth, UptimeRobot and more.", path: "/work" });
+export const metadata = pageMeta({ title: "Case studies: real-time systems, AI agents and SaaS", description: "Case studies by Ahmed Mamdouh: a real-time platform with 100K+ concurrent connections, a production AI agent and MCP server, the Zerocash e-wallet, SweepSouth, UptimeRobot and more.", path: "/work" });
 
 export default function WorkPage() {
   return (
@@ -25,7 +25,7 @@ export default function WorkPage() {
         </div>
       </section>
       <section className="xk-section">
-        <CTABar tone="accent" title="Want your project on this list?" text="Real-time systems, AI features, SaaS — scoped in one call."><Button variant="primary" href="/hire" iconRight="arrow-right" track="hire_click">Start a mission</Button></CTABar>
+        <CTABar tone="accent" title="Want your project on this list?" text="Real-time systems, AI features or SaaS. We can scope it in one call."><Button variant="primary" href="/hire" iconRight="arrow-right" track="hire_click">Start a mission</Button></CTABar>
       </section>
     </div>
   );

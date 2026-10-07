@@ -1,24 +1,24 @@
 ---
 title: "At-least-once delivery means at least once"
 publishedAt: "2026-09-01"
-summary: "Every queue consumer will eventually run twice, so give each one an idempotency key and check it before doing the work."
+summary: "Every queue consumer eventually runs twice. Give each one an idempotency key from the message and check it before doing the work."
 tags: ["nodejs", "distributed-systems", "queues", "redis", "backend"]
 source: "linkedin"
 ---
 
-The worst bug I ever shipped ran perfectly. It was a queue consumer that was not idempotent, and the fix is the same every time: give every consumer an idempotency key and check it before doing any work.
+The worst bug I ever shipped ran perfectly. It was a queue consumer that wasn't idempotent, and the fix is the same every time: give every consumer an idempotency key and check it before doing any work.
 
 ## The bug that did not crash
 
-It was a payment notification consumer. The queue delivers a message, the consumer sends the notification. Tested, deployed, worked.
+It was a payment notification consumer. The queue delivers a message, the consumer sends the notification. I tested it, deployed it, and it worked.
 
-Then a network blip made the queue redeliver a batch. Every affected user got the same payment notification twice. Some got it three times. Nothing crashed. No errors. The system did exactly what I built it to do, twice.
+Then a network blip made the queue redeliver a batch. Every affected user got the same payment notification twice, and some got it three times. Nothing crashed and nothing logged an error, because the system did exactly what I built it to do. It just did it twice.
 
-That week I learned the phrase that now lives rent free in my head: at-least-once delivery means at least once.
+That week I learned the phrase that has lived rent free in my head ever since: at-least-once delivery means at least once.
 
 ## The boring fix
 
-Every consumer gets an idempotency key. Before doing the work, check if the key was already processed. A Redis `SETNX` with a TTL covers most cases in a few lines:
+Every consumer gets an idempotency key. Before doing the work, it checks whether that key was already processed. A Redis `SETNX` with a TTL covers most cases in a few lines:
 
 ```ts
 async function handle(message: { id: string; payload: unknown }) {
@@ -31,20 +31,12 @@ async function handle(message: { id: string; payload: unknown }) {
 }
 ```
 
-The key has to come from the message itself, something stable like an event ID, not something generated when the consumer runs. Otherwise every redelivery looks new.
+The key has to come from the message itself, something stable like an event ID. If you generate it when the consumer runs, every redelivery looks new and the check does nothing.
 
 ## Duplicates come from everywhere
 
-What surprised me is how deep the rule goes. Retries, replays, manual reprocessing after an incident, a colleague running a backfill script. Duplicates come from everywhere. The queue is just the messenger.
+What surprised me is how far the rule reaches. Retries, replays, manual reprocessing after an incident, a colleague running a backfill script: all of them send the same work through twice. The queue was only the first place I noticed it.
 
 ## The one review question
 
-Now when I review a consumer, I ask one question first: what happens if this runs twice? If the answer is "that can't happen", the review is over. It can.
-
-## Takeaways
-
-- At-least-once delivery guarantees duplicates eventually, not just in theory.
-- Give every consumer an idempotency key derived from the message, and check it before doing work.
-- A Redis `SET ... NX` with a TTL handles most cases.
-- Retries, replays and backfills cause duplicates too, not only the queue.
-- In review, ask first: what happens if this runs twice?
+When I review a consumer now, the first thing I ask is what happens if it runs twice. If the answer is "that can't happen", I already know what the next comment is going to say. It can, and eventually it will, usually during the one week you'd least like it to.

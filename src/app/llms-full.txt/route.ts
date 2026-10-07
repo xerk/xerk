@@ -20,7 +20,7 @@ ${Object.entries(skills).map(([k, v]) => `- ${k}: ${v.join(", ")}`).join("\n")}
 ## Case studies
 ${projects.map((p) => `### ${p.title} — ${SITE_URL}/work/${p.slug}\n${p.answer}\n\n${p.sections.map((s) => `#### ${s.title}\n${s.body.join("\n\n")}`).join("\n\n")}\n${p.faq.map((f) => `Q: ${f.q}\nA: ${f.a}`).join("\n")}`).join("\n\n")}
 
-## Field notes
+## Blog
 ${bodies.filter(Boolean).map((b) => `### ${b!.title} (${b!.publishedAt}) — ${SITE_URL}/blog/${b!.slug}\n${b!.markdown.trim()}`).join("\n\n")}
 `;
   return new Response(md, { headers: { "content-type": "text/markdown; charset=utf-8" } });

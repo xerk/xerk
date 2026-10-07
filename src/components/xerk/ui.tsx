@@ -350,14 +350,13 @@ export function RelatedProjects({ items, title = "Next stage" }: { items: { slug
 }
 
 /* ---------- Hire ---------- */
-export function ServiceCard(p: { icon: string; title: string; text: string; price: string; unit?: string; timeline?: string; features: string[]; featured?: boolean; ai?: boolean; href: string }) {
+export function ServiceCard(p: { icon: string; title: string; text: string; timeline?: string; features: string[]; featured?: boolean; ai?: boolean; href: string }) {
   return (
     <div className={cx("xk-card", "xk-service", p.featured && "is-featured")}>
       {p.featured && <span className="xk-service-flag">Most booked</span>}
       <span className={cx("xk-service-icon", p.ai && "is-ai")}><Icon name={p.icon} /></span>
       <h3>{p.title}</h3>
       <p className="xk-card-text">{p.text}</p>
-      <div className="xk-service-price"><strong>{p.price}</strong>{p.unit && <span>{p.unit}</span>}</div>
       {p.timeline && <span className="xk-label"><Icon name="timer" /> {p.timeline}</span>}
       <ul>{p.features.map((f) => <li key={f}><Icon name="check-circle" />{f}</li>)}</ul>
       <Button variant={p.featured ? "primary" : "secondary"} block href={p.href} iconRight="arrow-right" track="hire_click">Start a project</Button>

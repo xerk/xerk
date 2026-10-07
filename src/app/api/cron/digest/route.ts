@@ -7,6 +7,6 @@ export async function GET(req: NextRequest) {
   const secret = process.env.CRON_SECRET;
   if (secret && req.headers.get("authorization") !== `Bearer ${secret}`) return NextResponse.json({ ok: false }, { status: 401 });
   const stats = await getStats(1);
-  const res = await sendTelegram(formatStats(stats, "xerk.io — last 24h"));
+  const res = await sendTelegram(formatStats(stats, "xerk.io, last 24h"));
   return NextResponse.json({ ok: true, sent: res.ok, stats });
 }

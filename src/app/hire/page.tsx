@@ -3,7 +3,7 @@ import { AskMyCV, ContactForm } from "@/components/xerk/client";
 import { bookingUrl, hireFaq, process_, profile, services, socials, SITE_URL, upworkHref, socialHref } from "@/data/profile";
 import { pageMeta, JsonLd, faqJsonLd } from "@/lib/seo";
 
-export const metadata = pageMeta({ title: "Hire a senior full-stack & AI engineer — NestJS, Next.js, AI agents", description: "Hire Ahmed Mamdouh (10+ years) for AI agents, real-time platforms and SaaS — fixed-scope builds or a fractional tech lead. Work directly or through Upwork.", path: "/hire" });
+export const metadata = pageMeta({ title: "Hire a senior full-stack and AI engineer (NestJS, Next.js, AI agents)", description: "Hire Ahmed Mamdouh (10+ years) for AI agents, real-time platforms and SaaS — fixed-scope builds or a fractional tech lead. Work directly or through Upwork.", path: "/hire" });
 
 export default function Hire() {
   return (
@@ -13,7 +13,7 @@ export default function Hire() {
       <header className="xk-page-head" data-hud="Co-op mode">
         <StatusPill>{profile.availability}</StatusPill>
         <h1 data-split="">Hire a senior engineer for your AI feature or real-time platform</h1>
-        <p>{profile.years}+ years shipping production systems — 100K-connection backends, fintech transactions, AI agents and MCP servers. Fixed-scope builds or a few days a week on your team, directly or through Upwork.</p>
+        <p>{profile.years}+ years shipping production systems: backends with 100K+ connections, fintech transactions, AI agents and MCP servers. Fixed-scope builds or a few days a week on your team, directly or through Upwork.</p>
         <div className="xk-hero-actions"><Button variant="primary" size="lg" icon="calendar-dots" href={bookingUrl} track="book_call">Book a 15-min call</Button><Button size="lg" brand="upwork" iconRight="arrow-up-right" href={upworkHref} track="upwork_click">Hire on Upwork</Button></div>
       </header>
       <section className="xk-section" style={{ paddingTop: 0 }}>

@@ -1,39 +1,33 @@
 ---
 title: "How an endpoint got 45 percent faster with no clever code"
 publishedAt: "2026-09-09"
-summary: "Twenty minutes with a profiler beat a week of guessing: an N+1, a missing index and a useless cache made an endpoint 45 percent faster."
+summary: "Twenty minutes with a profiler beat a week of guessing. An N+1, a missing index and a useless cache made an endpoint 45 percent faster."
 tags: ["performance", "postgresql", "redis", "backend"]
 source: "linkedin"
 ---
 
-An endpoint got about 45 percent faster and I did not write a single clever line of code. I ran a profiler, and it disagreed with four experienced engineers.
+An endpoint got about 45 percent faster and I didn't write a single clever line of code. I ran a profiler, and it disagreed with four experienced engineers.
 
 ## A week of guessing
 
-The team had been arguing about it for a week. One person was sure it was the ORM. Another wanted to move the whole thing to a queue. Someone suggested rewriting it in Go, because someone always does.
+The team had been arguing about this endpoint for a week. One person was sure it was the ORM. Another wanted to move the whole thing to a queue. Someone suggested rewriting it in Go, because someone always does.
 
 I ran a profiler for twenty minutes instead.
 
 ## What the profile found
 
-Three things came out, and none of them were what anyone guessed.
+It turned up three problems, and nobody had guessed any of them.
 
-- **A relationship loaded in a loop.** One request became sixty one queries, the classic N+1.
-- **A WHERE clause on an unindexed column.** It had been fine at ten thousand rows and was not fine at four million.
-- **A cache keyed per user.** We had added it six months earlier. The hit rate was close to nothing, while we paid the write cost on every request.
+A relationship was being loaded in a loop, so one request became sixty one queries. The classic N+1.
+
+A WHERE clause filtered on an unindexed column. That had been fine at ten thousand rows and was not fine at four million.
+
+We also had a cache keyed per user, added six months earlier. Its hit rate was close to nothing, and we were paying the write cost on every request.
 
 ## An afternoon of fixes
 
-Fixing all three took an afternoon. Eager loading, one index, delete the cache.
+Fixing all three took an afternoon: eager loading, one index, and deleting the cache. Deleting a cache feels wrong, but one that almost never hits only costs you.
 
-## The actual lesson
+## Why this stuck with me
 
-The lesson is not "use a profiler". Everyone nods at that and goes back to guessing. The lesson is that the profile disagreed with four experienced engineers, and the profile was right. We would have spent a sprint rewriting the wrong thing.
-
-## Takeaways
-
-- Profile before debating architecture changes.
-- Look for N+1 queries, missing indexes and caches with poor hit rates.
-- Queries that are fine on small tables can fall over as data grows.
-- A cache that rarely hits is pure cost; deleting it is a valid fix.
-- Measure first. It is boring and it keeps being correct.
+"Use a profiler" is advice everyone nods at and then ignores. What I keep coming back to is that four experienced engineers each had a confident theory, and all four were wrong. Without the profile we'd have spent a sprint rewriting the wrong thing. Measuring first is boring, and it keeps being correct.

@@ -6,25 +6,18 @@ tags: ["mcp", "ai", "architecture"]
 source: "linkedin"
 ---
 
-The July MCP revision went stateless, with OAuth 2.0 and OpenID Connect, so servers can run serverless. That sounds like a boring spec note. It is not.
+The July MCP revision went stateless and adopted OAuth 2.0 and OpenID Connect, so servers can now run serverless. It reads like a boring spec note, but I think it matters more than it sounds.
 
 ## Why stateless matters
 
-Stateless plus standard auth is the difference between a protocol you demo on a laptop and one you can put behind a load balancer at work.
+Stateless servers plus standard auth are what separate a protocol you demo on a laptop from one you can put behind a load balancer at work.
 
-When a server keeps per-session state in memory, every request from a client has to reach the same instance. That fights against how most production infrastructure works: load balancers spread traffic, serverless functions come and go, and instances are replaced during deploys. A stateless server can handle any request on any instance.
+When a server keeps per-session state in memory, every request from a client has to reach the same instance. Most production infrastructure works against that. Load balancers spread traffic, serverless functions come and go, and deploys replace instances. A stateless server can handle any request on any instance.
 
 ## Why standard auth matters
 
-OAuth 2.0 and OpenID Connect are what identity infrastructure already speaks. Using them means an MCP server can plug into the same auth setup as everything else, instead of needing its own.
+OAuth 2.0 and OpenID Connect are what identity infrastructure already speaks. With them, an MCP server can plug into the same auth setup as everything else instead of needing its own.
 
-## Removing the excuse
+## One less excuse
 
-Most integration standards die because nobody could deploy them the way their infrastructure already works. This one just removed that excuse.
-
-## Takeaways
-
-- The July MCP revision is stateless and uses OAuth 2.0 and OpenID Connect.
-- Stateless servers can scale horizontally and run serverless.
-- Standard auth lets MCP fit into existing identity infrastructure.
-- Deployability is what decides whether an integration standard survives.
+Most integration standards die because nobody can deploy them the way their infrastructure already works. MCP just removed that excuse.

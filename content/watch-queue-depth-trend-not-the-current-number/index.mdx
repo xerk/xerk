@@ -1,23 +1,13 @@
 ---
 title: "Watch queue depth trend, not the current number"
 publishedAt: "2026-09-13"
-summary: "Monitor queue depth over time from day one; the current number says little, but the slope tells you whether you have twenty minutes or two."
+summary: "Track queue depth over time from day one. The current number says little; the slope tells you whether you have twenty minutes or two."
 tags: ["monitoring", "queues", "system-design"]
 source: "linkedin"
 ---
 
-The one piece of monitoring I added after an incident and now put in every service on day one is queue depth over time. Not the current number, the trend.
+The one piece of monitoring I added after an incident, and now put in every service on day one, is queue depth over time. I care about the trend far more than the current number.
 
-## Why the current number lies
+A large queue that drains fast is fine. A smaller one that has grown steadily for an hour is a problem: consumers are falling behind producers, and that won't fix itself.
 
-Current depth tells you nothing on its own. A large queue that is draining fast is fine. A smaller queue that has grown steadily for an hour is a problem, because consumers are falling behind producers and nothing will fix that by itself.
-
-## The slope is the signal
-
-The slope tells you whether you have twenty minutes or two. If depth is rising, divide the remaining headroom by the rate of growth and you have a rough time until it hurts. That is the number that tells you whether to page someone, scale consumers, or just watch.
-
-## Takeaways
-
-- Track queue depth over time in every service from day one.
-- A single depth reading says little; the trend shows if consumers keep up.
-- The rate of growth tells you how much time you have to react.
+The slope tells you whether you have twenty minutes or two. Divide the remaining headroom by the growth rate and you get a rough time until it hurts, which is what decides whether you page someone, scale consumers, or keep watching.

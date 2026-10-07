@@ -12,19 +12,12 @@ npm v12 now blocks install scripts unless you explicitly approve them. It should
 
 `preinstall`, `install` and `postinstall` no longer run on their own.
 
-That single behaviour is how a large share of supply chain attacks worked: publish a package, wait for someone to type `npm install`, and run whatever you like on their machine and in their CI. Install scripts run with the same permissions as the user or CI job doing the install, which is exactly why they were such an attractive target.
+That one behaviour is how a large share of supply chain attacks worked: publish a package, wait for someone to type `npm install`, then run whatever you like on their machine and in their CI. Install scripts run with the same permissions as the user or CI job doing the install, which is why attackers liked them so much.
 
 ## It will break some builds
 
-It will break some builds, and those builds were the ones running arbitrary code from strangers.
+Some builds will break. Those are the builds that were running arbitrary code from strangers.
 
 ## What to do now
 
-Check which of your dependencies actually needs a postinstall hook. It is usually fewer than you think. Approve those deliberately, and treat a new dependency asking for an install script as something to review rather than wave through.
-
-## Takeaways
-
-- npm v12 does not run install lifecycle scripts unless you approve them.
-- Install scripts were a major supply chain attack vector.
-- Expect some builds to break; that is the point.
-- Audit which dependencies genuinely need an install hook.
+Check which of your dependencies actually need a postinstall hook. It's usually fewer than you think. Approve those on purpose, and when a new dependency asks for an install script, review it before you let it through.

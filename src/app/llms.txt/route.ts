@@ -24,7 +24,7 @@ ${projects.map((p) => `- [${p.title}](${SITE_URL}/work/${p.slug}): ${p.answer}`)
 ## Services
 ${services.map((s) => `- ${s.title}: ${s.text}`).join("\n")}
 
-## Field notes
+## Blog
 ${posts.map((p) => `- [${p.title}](${SITE_URL}/blog/${p.slug}) (${p.publishedAt}): ${p.summary}`).join("\n")}
 `;
   return new Response(md, { headers: { "content-type": "text/markdown; charset=utf-8" } });

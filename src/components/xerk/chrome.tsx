@@ -8,7 +8,7 @@ import { getPosts } from "@/lib/posts";
 export const NAV = [
   { label: "Work", href: "/work" },
   { label: "AI", href: "/ai" },
-  { label: "Notes", href: "/blog" },
+  { label: "Blog", href: "/blog" },
   { label: "Hire", href: "/hire" },
   { label: "CV", href: "/cv" },
 ];
@@ -43,7 +43,7 @@ export function SiteFooter() {
       </div>
       <div className="xk-footer-col"><span className="xk-label">Play</span><ul><li><Link href="/work">Level select</Link></li><li><Link href="/#achievements">Achievements</Link></li><li><Link href="/#console">Terminal</Link></li><li><Link href="/ai">AI work</Link></li></ul></div>
       <div className="xk-footer-col"><span className="xk-label">Hire</span><ul><li><Link href="/hire">Services</Link></li><li><a href={upworkHref} target="_blank" rel="noopener me">Upwork</a></li><li><a href={bookingUrl}>Book a call</a></li><li><Link href="/cv">CV</Link></li></ul></div>
-      <div className="xk-footer-col"><span className="xk-label">More</span><ul><li><Link href="/blog">Field notes</Link></li><li><Link href="/uses">Uses</Link></li><li><Link href="/now">Now</Link></li><li><a href="/llms.txt">llms.txt</a></li></ul></div>
+      <div className="xk-footer-col"><span className="xk-label">More</span><ul><li><Link href="/blog">Blog</Link></li><li><Link href="/uses">Uses</Link></li><li><Link href="/now">Now</Link></li><li><a href="/llms.txt">llms.txt</a></li></ul></div>
       <div className="xk-footer-base"><span>© {year} {profile.name}</span><span className="xk-muted">Built with Next.js, Three.js, GSAP &amp; Supabase</span></div>
     </footer>
   );
@@ -56,7 +56,7 @@ export function MobileDock() {
         { label: "Home", href: "/", icon: "house" },
         { label: "Work", href: "/work", icon: "game-controller" },
         { label: "AI", href: "/ai", icon: "sparkle" },
-        { label: "Notes", href: "/blog", icon: "pen-nib" },
+        { label: "Blog", href: "/blog", icon: "pen-nib" },
         { label: "Hire", href: "/hire", icon: "handshake" },
       ]} />
     </div>
@@ -67,7 +67,7 @@ export async function Palette() {
   const posts = await getPosts();
   const items: PaletteItem[] = [
     ...projects.map((p) => ({ group: "Stages", label: p.title, href: `/work/${p.slug}`, icon: p.ai ? "robot" : "game-controller", hint: p.code, ai: p.ai })),
-    ...posts.slice(0, 12).map((p) => ({ group: "Notes", label: p.title, href: `/blog/${p.slug}`, icon: "pen-nib", hint: "note" })),
+    ...posts.slice(0, 12).map((p) => ({ group: "Blog", label: p.title, href: `/blog/${p.slug}`, icon: "pen-nib", hint: "post" })),
     { group: "Actions", label: "Ask my CV anything", href: "/ai#ask", icon: "sparkle", ai: true },
     { group: "Actions", label: "Open terminal", href: "/#console", icon: "terminal-window", hint: "`" },
     { group: "Actions", label: "View CV", href: "/cv", icon: "read-cv-logo" },

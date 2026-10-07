@@ -1,30 +1,23 @@
 ---
 title: "Splitting a monolith: what it actually bought us"
 publishedAt: "2026-09-07"
-summary: "Split a monolith for failure isolation and team ownership, not speed; if it is slow, profile first, since the cause is usually a missing index."
+summary: "Split a monolith for failure isolation and team ownership. If speed is the goal, profile first; the cause is usually a missing index."
 tags: ["microservices", "nodejs", "system-design"]
 source: "linkedin"
 ---
 
-We split a monolith into services and p95 latency dropped about 40 percent. That number is the least interesting thing that happened: the real win was failure isolation, and the real costs are the ones nobody puts in the conference talk.
+On a platform I worked on, we split a monolith into services and p95 latency dropped about 40 percent. That's the least interesting result. What we actually got was failure isolation, and what it cost us is the part conference talks leave out.
 
 ## What stopped happening
 
-One bad deploy used to take the whole product down. After the split it took one service down, and the other six kept serving. That is the actual reason to do this. Latency was a side effect.
+One bad deploy used to take the whole product down. After the split, a bad deploy took down one service and the rest kept serving. That's the reason I'd split a monolith, along with clearer ownership for each team. The latency drop was a side effect.
 
-## The honest cost
+## What it cost
 
 Local development got worse. Running the full product on a laptop went from one command to a compose file nobody fully understood.
 
-Debugging moved from a stack trace to correlating three logs across two services. Distributed tracing stopped being nice to have and became the thing you install before you split, not after.
+Debugging got worse too. A stack trace turned into correlating three logs across two services. Distributed tracing went from nice to have to something you install before the split, because adding it afterwards means debugging blind in the meantime.
 
-## The trap
+## When splitting won't help
 
-If your monolith is slow because of one endpoint doing an N+1 query, splitting it will not help. You will have the same slow query, in a smaller box, with a network hop in front of it.
-
-## Takeaways
-
-- The main benefit of splitting is failure isolation, plus clearer team ownership.
-- Expect worse local development and harder debugging.
-- Set up distributed tracing before the split, not after.
-- If you are splitting for speed, profile first. The answer is usually a missing index.
+If your monolith is slow because one endpoint is doing an N+1 query, splitting won't fix it. You'll have the same slow query in a smaller box, with a network hop in front of it. If speed is your reason for splitting, profile first. The answer is usually a missing index.
