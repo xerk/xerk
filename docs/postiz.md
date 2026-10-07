@@ -1,4 +1,6 @@
-# Postiz integration
+# Tadween integration
+
+Tadween is our scheduler at post.xerk.io (built on Postiz, so the API and MCP tools below keep Postiz names). Env vars: `TADWEEN_API_URL` / `TADWEEN_API_KEY` (the old `POSTIZ_*` names still work).
 
 Postiz (self-hosted at **https://post.xerk.io**) is the scheduler for all social posting from this repo. Two consumers:
 

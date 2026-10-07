@@ -45,7 +45,7 @@ export default async function Overview({ searchParams }: { searchParams: Promise
     { label: "Telegram", ok: telegramEnabled },
     { label: "AI", ok: !!(process.env.AI_GATEWAY_API_KEY || process.env.VERCEL) },
     { label: "GitHub", ok: !!process.env.GITHUB_TOKEN },
-    { label: "Postiz", ok: !!process.env.POSTIZ_API_KEY },
+    { label: "Tadween", ok: !!(process.env.TADWEEN_API_KEY || process.env.POSTIZ_API_KEY) },
   ];
   const first = site.profile.name.split(" ")[0];
 
