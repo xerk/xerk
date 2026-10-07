@@ -11,7 +11,7 @@ import { unified } from "unified";
 import { adminDb, publicDb } from "./supabase";
 import { readingTime } from "./utils";
 
-export type PostMeta = { slug: string; title: string; publishedAt: string; summary: string; tags: string[]; image?: string; video?: string; readingTime: string; source?: string };
+export type PostMeta = { slug: string; title: string; publishedAt: string; summary: string; tags: string[]; image?: string; video?: string; readingTime: string; source?: string; lang?: string; dir?: "ltr" | "rtl" };
 export type Post = PostMeta & { html: string; markdown: string; headings: { id: string; label: string }[] };
 
 const DIR = path.join(process.cwd(), "content");
@@ -60,11 +60,11 @@ async function fromDb(): Promise<DbPosts> {
   const db = publicDb();
   if (!db) return out;
   try {
-    const { data, error } = await db.from("posts").select("slug,title,summary,tags,published_at,body_md,cover_url,video_url,source").eq("status", "published").order("published_at", { ascending: false });
+    const { data, error } = await db.from("posts").select("slug,title,summary,tags,published_at,body_md,cover_url,video_url,source,lang,dir").eq("status", "published").order("published_at", { ascending: false });
     if (!error && data) {
       out.published = data.map((r) => ({
         slug: r.slug, title: r.title, summary: r.summary || "", tags: r.tags || [], publishedAt: r.published_at ? String(r.published_at).slice(0, 10) : "",
-        image: r.cover_url || undefined, video: r.video_url || undefined, source: r.source || "supabase",
+        image: r.cover_url || undefined, video: r.video_url || undefined, source: r.source || "supabase", lang: r.lang || undefined, dir: r.dir || undefined,
         readingTime: readingTime(r.body_md || ""), markdown: r.body_md || "",
         headings: [...(r.body_md || "").matchAll(/^##\s+(.+)$/gm)].map((m: RegExpMatchArray) => ({ id: slugify(m[1]), label: m[1].trim() })),
       }));

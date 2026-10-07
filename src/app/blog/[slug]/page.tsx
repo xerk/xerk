@@ -35,7 +35,7 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
       <header className="xk-page-head" data-hud="Blog">
         <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Blog", href: "/blog" }, { label: post.title }]} />
         <span className="xk-label">{formatDate(post.publishedAt)} · {post.readingTime} · by {profile.name}</span>
-        <h1 data-split="">{post.title}</h1>
+        <h1 data-split="" lang={post.lang} dir={post.dir}>{post.title}</h1>
         <div className="xk-tags">{post.tags.map((t) => <span key={t} className="xk-badge">#{t}</span>)}</div>
       </header>
       <div style={{ padding: "0 24px 8px", maxWidth: 1000 }}>{post.video ? <PostVideo src={post.video} title={post.title} /> : <PostCover post={post} size="lg" priority />}</div>
@@ -47,7 +47,7 @@ export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
         </aside>
         <article style={{ display: "flex", flexDirection: "column", gap: 32, minWidth: 0 }}>
           {post.summary && <KeyTakeaways title="In one line" answer={post.summary} />}
-          <div className="xk-prose" dangerouslySetInnerHTML={{ __html: post.html }} />
+          <div className="xk-prose" lang={post.lang} dir={post.dir} dangerouslySetInnerHTML={{ __html: post.html }} />
           <CTABar title="Building something like this?" text={`I'm ${profile.name}, a senior full-stack & AI engineer. I reply within one working day.`}>
             <Button variant="primary" href="/hire" iconRight="arrow-right" track="hire_click">Start a mission</Button>
           </CTABar>
