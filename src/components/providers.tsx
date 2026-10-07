@@ -13,7 +13,6 @@ function PageViews() {
   const pathname = usePathname();
   const search = useSearchParams();
   useEffect(() => {
-    if (KEY && posthog.__loaded) posthog.capture("$pageview", { $current_url: window.location.href });
     if (!/bot|crawl|spider|headless/i.test(navigator.userAgent)) track("pageview");
   }, [pathname, search]);
   return null;
@@ -38,16 +37,6 @@ function VisitPing() {
 }
 
 export function Providers({ children }: { children: ReactNode }) {
-  useEffect(() => {
-    if (!KEY || posthog.__loaded) return;
-    posthog.init(KEY, {
-      api_host: "/ingest",
-      ui_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.posthog.com",
-      capture_pageview: false,
-      capture_pageleave: true,
-      person_profiles: "identified_only",
-    });
-  }, []);
   return (
     <PostHogProvider client={posthog}>
       <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem disableTransitionOnChange>
