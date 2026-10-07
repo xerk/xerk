@@ -6,7 +6,8 @@ import { profile } from "@/data/profile";
 export const maxDuration = 30;
 
 const MODEL = process.env.AI_MODEL || "anthropic/claude-sonnet-5.5";
-const hasAI = () => Boolean(process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN);
+// On Vercel the AI Gateway authenticates with the per-request OIDC token; elsewhere it needs AI_GATEWAY_API_KEY.
+const hasAI = () => Boolean(process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN || process.env.VERCEL);
 
 // naive per-instance rate limit
 const hits = new Map<string, { n: number; t: number }>();

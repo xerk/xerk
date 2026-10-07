@@ -18,7 +18,7 @@ export default async function Admin() {
     { label: "Supabase", ok: supabaseEnabled && !!db, hint: "NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY" },
     { label: "PostHog", ok: !!process.env.NEXT_PUBLIC_POSTHOG_KEY, hint: "NEXT_PUBLIC_POSTHOG_KEY (+ POSTHOG_PERSONAL_API_KEY, POSTHOG_PROJECT_ID for stats)" },
     { label: "Telegram", ok: telegramEnabled, hint: "TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID" },
-    { label: "AI (Ask my CV)", ok: !!(process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN), hint: "AI_GATEWAY_API_KEY (falls back to search without it)" },
+    { label: "AI (Ask my CV)", ok: !!(process.env.AI_GATEWAY_API_KEY || process.env.VERCEL), hint: "AI_GATEWAY_API_KEY (falls back to search without it)" },
     { label: "GitHub live heatmap", ok: !!process.env.GITHUB_TOKEN, hint: "GITHUB_TOKEN (falls back to snapshot)" },
     { label: "Postiz", ok: !!process.env.POSTIZ_API_KEY, hint: "POSTIZ_API_URL, POSTIZ_API_KEY" },
   ];
