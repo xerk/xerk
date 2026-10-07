@@ -256,11 +256,12 @@ export function QuestLog({ quests }: { quests: Quest[] }) {
         const active = q.status === "active";
         return (
           <article key={q.company} className={cx("xk-quest", active && "is-active")}>
-            <div className="xk-quest-rail"><span className="xk-quest-dot"><Icon name={active ? "sword" : "check"} /></span></div>
+            <div className="xk-quest-rail">{q.logo ? <span className="xk-quest-logo"><img src={q.logo} alt={`${q.company} logo`} width={44} height={44} loading="lazy" /></span> : <span className="xk-quest-dot"><Icon name={active ? "sword" : "check"} /></span>}</div>
             <div className="xk-quest-main">
               <div className="xk-quest-head"><span className={cx("xk-quest-status", active && "is-active")}>{active ? "Active quest" : "Completed"}</span><span className="xk-label">{q.period}</span></div>
               <h3>{q.company}<span> · {q.role}</span></h3>
               <span className="xk-quest-where"><Icon name="map-pin" />{q.where}</span>
+              {q.summary && <p className="xk-quest-summary">{q.summary}</p>}
               <ul>{q.objectives.map((o) => <li key={o}><Icon name="check-square" /><span>{o}</span></li>)}</ul>
               <div className="xk-quest-loot"><span className="xk-label">Loot</span>{q.loot.map((l) => <span key={l} className="xk-loot">{l}</span>)}</div>
             </div>

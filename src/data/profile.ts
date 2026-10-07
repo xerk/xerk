@@ -72,11 +72,11 @@ export const achievements: Achievement[] = [
   { locked: true, title: "Your project", text: "Unlocks when we ship something together." },
 ];
 
-export type Quest = { status?: "active"; company: string; role: string; where: string; period: string; start: string; end?: string; url?: string; summary: string; objectives: string[]; loot: string[]; stack: string[] };
+export type Quest = { status?: "active"; logo?: string; company: string; role: string; where: string; period: string; start: string; end?: string; url?: string; summary: string; objectives: string[]; loot: string[]; stack: string[] };
 
 export const experience: Quest[] = [
   {
-    status: "active", company: "Netsync Network Solutions", role: "Senior Software Engineer", where: "Remote, US", period: "Feb 2023 — Now", start: "2023-02", url: "https://www.netsync.com",
+    status: "active", logo: "/experiences/netsync.png", company: "Netsync Network Solutions", role: "Senior Software Engineer", where: "Remote, US", period: "Feb 2023 — Now", start: "2023-02", url: "https://www.netsync.com",
     summary: "IT solutions provider for enterprise clients. Product details are under NDA.",
     objectives: [
       "Built a real-time device platform that holds more than 100,000 concurrent connections",
@@ -87,28 +87,28 @@ export const experience: Quest[] = [
     stack: ["TypeScript", "NestJS", "Python", "LangChain", "MCP", "Anthropic API", "OpenAI API", "Qdrant", "GraphQL", "Socket.io", "MongoDB", "PostgreSQL", "AWS", "Kubernetes"],
   },
   {
-    company: "SweepSouth", role: "Senior Software Engineer", where: "Remote, South Africa", period: "Apr 2022 — Feb 2023", start: "2022-04", end: "2023-02", url: "https://sweepsouth.com",
+    logo: "/experiences/sweepsouth.png", company: "SweepSouth", role: "Senior Software Engineer", where: "Remote, South Africa", period: "Apr 2022 — Feb 2023", start: "2022-04", end: "2023-02", url: "https://sweepsouth.com",
     summary: "Africa's largest on-demand home services platform (South Africa, Kenya, Nigeria and Egypt as FilKhedma).",
     objectives: ["Built and scaled Node.js and NestJS services serving 100k+ active customers", "Shipped mobile-first booking flows in Angular and Vue.js", "Raised booking-flow throughput and cut API tail latency with query tuning, caching and async workflows"],
     loot: ["100k+ active customers"],
     stack: ["TypeScript", "NestJS", "MongoDB", "Angular", "Vue.js", "Docker", "Kubernetes", "AWS"],
   },
   {
-    company: "Technocloud", role: "Tech Lead", where: "Cairo, Egypt", period: "Aug 2020 — Apr 2022", start: "2020-08", end: "2022-04",
+    logo: "/experiences/technocloud.png", company: "Technocloud", role: "Tech Lead", where: "Cairo, Egypt", period: "Aug 2020 — Apr 2022", start: "2020-08", end: "2022-04",
     summary: "Fintech and e-commerce products: Zerocash (e-wallet), Rojetah (healthcare), Dealmart (e-commerce), Trjim.",
     objectives: ["Architected the Zerocash e-wallet transaction system with audit trails and reconciliation", "Shipped versioned REST APIs in Node.js and Laravel, backed by contract tests", "Made critical endpoints ~45% faster with Redis caching, N+1 cleanup and indexed queries", "Led 7+ engineers in Scrum"],
     loot: ["~45% faster endpoints", "thousands of payments/day"],
     stack: ["Node.js", "Laravel", "PHP", "Vue.js", "MySQL", "Redis", "Docker"],
   },
   {
-    company: "Itrinity · UptimeRobot", role: "Senior Software Engineer", where: "Remote, Slovakia", period: "Oct 2019 — Aug 2020", start: "2019-10", end: "2020-08", url: "https://uptimerobot.com",
+    logo: "/experiences/itrinity.png", company: "Itrinity · UptimeRobot", role: "Senior Software Engineer", where: "Remote, Slovakia", period: "Oct 2019 — Aug 2020", start: "2019-10", end: "2020-08", url: "https://uptimerobot.com",
     summary: "Website monitoring SaaS with 2.1M+ users.",
     objectives: ["Built high-throughput Node.js and NestJS services running millions of website checks a day", "Designed schema-first GraphQL APIs that cut client network overhead by ~35%", "Queue-based alerting pipeline with retry, deduplication and SLA tracking on AWS ECS and Lambda"],
     loot: ["2.1M+ users", "−35% network overhead"],
     stack: ["TypeScript", "NestJS", "GraphQL", "AWS ECS", "AWS Lambda"],
   },
   {
-    company: "Schoolver", role: "Software Engineer", where: "Cairo, Egypt", period: "Mar 2017 — Oct 2019", start: "2017-03", end: "2019-10",
+    logo: "/experiences/schoolver.png", company: "Schoolver", role: "Software Engineer", where: "Cairo, Egypt", period: "Mar 2017 — Oct 2019", start: "2017-03", end: "2019-10",
     summary: "School Management System and Learning Management System.",
     objectives: ["Built the LMS end to end (Vue.js frontend, REST APIs) for thousands of students and teachers", "Multi-tenancy across schools with Socket.io chat and notifications"],
     loot: ["thousands of students"],

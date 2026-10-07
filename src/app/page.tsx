@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BentoGrid, BentoTile, Button, CTABar, ExperienceList, PlayerCard, ProjectCard, Section, SocialLinks, StatusPill } from "@/components/xerk/ui";
+import { BentoGrid, BentoTile, Button, CTABar, PlayerCard, QuestLog, ProjectCard, Section, SocialLinks, StatusPill } from "@/components/xerk/ui";
 import { HeroScene } from "@/components/xerk/client";
 import { BlogCard } from "@/components/xerk/blog";
 import { bookingUrl, experience, profile, socials, stats, upworkHref, SITE_URL } from "@/data/profile";
@@ -54,7 +54,7 @@ export default async function Home() {
         </Section>
 
         <Section id="experience" eyebrow="Experience" title={`${profile.years}+ years building software`} scramble={false} action={<Button variant="ghost" iconRight="arrow-right" href="/cv">Full CV</Button>}>
-          <ExperienceList items={experience} />
+          <div style={{ maxWidth: 860 }}><QuestLog quests={experience.map((e) => ({ ...e, objectives: e.objectives.slice(0, 3) }))} /></div>
         </Section>
 
         <Section id="blog" eyebrow="Blog" title="Latest posts" scramble={false} action={<Button variant="ghost" iconRight="arrow-right" href="/blog">All posts</Button>}>

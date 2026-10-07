@@ -24,7 +24,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
   if (!p) notFound();
   const i = projects.findIndex((x) => x.slug === p.slug);
   const related = [projects[(i + 1) % projects.length], projects[(i + 2) % projects.length]];
-  const toc = [...p.sections.map((s) => ({ id: s.id, label: s.title })), ...(p.embedUrl || p.video || p.image ? [{ id: "demo", label: "Demo" }] : []), ...(p.faq.length ? [{ id: "faq", label: "FAQ" }] : [])];
+  const toc = [...p.sections.map((s) => ({ id: s.id, label: s.title })), ...(p.embedUrl || p.video || p.screens?.length ? [{ id: "demo", label: p.embedUrl ? "Demo" : "Screens" }] : []), ...(p.faq.length ? [{ id: "faq", label: "FAQ" }] : [])];
   const url = `${SITE_URL}/work/${p.slug}`;
   return (
     <div className="xk-container">
@@ -49,6 +49,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
           />
         </div>
       </div>
+      {p.image && <div style={{ padding: "8px 24px 0" }}><img src={p.image} alt={`${p.title} cover`} width={1600} height={1000} className="xk-cs-cover" /></div>}
       <div className="xk-article">
         <aside className="xk-article-side">
           <TableOfContents items={toc} />
@@ -68,7 +69,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
               </section>
             ))}
           </div>
-          {(p.embedUrl || p.video || p.image) && <ArtifactEmbed title={p.title} src={p.embedUrl} video={p.video} poster={p.image} url={p.url?.replace(/^https?:\/\//, "")} caption={p.embedUrl ? "Interactive demo — embedded on xerk.io. The article above explains what it shows." : `${p.title} — product screenshot`} />}
+          {(p.embedUrl || p.video || p.screens?.length) && <ArtifactEmbed title={p.title} src={p.embedUrl} video={p.video} screens={p.screens} poster={p.screens?.length ? undefined : p.image} url={p.url?.replace(/^https?:\/\//, "")} caption={p.embedUrl ? "Interactive demo — embedded on xerk.io. The article above explains what it shows." : `${p.title} — product screenshot`} />}
           {p.metrics.length > 0 && <div data-reveal=""><MetricRow items={p.metrics} /></div>}
           {p.faq.length > 0 && <section><h2 id="faq" className="xk-prose" style={{ font: "600 28px/34px var(--font-sans)", letterSpacing: "-0.02em", margin: "0 0 16px" }}>FAQ</h2><FAQ items={p.faq} /></section>}
           <CTABar tone="accent" title={p.ai ? "Want an AI agent like this?" : "Need something like this?"} text={`I'm ${profile.name} — ${profile.years}+ years building systems like ${p.title}. Scoped in one call.`}>

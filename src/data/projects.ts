@@ -19,6 +19,7 @@ export type Project = {
   big?: string;
   bigLabel?: string;
   image?: string;
+  screens?: { src: string; alt: string }[];
   video?: string;
   embedUrl?: string;
   url?: string;
@@ -34,6 +35,8 @@ export type Project = {
 export const projects: Project[] = [
   {
     slug: "realtime-device-platform",
+    image: "/projects/realtime-device-platform/cover.webp",
+    screens: [{ src: "/projects/realtime-device-platform/screen-1.webp", alt: "Reconnect storm simulator, dark theme" }, { src: "/projects/realtime-device-platform/screen-2.webp", alt: "Reconnect storm simulator, light theme" }],
     code: "1-1",
     title: "Real-time device platform",
     world: "Enterprise · IoT",
@@ -63,6 +66,8 @@ export const projects: Project[] = [
   },
   {
     slug: "ai-agent-mcp",
+    image: "/projects/ai-agent-mcp/cover.webp",
+    screens: [{ src: "/projects/ai-agent-mcp/screen-1.webp", alt: "Agent trace playground, dark theme" }, { src: "/projects/ai-agent-mcp/screen-2.webp", alt: "Agent trace playground, light theme" }],
     code: "1-2",
     title: "AI agent + MCP server",
     world: "Enterprise · AI",
@@ -93,6 +98,7 @@ export const projects: Project[] = [
   },
   {
     slug: "zerocash",
+    image: "/projects/zerocash/cover.webp",
     code: "2-1",
     title: "Zerocash",
     world: "Technocloud · Fintech",
@@ -120,13 +126,14 @@ export const projects: Project[] = [
   },
   {
     slug: "sweepsouth",
+    image: "/projects/sweepsouth/cover.webp",
+    screens: [{ src: "/projects/sweepsouth/screen-1.webp", alt: "SweepSouth website on desktop" }, { src: "/projects/sweepsouth/screen-2.webp", alt: "SweepSouth website on mobile" }],
     code: "2-2",
     title: "SweepSouth",
     world: "Home services · Africa",
     company: "SweepSouth",
     period: "2022 — 2023",
     role: "Senior software engineer",
-    image: "/projects/sweepsouth.png",
     url: "https://sweepsouth.com",
     summary: "Africa's largest on-demand home-services platform: NestJS services and booking flows for 100k+ active customers.",
     answer: "SweepSouth is Africa's largest on-demand home-services platform; Ahmed Mamdouh built and scaled its Node.js and NestJS services for 100k+ active customers and shipped its mobile-first booking flows.",
@@ -144,13 +151,14 @@ export const projects: Project[] = [
   },
   {
     slug: "uptimerobot",
+    image: "/projects/uptimerobot/cover.webp",
+    screens: [{ src: "/projects/uptimerobot/screen-1.webp", alt: "UptimeRobot website on desktop" }, { src: "/projects/uptimerobot/screen-2.webp", alt: "UptimeRobot website on mobile" }],
     code: "3-1",
     title: "UptimeRobot",
     world: "Monitoring SaaS",
     company: "Itrinity",
     period: "2019 — 2020",
     role: "Senior software engineer",
-    image: "/projects/uptimerobot.png",
     url: "https://uptimerobot.com",
     summary: "Website monitoring for 2.1M+ users: Node.js services running millions of checks a day and a schema-first GraphQL API.",
     answer: "At Itrinity, Ahmed Mamdouh built high-throughput Node.js and NestJS services for UptimeRobot — a monitoring SaaS with 2.1M+ users — running millions of website checks a day, plus a GraphQL API that cut client network overhead by ~35%.",
@@ -168,6 +176,7 @@ export const projects: Project[] = [
   },
   {
     slug: "mall-of-arabia",
+    image: "/projects/mall-of-arabia/cover.webp",
     code: "3-2",
     title: "Mall of Arabia",
     world: "Retail · Web",

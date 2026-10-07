@@ -495,8 +495,10 @@ export function ContactForm({ budgets = ["< $2k", "$2k–5k", "$5k–15k", "$15k
 }
 
 /* ---------- Artifact embed ---------- */
-export function ArtifactEmbed({ title, src, poster, video, code, url, liveTitle, liveText, caption }: { title: string; src?: string; poster?: string; video?: string; code?: string; url?: string; liveTitle?: string; liveText?: string; caption?: string }) {
-  const tabs = [src && "live", video && "video", poster && "screens", code && "code"].filter(Boolean) as string[];
+export function ArtifactEmbed({ title, src, poster, screens, video, code, url, liveTitle, liveText, caption }: { title: string; src?: string; poster?: string; screens?: { src: string; alt: string }[]; video?: string; code?: string; url?: string; liveTitle?: string; liveText?: string; caption?: string }) {
+  const gallery = screens && screens.length ? screens : poster ? [{ src: poster, alt: `${title} screenshot` }] : [];
+  const [shot, setShot] = useState(0);
+  const tabs = [src && "live", video && "video", gallery.length && "screens", code && "code"].filter(Boolean) as string[];
   const [tab, setTab] = useState(tabs[0] || "screens");
   const [live, setLive] = useState(false);
   const labels: Record<string, [string, string]> = { live: ["Interactive", "cursor-click"], video: ["Video", "video-camera"], screens: ["Screens", "images"], code: ["Code", "code"] };
@@ -512,7 +514,10 @@ export function ArtifactEmbed({ title, src, poster, video, code, url, liveTitle,
           <div className="xk-embed-launch">{poster && <img src={poster} alt="" />}<div className="xk-embed-launch-inner"><Badge tone="accent" icon="cursor-click">Live artifact</Badge><strong>{liveTitle || "Try it yourself"}</strong><p>{liveText || "Runs in your browser. Nothing to install."}</p><button className="xk-btn xk-btn-primary" onClick={() => { setLive(true); track("demo_launch", { title }); unlock("player"); }}><Icon name="play" />Launch demo</button></div></div>
         ))}
         {tab === "video" && video && <video src={video} poster={poster} controls playsInline onPlay={() => track("video_play", { title })} />}
-        {tab === "screens" && poster && <img src={poster} alt={`${title} screenshot`} />}
+        {tab === "screens" && gallery[shot] && <>
+          <img src={gallery[shot].src} alt={gallery[shot].alt} style={{ objectFit: "contain", background: "var(--surface-raised)" }} />
+          {gallery.length > 1 && <div className="xk-embed-dots">{gallery.map((g, i) => <button key={g.src} aria-label={`Show ${g.alt}`} aria-current={i === shot ? "true" : undefined} onClick={() => setShot(i)} />)}</div>}
+        </>}
         {tab === "code" && <pre className="xk-embed-code">{code}</pre>}
       </div>
       {caption && <figcaption>{caption}</figcaption>}
