@@ -1,0 +1,197 @@
+// Projects = "stages" in the level select and full case studies at /work/[slug].
+// Body copy is written only from facts in the CV. `embedUrl` takes a public Claude artifact (or any demo URL).
+
+export type Faq = { q: string; a: string };
+export type Section = { id: string; title: string; body: string[] };
+
+export type Project = {
+  slug: string;
+  code: string;
+  title: string;
+  world: string;
+  company: string;
+  period: string;
+  role: string;
+  summary: string;
+  answer: string; // answer-first sentence for KeyTakeaways / AI search
+  takeaways: string[];
+  boss: string;
+  big?: string;
+  bigLabel?: string;
+  image?: string;
+  video?: string;
+  embedUrl?: string;
+  url?: string;
+  ai?: boolean;
+  featured?: boolean;
+  stack: string[];
+  metrics: { value: string; label: string; hint?: string }[];
+  sections: Section[];
+  faq: Faq[];
+  updated: string;
+};
+
+export const projects: Project[] = [
+  {
+    slug: "alto",
+    code: "1-1",
+    title: "ALTO device platform",
+    world: "Netsync · IPTV",
+    company: "Netsync Network Solutions",
+    period: "2023 — Now",
+    role: "Senior engineer · team lead",
+    summary: "Real-time device management for an IPTV platform: NestJS, Socket.io and MongoDB holding 100,000+ concurrent device connections.",
+    answer: "ALTO is Netsync's IPTV platform; its real-time device management system, designed by Ahmed Mamdouh on NestJS, Socket.io and MongoDB, handles 100,000+ concurrent device connections.",
+    takeaways: ["100,000+ concurrent device connections over WebSockets", "Monolith split into NestJS services on Kubernetes cut p95 latency ~40%", "Event pipeline delivering millions of events a day with at-least-once semantics"],
+    boss: "100,000 sockets that must never drop",
+    big: "100K+",
+    bigLabel: "concurrent devices",
+    url: "https://go2alto.com",
+    embedUrl: "/demos/alto.html",
+    featured: true,
+    stack: ["NestJS", "Socket.io", "MongoDB", "GraphQL", "Docker", "Kubernetes", "AWS EKS", "Jenkins"],
+    metrics: [{ value: "100K+", label: "Concurrent connections" }, { value: "−40%", label: "p95 latency", hint: "after the services split" }, { value: "M/day", label: "Events delivered", hint: "at-least-once" }],
+    sections: [
+      { id: "problem", title: "The problem", body: ["Every IPTV device on the ALTO platform keeps a live connection for commands, status and notifications. At 100,000+ devices, the backend has to hold every socket open, route messages to the right device and survive spikes without dropping events.", "On top of that, the original backend was a monolith: one slow path could drag the whole platform's latency up."] },
+      { id: "approach", title: "Approach", body: ["I designed the real-time device management system on NestJS with Socket.io for the device connections and MongoDB for device state.", "Notifications run through a WebSocket and queue-based event pipeline that delivers millions of events a day with at-least-once semantics, so a slow consumer delays a message instead of losing it.", "We split the monolith into NestJS services on Docker and Kubernetes. Isolating failure domains cut p95 latency by about 40%."] },
+      { id: "architecture", title: "Architecture", body: ["Devices connect to NestJS Socket.io gateways; events flow through queues to NestJS services backed by MongoDB.", "A schema-first GraphQL API is the single layer for web, mobile and partner integrations.", "Everything ships through Jenkins CI/CD to Kubernetes on AWS EKS, with monitoring and incident response owned by the team I led (7+ engineers)."] },
+      { id: "results", title: "Results", body: ["100,000+ concurrent device connections, millions of events a day, and p95 latency down ~40% after the services split. The same device telemetry later fed the ALTO AI agent and MCP server."] },
+    ],
+    faq: [
+      { q: "What is ALTO?", a: "An IPTV platform by Netsync. Its real-time device management backend handles 100,000+ concurrent device connections on NestJS, Socket.io and MongoDB." },
+      { q: "How do you keep that many WebSocket connections reliable?", a: "Socket.io gateways in NestJS, a queue between the sockets and the business logic, at-least-once delivery for events, and services isolated on Kubernetes so one failure doesn't take down the rest." },
+      { q: "Can you build a real-time system like this for me?", a: "Yes. Book a call or message me on Upwork with how many devices or users you expect and what has to happen in real time." },
+    ],
+    updated: "2026-10",
+  },
+  {
+    slug: "alto-ai-agent",
+    code: "1-2",
+    title: "ALTO AI agent + MCP",
+    world: "Netsync · AI",
+    company: "Netsync Network Solutions",
+    period: "2024 — Now",
+    role: "Senior engineer",
+    ai: true,
+    summary: "A production AI agent on the Anthropic and OpenAI APIs with tool use, memory and guardrails — plus an MCP server that gives LLMs safe access to internal systems.",
+    answer: "At Netsync, Ahmed Mamdouh built a production AI agent on the Anthropic and OpenAI APIs (LangChain, tool use, memory, guardrails) and an MCP server that exposes internal databases, telemetry and services to LLM clients securely.",
+    takeaways: ["Production agent on Anthropic + OpenAI with tool use, memory and guardrails", "MCP server with structured query and action tools into internal systems", "RAG on AWS with Qdrant, plus fine-tuning on SageMaker and Bedrock with eval harnesses"],
+    boss: "Letting an LLM touch production data safely",
+    big: "MCP",
+    bigLabel: "tools for LLMs",
+    embedUrl: "/demos/agent.html",
+    stack: ["LangChain", "Anthropic API", "OpenAI API", "MCP", "Qdrant", "Python", "TypeScript", "AWS Bedrock", "SageMaker"],
+    metrics: [{ value: "MCP", label: "Server in production" }, { value: "RAG", label: "Pipelines with evals" }, { value: "2", label: "Model providers", hint: "Anthropic + OpenAI" }],
+    sections: [
+      { id: "problem", title: "The problem", body: ["Device, support and ops workflows at Netsync meant digging through telemetry, docs and internal tools by hand. An LLM could help — but only if it could reach real data without being able to do damage."] },
+      { id: "approach", title: "Approach", body: ["I built a production AI agent on the Anthropic and OpenAI APIs with LangChain: multi-step reasoning, tool use, memory and guardrails, automating internal device, support and ops workflows.", "Then I designed and shipped a Model Context Protocol (MCP) server that exposes structured query and action tools to LLM clients, with secure tool calls into our database, telemetry and internal services."] },
+      { id: "architecture", title: "Retrieval and evals", body: ["Retrieval-augmented generation pipelines with Qdrant and embeddings over telemetry, docs and support content run on AWS.", "Fine-tuning runs on S3, SageMaker and Bedrock, with eval harnesses that catch quality regressions before they reach users."] },
+      { id: "results", title: "Results", body: ["An agent and tool server in production on top of the same platform that handles 100,000+ concurrent devices — AI that works on live operational data, with guardrails."] },
+    ],
+    faq: [
+      { q: "What is an MCP server?", a: "A Model Context Protocol server exposes tools (queries and actions) to LLM clients in a standard way, so an agent can use internal systems through controlled, auditable calls." },
+      { q: "Which models does the agent use?", a: "The Anthropic and OpenAI APIs, orchestrated with LangChain, with retrieval from Qdrant." },
+      { q: "Can you add an AI agent to my product?", a: "Yes — tool use into your APIs, RAG on your data, guardrails and evals. See the AI agent service on the hire page." },
+    ],
+    updated: "2026-10",
+  },
+  {
+    slug: "zerocash",
+    code: "2-1",
+    title: "Zerocash",
+    world: "Technocloud · Fintech",
+    company: "Technocloud",
+    period: "2020 — 2022",
+    role: "Tech lead",
+    summary: "E-wallet transaction system clearing thousands of payments a day, with audit trails and reconciliation.",
+    answer: "Zerocash is an e-wallet platform whose transaction system — architected by Ahmed Mamdouh as tech lead at Technocloud — processes thousands of daily payments with audit trails and reconciliation.",
+    takeaways: ["Secure transaction system for thousands of daily payments", "Audit trails and reconciliation built in", "Critical endpoints ~45% faster through caching and query work"],
+    boss: "Every cent reconciled",
+    big: "1000s",
+    bigLabel: "payments a day",
+    stack: ["Node.js", "Laravel", "Vue.js", "MySQL", "Redis", "Docker"],
+    metrics: [{ value: "1000s", label: "Payments a day" }, { value: "~45%", label: "Faster endpoints" }, { value: "7+", label: "Engineers led" }],
+    sections: [
+      { id: "problem", title: "The problem", body: ["An e-wallet moves real money. Every transaction has to be recorded, traceable and reconcilable — and the API has to stay fast while it does that."] },
+      { id: "approach", title: "Approach", body: ["I architected a secure transaction system with audit trails and reconciliation, and shipped versioned REST APIs in Node.js and Laravel for web and partner clients, backed by contract tests.", "Critical endpoints got ~45% faster through Redis caching, N+1 query cleanup and indexed queries."] },
+      { id: "results", title: "Results", body: ["Thousands of payments a day processed with a full audit trail, while I led a team of 7+ engineers in Scrum across Zerocash, Rojetah, Dealmart and Trjim."] },
+    ],
+    faq: [
+      { q: "What is Zerocash?", a: "An e-wallet platform built at Technocloud; its transaction system processes thousands of daily payments with audit trails and reconciliation." },
+      { q: "Do you build payment and wallet systems?", a: "Yes — transaction systems, reconciliation, and integrations like Stripe, PayPal, Paymob and Paytabs." },
+    ],
+    updated: "2026-10",
+  },
+  {
+    slug: "sweepsouth",
+    code: "2-2",
+    title: "SweepSouth",
+    world: "Home services · Africa",
+    company: "SweepSouth",
+    period: "2022 — 2023",
+    role: "Senior software engineer",
+    image: "/projects/sweepsouth.png",
+    url: "https://sweepsouth.com",
+    summary: "Africa's largest on-demand home-services platform: NestJS services and booking flows for 100k+ active customers.",
+    answer: "SweepSouth is Africa's largest on-demand home-services platform; Ahmed Mamdouh built and scaled its Node.js and NestJS services for 100k+ active customers and shipped its mobile-first booking flows.",
+    takeaways: ["Node.js / NestJS services for 100k+ active customers", "Mobile-first booking flows in Angular and Vue.js", "Better booking throughput and lower API tail latency"],
+    boss: "Booking-flow tail latency",
+    stack: ["NestJS", "TypeScript", "MongoDB", "Angular", "Vue.js", "Docker", "Kubernetes", "AWS"],
+    metrics: [{ value: "100k+", label: "Active customers" }, { value: "4", label: "Countries", hint: "ZA, KE, NG, EG" }],
+    sections: [
+      { id: "problem", title: "The problem", body: ["SweepSouth runs in South Africa, Kenya, Nigeria and Egypt (as FilKhedma). The booking flow is the business — it has to be fast on mobile networks and hold up under load."] },
+      { id: "approach", title: "Approach", body: ["I built and scaled Node.js and NestJS services and shipped customer-facing booking flows in Angular and Vue.js, mobile-first.", "Query tuning, caching and moving work to async workflows raised booking-flow throughput and cut API tail latency."] },
+      { id: "results", title: "Results", body: ["Services serving 100k+ active customers across four countries."] },
+    ],
+    faq: [{ q: "What did you build at SweepSouth?", a: "Node.js and NestJS services for 100k+ active customers and the mobile-first booking flows in Angular and Vue.js." }],
+    updated: "2026-10",
+  },
+  {
+    slug: "uptimerobot",
+    code: "3-1",
+    title: "UptimeRobot",
+    world: "Monitoring SaaS",
+    company: "Itrinity",
+    period: "2019 — 2020",
+    role: "Senior software engineer",
+    image: "/projects/uptimerobot.png",
+    url: "https://uptimerobot.com",
+    summary: "Website monitoring for 2.1M+ users: Node.js services running millions of checks a day and a schema-first GraphQL API.",
+    answer: "At Itrinity, Ahmed Mamdouh built high-throughput Node.js and NestJS services for UptimeRobot — a monitoring SaaS with 2.1M+ users — running millions of website checks a day, plus a GraphQL API that cut client network overhead by ~35%.",
+    takeaways: ["Millions of website checks a day for 2.1M+ users", "Schema-first GraphQL cut client network overhead ~35%", "Queue-based alerting with retry, dedup and SLA tracking on AWS ECS and Lambda"],
+    boss: "Millions of checks a day, on time",
+    stack: ["NestJS", "TypeScript", "GraphQL", "AWS ECS", "AWS Lambda"],
+    metrics: [{ value: "2.1M+", label: "Users" }, { value: "−35%", label: "Client network overhead" }],
+    sections: [
+      { id: "problem", title: "The problem", body: ["A monitoring service is only useful if every check runs on time and every alert arrives exactly once — for millions of websites."] },
+      { id: "approach", title: "Approach", body: ["High-throughput Node.js and NestJS services run millions of website checks a day.", "A queue-based alerting pipeline with retry, deduplication and SLA tracking runs on AWS ECS and Lambda.", "Schema-first GraphQL APIs cut client network overhead by ~35%."] },
+      { id: "results", title: "Results", body: ["Reliable checks and alerts for 2.1M+ users."] },
+    ],
+    faq: [{ q: "What did you build for UptimeRobot?", a: "High-throughput NestJS services for website checks, a queue-based alerting pipeline on AWS ECS and Lambda, and schema-first GraphQL APIs." }],
+    updated: "2026-10",
+  },
+  {
+    slug: "mall-of-arabia",
+    code: "3-2",
+    title: "Mall of Arabia",
+    world: "Retail · Web",
+    company: "Freelance",
+    period: "Web",
+    role: "Full-stack engineer",
+    summary: "Website for Egypt's largest mall.",
+    answer: "Ahmed Mamdouh built the website for Mall of Arabia, Egypt's largest mall, with Next.js / Nuxt 3 and Tailwind CSS.",
+    takeaways: ["Website for Egypt's largest mall", "Next.js / Nuxt 3 and Tailwind CSS"],
+    boss: "A brand everyone in Cairo knows",
+    big: "MoA",
+    bigLabel: "Egypt's largest mall",
+    stack: ["Next.js", "Nuxt 3", "Tailwind CSS"],
+    metrics: [],
+    sections: [{ id: "overview", title: "Overview", body: ["A public website for Mall of Arabia, Egypt's largest mall, built with Next.js / Nuxt 3 and Tailwind CSS."] }],
+    faq: [],
+    updated: "2026-10",
+  },
+];
+
+export function getProject(slug: string) {
+  return projects.find((p) => p.slug === slug);
+}

@@ -1,0 +1,76 @@
+/* xerk design tokens — generated from the design system tokens.json */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0a0b0d;
+  --surface: #111316;
+  --surface-raised: #181b1f;
+  --border: #26292e;
+  --border-strong: #61666f;
+  --ink: #f2f3f5;
+  --ink-muted: #9ba1aa;
+  --accent: #c6f432;
+  --accent-hover: #d6ff5c;
+  --on-accent: #0a0b0d;
+  --accent-text: #c6f432;
+  --accent-soft: rgba(198, 244, 50, 0.12);
+  --agent: #9b7cff;
+  --agent-text: #b9a2ff;
+  --agent-soft: rgba(155, 124, 255, 0.14);
+  --warning: #f5b83d;
+  --danger: #ff7a66;
+  --focus: var(--accent-text);
+  --code-bg: #0e1013;
+  --mark-tile: #0a0b0d;
+  --mark-ink: #f2f3f5;
+  --shadow-pop: 0 16px 40px rgba(0, 0, 0, 0.55);
+  --shadow-glow: 0 0 0 1px rgba(198, 244, 50, 0.45), 0 8px 28px rgba(198, 244, 50, 0.18);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #fafaf9;
+  --surface: #ffffff;
+  --surface-raised: #f2f2ef;
+  --border: #e2e2dd;
+  --border-strong: #8e939a;
+  --ink: #0e1013;
+  --ink-muted: #5a5f67;
+  --accent-hover: #b5e31f;
+  --accent-text: #4a6600;
+  --accent-soft: rgba(98, 130, 0, 0.10);
+  --agent: #6e52e8;
+  --agent-text: #5b3fd6;
+  --agent-soft: rgba(91, 63, 214, 0.10);
+  --warning: #8a5a00;
+  --danger: #c2321f;
+  --code-bg: #f4f4f1;
+  --shadow-pop: 0 16px 40px rgba(14, 16, 19, 0.12);
+  --shadow-glow: 0 0 0 1px rgba(74, 102, 0, 0.35), 0 8px 24px rgba(98, 130, 0, 0.14);
+}
+
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --duration-fast: 0.15s;
+  --duration-base: 0.35s;
+  --duration-slow: 0.7s;
+  --duration-page: 0.6s;
+  --stagger: 0.06s;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
+}

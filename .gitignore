@@ -34,3 +34,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# link-to-video studio outputs
+studio/*/
+!studio/README.md
+.env
+.env*

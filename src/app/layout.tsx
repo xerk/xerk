@@ -1,103 +1,50 @@
-import Navbar from "@/components/navbar";
-import { ThemeProvider } from "@/components/theme-provider";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { DATA } from "@/data/resume";
-import { cn } from "@/lib/utils";
-import type { Metadata } from "next";
-import { Inter as FontSans } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
 import "./globals.css";
-
-const fontSans = FontSans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
+import { Providers } from "@/components/providers";
+import { SiteHeader, SiteFooter, MobileDock, Palette } from "@/components/xerk/chrome";
+import { AchievementToaster, BootScreen, MotionRoot } from "@/components/xerk/client";
+import { SITE_URL, profile } from "@/data/profile";
+import { JsonLd, personJsonLd, websiteJsonLd } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(DATA.url),
-  title: {
-    default: DATA.title,
-    template: `%s | ${DATA.name}`,
-  },
-  description: DATA.description,
-  keywords: DATA.metaKeywords,
-  authors: [{ name: DATA.name, url: DATA.url }],
-  creator: DATA.name,
-  openGraph: {
-    type: "website",
-    locale: "en_US",
-    url: DATA.url,
-    siteName: DATA.name,
-    title: DATA.title,
-    description: DATA.description,
-    images: [
-      {
-        url: `${DATA.url}/og-image.png`,
-        width: 1200,
-        height: 630,
-        alt: DATA.title,
-      }
-    ],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: DATA.title,
-    description: DATA.description,
-    creator: "@xerk",
-    images: [`${DATA.url}/og-image.png`],
-  },
-  verification: {
-    google: "RB2dzZGLiNJe7uPzE0s-vpARRoG0ZGv_6mOFsIlFAf4",
-  },
-  alternates: {
-    canonical: DATA.url,
-  },
+  metadataBase: new URL(SITE_URL),
+  title: { default: `${profile.name} — ${profile.title}`, template: `%s | ${profile.name}` },
+  description: profile.description,
+  applicationName: "xerk.io",
+  authors: [{ name: profile.name, url: SITE_URL }],
+  creator: profile.name,
+  keywords: ["Senior Full-Stack Engineer", "AI Engineer", "NestJS", "Node.js", "Next.js", "TypeScript", "AI agents", "MCP server", "RAG", "Real-time systems", "WebSockets", "Laravel", "Freelance developer Egypt", "Upwork full-stack developer", "Ahmed Mamdouh", "xerk"],
+  openGraph: { type: "website", siteName: "xerk.io", locale: "en_US", images: [{ url: "/og?kind=Profile", width: 1200, height: 630 }] },
+  twitter: { card: "summary_large_image", creator: "@xerk" },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
+  alternates: { canonical: "/", types: { "application/rss+xml": "/rss.xml" } },
+  verification: { google: "RB2dzZGLiNJe7uPzE0s-vpARRoG0ZGv_6mOFsIlFAf4" },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export const viewport: Viewport = { themeColor: [{ media: "(prefers-color-scheme: dark)", color: "#0a0b0d" }, { media: "(prefers-color-scheme: light)", color: "#fafaf9" }], colorScheme: "dark light" };
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html 
-      lang="en" 
-      suppressHydrationWarning
-      style={{ 
-        scrollBehavior: 'smooth',
-        '--scroll-duration': '1200ms',
-        '--scroll-timing': 'cubic-bezier(0.45, 0.05, 0.35, 1)',
-      } as React.CSSProperties}
-    >
-      <body
-        className={cn(
-          "min-h-screen bg-background font-sans antialiased max-w-2xl mx-auto py-12 sm:py-24 px-6",
-          "scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-400/60 hover:scrollbar-thumb-gray-500/80",
-          "dark:scrollbar-thumb-gray-600/60 dark:hover:scrollbar-thumb-gray-500/80",
-          "transition-all duration-300 ease-in-out",
-          fontSans.variable
-        )}
-      >
-        <ThemeProvider 
-          attribute="class" 
-          defaultTheme="system" 
-          enableSystem
-        >
-          <TooltipProvider delayDuration={0}>
-            {children}
-            <Navbar />
-          </TooltipProvider>
-        </ThemeProvider>
+    <html lang="en" suppressHydrationWarning className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+        <JsonLd data={personJsonLd()} />
+        <JsonLd data={websiteJsonLd()} />
+      </head>
+      <body>
+        <Providers>
+          <a href="#main" className="xk-skip">Skip to content</a>
+          <BootScreen />
+          <SiteHeader />
+          <main id="main" className="xk-main">{children}</main>
+          <SiteFooter />
+          <MobileDock />
+          <Palette />
+          <AchievementToaster />
+          <MotionRoot />
+        </Providers>
       </body>
     </html>
   );

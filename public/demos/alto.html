@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reconnect Storm Simulator</title>
+<meta name="description" content="Interactive simulation of a device reconnect storm: naive reconnects versus exponential backoff with jitter, with a queue that delivers events at-least-once.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<script>
+(function(){try{var t=new URLSearchParams(location.search).get('theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
+</script>
+<style>
+:root{
+  --bg:#0a0b0d;--surface:#111316;--surface-raised:#181b1f;--border:#26292e;--border-strong:#61666f;
+  --ink:#f2f3f5;--ink-muted:#9ba1aa;--accent:#c6f432;--on-accent:#0a0b0d;--accent-text:#c6f432;
+  --danger:#ff7a66;--warning:#f5b83d;--violet:#9b7cff;--glow:rgba(198,244,50,.14);
+  --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#fafaf9;--surface:#ffffff;--surface-raised:#f2f2ef;--border:#e2e2dd;--border-strong:#8e939a;
+    --ink:#0e1013;--ink-muted:#5a5f67;--accent-text:#4a6600;--danger:#c2321f;--warning:#8a5a00;--violet:#6a4bd8;--glow:rgba(74,102,0,.10);
+    color-scheme:light;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#fafaf9;--surface:#ffffff;--surface-raised:#f2f2ef;--border:#e2e2dd;--border-strong:#8e939a;
+  --ink:#0e1013;--ink-muted:#5a5f67;--accent-text:#4a6600;--danger:#c2321f;--warning:#8a5a00;--violet:#6a4bd8;--glow:rgba(74,102,0,.10);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:var(--bg);color:var(--ink);font:13px/1.4 var(--sans);
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(232px,30%);
+  grid-template-rows:auto minmax(0,1fr) auto auto;
+  grid-template-areas:"head head" "stage stats" "ctrl stats" "cap cap";
+  gap:8px 10px;padding:10px 12px;overflow:auto;
+}
+.lbl{font:500 12px/1.2 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted)}
+header{grid-area:head;display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0}
+h1{margin:0;font-size:14px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag{font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--warning);border:1px solid var(--border);border-radius:999px;padding:5px 8px;white-space:nowrap}
+.stage{grid-area:stage;position:relative;min-height:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.overlay{position:absolute;left:8px;right:8px;top:8px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:8px;pointer-events:none}
+.chip{font:500 11px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;background:var(--surface-raised);border:1px solid var(--border);border-radius:999px;padding:5px 8px;color:var(--ink-muted);white-space:nowrap}
+.chip.state{display:flex;align-items:center;gap:6px;color:var(--ink)}
+.chip .dot{width:7px;height:7px;border-radius:50%;background:var(--accent-text);box-shadow:0 0 8px var(--glow)}
+.chip[data-s="down"] .dot{background:var(--danger)}
+.chip[data-s="rec"] .dot{background:var(--warning)}
+.legend{position:absolute;left:8px;bottom:8px;display:flex;gap:10px;flex-wrap:wrap;pointer-events:none}
+.legend span{display:inline-flex;align-items:center;gap:5px;font:500 10px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted);background:var(--surface-raised);border:1px solid var(--border);border-radius:6px;padding:3px 6px}
+.legend i{width:7px;height:7px;border-radius:2px;display:inline-block}
+.stats{grid-area:stats;display:flex;flex-direction:column;gap:8px;min-height:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:7px 9px;min-width:0}
+.card .v{font:500 18px/1.15 var(--mono);color:var(--ink);margin-top:3px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .v small{font-size:11px;color:var(--ink-muted);font-weight:400}
+.card.hero .v{color:var(--accent-text)}
+.chart{flex:1 1 0;min-height:64px;display:flex;flex-direction:column}
+.chart .row{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+.chart .num{font:500 12px/1 var(--mono);color:var(--ink);font-variant-numeric:tabular-nums}
+.chart .num.over{color:var(--danger)}
+.chart canvas{flex:1;width:100%;min-height:30px;margin-top:5px;display:block}
+.ev{display:flex;justify-content:space-between;gap:6px;font:500 12px/1.3 var(--mono);font-variant-numeric:tabular-nums;color:var(--ink-muted);margin-top:3px}
+.ev b{color:var(--ink);font-weight:500}
+.ev b.ok{color:var(--accent-text)}
+.controls{grid-area:ctrl;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:7px 9px}
+.slider{display:flex;align-items:center;gap:8px;flex:1 1 160px;min-width:150px}
+.slider output{font:500 12px/1 var(--mono);color:var(--ink);min-width:44px;text-align:right;font-variant-numeric:tabular-nums}
+input[type=range]{flex:1;accent-color:var(--accent);min-width:60px;height:20px;margin:0}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:10px;padding:2px;background:var(--surface-raised)}
+.seg button{font:500 12px/1 var(--sans);color:var(--ink-muted);background:transparent;border:0;border-radius:8px;padding:7px 9px;cursor:pointer;white-space:nowrap}
+.seg button:disabled{cursor:default;opacity:.6}.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:inset 0 0 0 1px var(--border-strong)}
+.btn{font:600 13px/1 var(--sans);background:var(--accent);color:var(--on-accent);border:0;border-radius:10px;padding:9px 14px;cursor:pointer;white-space:nowrap;box-shadow:0 0 0 0 var(--glow);transition:box-shadow .2s}
+.btn:hover{box-shadow:0 0 0 4px var(--glow)}
+.btn:disabled{opacity:.55;cursor:default;box-shadow:none}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent-text);outline-offset:2px}
+.caption{grid-area:cap;margin:0;color:var(--ink-muted);font-size:12px;line-height:1.45}
+.caption b{color:var(--ink);font-weight:500}
+.cap-short{display:none}
+.chart{overflow:hidden}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (max-width:600px), (max-height:300px){
+  html,body{height:auto}
+  body{grid-template-columns:minmax(0,1fr);grid-template-rows:auto;grid-template-areas:"head" "stage" "ctrl" "stats" "cap";overflow:auto;padding:12px 16px 16px}
+  .stage{height:min(72vw,320px);min-height:250px}
+  .chart{flex:none;height:86px}
+  header{flex-wrap:wrap}
+  .controls{justify-content:space-between}
+  .seg{flex:1 1 auto}.seg button{flex:1}
+  .btn{flex:1 1 auto}
+}
+@media (max-height:460px) and (min-width:601px){body{padding:8px 10px;gap:6px 8px}.legend{display:none}.chart{min-height:40px}.card{padding:5px 8px}.card .v{font-size:15px}.grid2,.stats{gap:6px}.caption{font-size:11px;line-height:1.35}.controls{padding:5px 8px}}
+@media (max-height:400px) and (min-width:601px){.cap-full,#last{display:none}.cap-short{display:inline}.chart{min-height:30px}.chart canvas{margin-top:3px}}
+@media (max-width:420px){.overlay .chip:first-child{white-space:normal;line-height:1.3;max-width:100%;border-radius:10px}.legend{display:none}h1{font-size:13px}}
+@media (min-width:1300px) and (min-height:700px){body{padding:20px 24px;gap:12px 14px}.card .v{font-size:22px}h1{font-size:16px}.caption{font-size:13px}}
+@media (prefers-reduced-motion: reduce){.btn{transition:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Reconnect storm simulator</h1>
+  <span class="tag">Simulation — not production data</span>
+</header>
+
+<section class="stage" aria-label="Device grid, one dot per simulated device">
+  <canvas id="grid" role="img" aria-label="Grid of simulated devices colored by connection state"></canvas>
+  <div class="overlay">
+    <span class="chip" id="scale">5,000 devices · scaled-down model of 100K+</span>
+    <span class="chip state" id="state" data-s="ok"><span class="dot"></span><span id="stateTxt">Stable</span></span>
+  </div>
+  <div class="legend" aria-hidden="true">
+    <span><i style="background:var(--accent-text)"></i>Connected</span>
+    <span><i style="background:var(--warning)"></i>Handshake</span>
+    <span><i style="background:var(--danger)"></i>Rejected</span>
+    <span><i style="background:var(--danger);opacity:.35"></i>Offline</span>
+  </div>
+</section>
+
+<aside class="stats" aria-label="Live metrics">
+  <div class="grid2">
+    <div class="card hero"><div class="lbl">Connected</div><div class="v" id="mConn" aria-live="off">5,000</div></div>
+    <div class="card"><div class="lbl" title="Time from network restore until every device is connected">Recovery</div><div class="v" id="mTtr">—</div></div>
+    <div class="card"><div class="lbl">Attempts/s</div><div class="v" id="mAps">0</div></div>
+    <div class="card"><div class="lbl">Rejected</div><div class="v" id="mRej">0</div></div>
+  </div>
+  <div class="card chart">
+    <div class="row"><span class="lbl">Gateway load</span><span class="num" id="mLoad">0%</span></div>
+    <canvas id="cLoad" aria-hidden="true"></canvas>
+  </div>
+  <div class="card chart">
+    <div class="row"><span class="lbl">Queue depth</span><span class="num" id="mQ">0</span></div>
+    <canvas id="cQ" aria-hidden="true"></canvas>
+  </div>
+  <div class="card">
+    <div class="lbl">Events (at-least-once)</div>
+    <div class="ev"><span>Delivered <b id="mDel">0</b></span><span>Retried <b id="mRe">0</b></span><span>Lost <b class="ok" id="mLost">0</b></span></div>
+  </div>
+</aside>
+
+<div class="controls">
+  <label class="slider"><span class="lbl">Devices</span>
+    <input id="n" type="range" min="1000" max="10000" step="500" value="5000" aria-describedby="nOut">
+    <output id="nOut" for="n">5,000</output></label>
+  <div class="seg" role="group" aria-label="Reconnect strategy">
+    <button type="button" id="sNaive" aria-pressed="false">Naive (all at once)</button>
+    <button type="button" id="sBack" aria-pressed="true">Backoff + jitter</button>
+  </div>
+  <button type="button" class="btn" id="drop">Drop network</button>
+</div>
+
+<p class="caption"><b>What you are seeing:</b> <span class="cap-short">jitter spreads reconnects so gateways stay under capacity; the queue absorbs the spike and redelivers anything unacknowledged, so nothing is lost.</span><span class="cap-full">every device loses its socket at once, then reconnects. Naive clients stampede the gateways past capacity, so handshakes get rejected and retried in waves; exponential backoff with jitter spreads them out so load stays under the line. Meanwhile the queue absorbs events for offline devices and redelivers anything unacknowledged, so nothing is lost.</span> <span id="last"></span></p>
+<div class="sr" role="status" aria-live="polite" id="live"></div>
+
+<script>
+(function(){
+'use strict';
+var DT=0.05, OUTAGE=24, HIST=160;
+var $=function(id){return document.getElementById(id)};
+var fmt=function(n){return Math.round(n).toLocaleString('en-US')};
+var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+// device states: 0 connected, 1 offline/waiting, 2 handshake accepted, 3 handshake rejected
+var S={N:5000,strat:'backoff',tick:0,phase:'stable',dropTick:0,restoreTick:0,
+  st:null,nx:null,at:null,conn:0,R:mulberry(7),cap:0,capT:0,
+  attHist:[],loadHist:[],qHist:[],queue:0,inflight:[0,0],delivered:0,redelivered:0,rejected:0,ttr:null,last:{}};
+
+function reset(n){
+  S.N=n;S.st=new Uint8Array(n);S.nx=new Int32Array(n);S.at=new Uint8Array(n);
+  S.conn=n;S.cap=n*0.4;S.capT=S.cap*DT;S.phase='stable';S.queue=0;S.inflight=[0,0];
+  S.produced=0;S.delivered=0;S.redelivered=0;S.rejected=0;S.ttr=null;S.attHist=[];S.loadHist=[];S.qHist=[];
+  layout();
+}
+
+function drop(){
+  if(S.phase!=='stable')return;
+  S.R=mulberry(42);
+  for(var i=0;i<S.N;i++){S.st[i]=1;S.nx[i]=1e9;S.at[i]=0}
+  S.run=S.strat;S.rejected=0;S.conn=0;S.phase='down';S.dropTick=S.tick;S.restoreTick=S.tick+OUTAGE;S.ttr=null;
+  // unacked in-flight events go back to the queue: they will be redelivered
+  var un=S.inflight[0]+S.inflight[1];S.queue+=un;S.redelivered+=un;S.inflight=[0,0];
+  announce('Network dropped. '+fmt(S.N)+' devices offline.');
+}
+
+function restore(){
+  S.phase='rec';
+  var naive=S.run==='naive';
+  for(var i=0;i<S.N;i++) S.nx[i]=S.tick+(naive?Math.floor(S.R()*4):Math.floor(S.R()*60));
+}
+
+function step(){
+  var N=S.N,st=S.st,nx=S.nx,at=S.at,R=S.R,t=S.tick,i,A=0;
+  if(S.phase==='down'&&t>=S.restoreTick)restore();
+  if(S.phase==='rec'){
+    for(i=0;i<N;i++) if(st[i]===1&&nx[i]<=t)A++;
+    var p=1,ratio=A/S.capT;
+    if(A>S.capT){p=S.capT/(1+0.35*(ratio-1))/A}  // overloaded gateways thrash: goodput falls
+    var naive=S.run==='naive';
+    for(i=0;i<N;i++){
+      var s=st[i];
+      if(s===1){ if(nx[i]<=t){ if(R()<p){st[i]=2;nx[i]=t+3}else{st[i]=3;nx[i]=t+2;S.rejected++} } }
+      else if(s===2){ if(nx[i]<=t){st[i]=0;S.conn++} }
+      else if(s===3){ if(nx[i]<=t){
+        st[i]=1;if(at[i]<20)at[i]++;
+        var d=naive?20+R()*6:R()*Math.min(600,20*Math.pow(2,at[i]));
+        nx[i]=t+Math.max(1,Math.round(d)); } }
+    }
+    if(S.conn>=N){S.phase='stable';S.ttr=(t-S.restoreTick)*DT;S.last[S.run]=S.ttr;
+      announce('Recovered all '+fmt(N)+' devices in '+S.ttr.toFixed(1)+' seconds after the network returned, using '+(naive?'naive reconnects.':'backoff with jitter.'));}
+  }
+  // event pipeline: produce, deliver to connected devices, ack after 2 ticks
+  var gen=N*0.01;S.queue+=gen;S.produced+=gen;
+  var acked=S.inflight.shift();S.delivered+=acked;
+  var out=Math.min(S.queue*(S.conn/N),N*0.05);S.queue-=out;S.inflight.push(out);
+  push(S.attHist,A,20);push(S.loadHist,A/S.capT,HIST);push(S.qHist,S.queue,HIST);
+  S.tick++;
+}
+function push(a,v,m){a.push(v);if(a.length>m)a.shift()}
+
+// ---------- rendering ----------
+var grid=$('grid'),gctx=grid.getContext('2d'),cL=$('cLoad'),cQ=$('cQ');
+var C={},geo={};
+function readColors(){var cs=getComputedStyle(document.documentElement);
+  ['accent-text','danger','warning','violet','border','border-strong','ink-muted','surface'].forEach(function(k){C[k]=cs.getPropertyValue('--'+k).trim()});}
+function fit(c){var r=c.getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,2);
+  var w=Math.max(1,Math.round(r.width*d)),h=Math.max(1,Math.round(r.height*d));
+  if(c.width!==w||c.height!==h){c.width=w;c.height=h}return d}
+function layout(){
+  var d=fit(grid),W=grid.width,H=grid.height,pad=Math.round(10*d),sr=grid.getBoundingClientRect();
+  var ovr=document.querySelector('.overlay').getBoundingClientRect(),lg=document.querySelector('.legend');
+  var top=Math.round((ovr.bottom-sr.top+8)*d),bot=lg.offsetParent?Math.round((sr.bottom-lg.getBoundingClientRect().top+8)*d):pad;
+  var w=W-pad*2,h=H-top-bot;if(h<20){top=pad;bot=pad;h=H-pad*2}
+  var cols=Math.max(1,Math.ceil(Math.sqrt(S.N*w/h))),rows=Math.ceil(S.N/cols);
+  var cell=Math.min(w/cols,h/rows);
+  geo={cols:cols,cell:cell,size:Math.max(1,Math.floor(cell*0.72)),
+    ox:pad+(w-cols*cell)/2,oy:top+(h-rows*cell)/2};
+  fit(cL);fit(cQ);dirty=true;
+}
+var dirty=true;
+function drawGrid(){
+  if(!dirty&&S.phase==='stable')return;dirty=S.phase!=='stable';
+  var W=grid.width,H=grid.height,g=gctx;g.clearRect(0,0,W,H);
+  var st=S.st,cols=geo.cols,cell=geo.cell,sz=geo.size,ox=geo.ox,oy=geo.oy;
+  var pass=[[0,C['accent-text'],1],[1,C.danger,0.32],[2,C.warning,1],[3,C.danger,1]];
+  for(var p=0;p<4;p++){var k=pass[p][0];g.fillStyle=pass[p][1];g.globalAlpha=pass[p][2];
+    for(var i=0;i<S.N;i++){if(st[i]!==k)continue;
+      g.fillRect(Math.round(ox+(i%cols)*cell),Math.round(oy+((i/cols)|0)*cell),sz,sz)}}
+  g.globalAlpha=1;
+}
+function spark(c,data,maxV,color,capLine,overColor){
+  var g=c.getContext('2d'),W=c.width,H=c.height,d=Math.min(window.devicePixelRatio||1,2);g.clearRect(0,0,W,H);
+  var m=Math.max(maxV,1e-9),pad=2*d;
+  var y=function(v){return H-pad-Math.min(v,m)/m*(H-pad*2)};
+  g.strokeStyle=C.border;g.lineWidth=d;g.beginPath();g.moveTo(0,H-pad);g.lineTo(W,H-pad);g.stroke();
+  if(capLine!=null){g.setLineDash([4*d,3*d]);g.strokeStyle=C['border-strong'];g.beginPath();g.moveTo(0,y(capLine));g.lineTo(W,y(capLine));g.stroke();g.setLineDash([]);
+    g.fillStyle=C['ink-muted'];g.font=(10*d)+'px '+getComputedStyle(document.body).getPropertyValue('--mono');
+    g.textAlign='right';g.fillText('CAPACITY',W-2*d,y(capLine)-3*d)}
+  if(!data.length)return;
+  var n=HIST,sx=W/(n-1),off=n-data.length;
+  // area
+  g.beginPath();g.moveTo(off*sx,H-pad);
+  for(var i=0;i<data.length;i++)g.lineTo((off+i)*sx,y(data[i]));
+  g.lineTo((off+data.length-1)*sx,H-pad);g.closePath();g.globalAlpha=.14;g.fillStyle=color;g.fill();g.globalAlpha=1;
+  g.lineWidth=1.5*d;g.lineJoin='round';
+  for(i=1;i<data.length;i++){
+    var over=capLine!=null&&(data[i]>capLine||data[i-1]>capLine);
+    g.strokeStyle=over?overColor:color;g.beginPath();g.moveTo((off+i-1)*sx,y(data[i-1]));g.lineTo((off+i)*sx,y(data[i]));g.stroke()}
+}
+var el={conn:$('mConn'),ttr:$('mTtr'),aps:$('mAps'),rej:$('mRej'),load:$('mLoad'),q:$('mQ'),del:$('mDel'),re:$('mRe'),
+  state:$('state'),stateTxt:$('stateTxt'),drop:$('drop'),last:$('last'),scale:$('scale')};
+function render(){
+  drawGrid();
+  var aps=0;for(var i=0;i<S.attHist.length;i++)aps+=S.attHist[i];
+  var load=0,lw=Math.min(20,S.loadHist.length);for(i=S.loadHist.length-lw;i<S.loadHist.length;i++)load+=S.loadHist[i]/lw;
+  var lmax=0;for(i=0;i<S.loadHist.length;i++)if(S.loadHist[i]>lmax)lmax=S.loadHist[i];
+  spark(cL,S.loadHist,Math.max(2,lmax*1.08),C['accent-text'],1,C.danger);
+  var qmax=S.N*0.2;for(i=0;i<S.qHist.length;i++)if(S.qHist[i]>qmax)qmax=S.qHist[i];
+  spark(cQ,S.qHist,qmax*1.1,C.violet,null);
+  el.conn.innerHTML=fmt(S.conn)+'<small> /'+fmt(S.N)+'</small>';
+  el.aps.textContent=fmt(aps);el.rej.textContent=fmt(S.rejected);
+  el.load.textContent=(load>9.95?'×'+load.toFixed(1):Math.round(load*100)+'%')+(load>1?' over':'');
+  el.load.classList.toggle('over',load>1);
+  el.q.textContent=fmt(S.queue);el.del.textContent=fmt(S.delivered);el.re.textContent=fmt(S.redelivered);
+  $('mLost').textContent=fmt(Math.max(0,S.produced-S.delivered-S.queue-S.inflight[0]-S.inflight[1]));
+  var t=S.phase==='stable'?(S.ttr!=null?S.ttr.toFixed(1)+'<small> s</small>':'—')
+    :S.phase==='down'?'<small>net down</small>':((S.tick-S.restoreTick)*DT).toFixed(1)+'<small> s</small>';
+  el.ttr.innerHTML=t;
+  var lab=S.phase==='down'?'Network down':S.phase==='rec'?'Reconnecting':'Stable';
+  el.state.dataset.s=S.phase==='down'?'down':S.phase==='rec'?'rec':'ok';el.stateTxt.textContent=lab;
+  el.drop.disabled=S.phase!=='stable';$('sNaive').disabled=$('sBack').disabled=S.phase!=='stable';
+}
+function updLast(){var a=[];if(S.last.naive!=null)a.push('Last run, naive: '+S.last.naive.toFixed(1)+' s');
+  if(S.last.backoff!=null)a.push('backoff + jitter: '+S.last.backoff.toFixed(1)+' s');el.last.textContent=a.length?a.join(' · ')+' to recover.':''}
+function announce(m){$('live').textContent=m}
+
+// ---------- loop ----------
+var acc=0,prev=0,lastDraw=0;
+function frame(now){
+  if(!prev)prev=now;var dt=Math.min(0.25,(now-prev)/1000);prev=now;acc+=dt;
+  var wasRec=S.phase;
+  while(acc>=DT){step();acc-=DT}
+  if(wasRec!=='stable'&&S.phase==='stable')updLast();
+  if(!reduce||now-lastDraw>250){render();lastDraw=now}
+  requestAnimationFrame(frame);
+}
+
+// ---------- controls ----------
+var nIn=$('n'),nOut=$('nOut');
+nIn.addEventListener('input',function(){var v=+nIn.value;nOut.textContent=fmt(v);
+  el.scale.textContent=fmt(v)+' devices · scaled-down model of 100K+';reset(v);render()});
+function setStrat(s){S.strat=s;$('sNaive').setAttribute('aria-pressed',s==='naive');$('sBack').setAttribute('aria-pressed',s==='backoff')}
+$('sNaive').addEventListener('click',function(){setStrat('naive')});
+$('sBack').addEventListener('click',function(){setStrat('backoff')});
+el.drop.addEventListener('click',drop);
+var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(function(){layout();render()},60)});
+var mq=window.matchMedia&&matchMedia('(prefers-color-scheme: light)');
+if(mq&&mq.addEventListener)mq.addEventListener('change',function(){readColors();dirty=true;render()});
+
+readColors();reset(5000);render();
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){layout();render()});
+requestAnimationFrame(frame);
+window.__alto={S:S,drop:drop,setStrat:setStrat,step:step};
+})();
+</script>
+</body>
+</html>

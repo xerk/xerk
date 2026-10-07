@@ -1,0 +1,46 @@
+---
+title: "Handle SIGTERM or every deploy is a small outage"
+publishedAt: "2026-09-07"
+summary: "A Node service that ignores SIGTERM drops in-flight requests on every deploy; a short graceful shutdown handler fixes it."
+tags: ["nodejs", "devops", "reliability", "kubernetes"]
+source: "linkedin"
+---
+
+If your Node service does not handle SIGTERM, every deploy is a small outage. The fix is a graceful shutdown handler of about fifteen lines.
+
+## What happens without it
+
+The pod gets the signal, the process dies immediately, and whatever requests were in flight just end. Users see a 502 and blame the feature you shipped.
+
+## The fix
+
+Catch SIGTERM, stop accepting new connections, let in-flight requests finish, close the database pool, then exit. Give it a timeout so a stuck request cannot block the shutdown forever.
+
+```ts
+const server = app.listen(port);
+
+process.on("SIGTERM", () => {
+  // Hard stop if something hangs
+  const timer = setTimeout(() => process.exit(1), 10_000);
+  timer.unref();
+
+  // Stop accepting new connections, wait for in-flight requests
+  server.close(async () => {
+    await db.end(); // close the database pool
+    process.exit(0);
+  });
+});
+```
+
+Keep the timeout shorter than your orchestrator's grace period, so your code decides how the process ends rather than a `SIGKILL`.
+
+## Nobody notices
+
+Nobody notices when you get this right. That is sort of the point.
+
+## Takeaways
+
+- Without a SIGTERM handler, every deploy cuts off in-flight requests.
+- Stop accepting connections, drain requests, close pools, then exit.
+- Add a timeout so a stuck request cannot block shutdown forever.
+- It is a small amount of code for a quieter deploy.
