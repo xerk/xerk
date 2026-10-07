@@ -477,7 +477,7 @@ export function ArtifactEmbed({ title, src, poster, video, code, url, liveTitle,
         <div className="xk-embed-tools">{url && <span className="xk-embed-url"><Icon name="globe" />{url}</span>}{src && <a className="xk-iconbtn" href={src} target="_blank" rel="noopener" aria-label="Open full screen"><Icon name="arrows-out" /></a>}</div>
       </div>
       <div className="xk-embed-stage" style={{ aspectRatio: "16 / 9" }}>
-        {tab === "live" && (live && src ? <iframe src={src} title={`${title} — interactive demo`} loading="lazy" allow="fullscreen; clipboard-write" /> : (
+        {tab === "live" && (live && src ? <iframe src={`${src}${src.includes("?") ? "&" : "?"}theme=${typeof document !== "undefined" ? document.documentElement.dataset.theme || "dark" : "dark"}`} title={`${title} — interactive demo`} loading="lazy" allow="fullscreen; clipboard-write" /> : (
           <div className="xk-embed-launch">{poster && <img src={poster} alt="" />}<div className="xk-embed-launch-inner"><Badge tone="accent" icon="cursor-click">Live artifact</Badge><strong>{liveTitle || "Try it yourself"}</strong><p>{liveText || "Runs in your browser. Nothing to install."}</p><button className="xk-btn xk-btn-primary" onClick={() => { setLive(true); track("demo_launch", { title }); unlock("player"); }}><Icon name="play" />Launch demo</button></div></div>
         ))}
         {tab === "video" && video && <video src={video} poster={poster} controls playsInline onPlay={() => track("video_play", { title })} />}

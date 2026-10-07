@@ -47,6 +47,7 @@ export const projects: Project[] = [
     big: "100K+",
     bigLabel: "concurrent devices",
     url: "https://go2alto.com",
+    embedUrl: "/demos/alto.html",
     featured: true,
     stack: ["NestJS", "Socket.io", "MongoDB", "GraphQL", "Docker", "Kubernetes", "AWS EKS", "Jenkins"],
     metrics: [{ value: "100K+", label: "Concurrent connections" }, { value: "−40%", label: "p95 latency", hint: "after the services split" }, { value: "M/day", label: "Events delivered", hint: "at-least-once" }],
@@ -78,6 +79,7 @@ export const projects: Project[] = [
     boss: "Letting an LLM touch production data safely",
     big: "MCP",
     bigLabel: "tools for LLMs",
+    embedUrl: "/demos/agent.html",
     stack: ["LangChain", "Anthropic API", "OpenAI API", "MCP", "Qdrant", "Python", "TypeScript", "AWS Bedrock", "SageMaker"],
     metrics: [{ value: "MCP", label: "Server in production" }, { value: "RAG", label: "Pipelines with evals" }, { value: "2", label: "Model providers", hint: "Anthropic + OpenAI" }],
     sections: [

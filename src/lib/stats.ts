@@ -3,6 +3,8 @@ import { adminDb } from "./supabase";
 const PH_HOST = process.env.POSTHOG_API_HOST || "https://us.posthog.com";
 const PH_KEY = process.env.POSTHOG_PERSONAL_API_KEY;
 const PH_PROJECT = process.env.POSTHOG_PROJECT_ID;
+// The PostHog project may be shared with other apps — only count this site's traffic.
+const HOST = `properties.$host ILIKE '%${(process.env.POSTHOG_HOST_FILTER || "xerk.io").replace(/'/g, "")}%'`;
 
 async function hogql(query: string): Promise<unknown[][] | null> {
   if (!PH_KEY || !PH_PROJECT) return null;
@@ -24,9 +26,9 @@ async function hogql(query: string): Promise<unknown[][] | null> {
 export async function getStats(days = 1) {
   const since = `now() - INTERVAL ${days} DAY`;
   const [visitors, refs, events] = await Promise.all([
-    hogql(`SELECT count(DISTINCT person_id), count() FROM events WHERE event = '$pageview' AND timestamp > ${since}`),
-    hogql(`SELECT properties.$referring_domain AS r, count(DISTINCT person_id) AS c FROM events WHERE event = '$pageview' AND timestamp > ${since} GROUP BY r ORDER BY c DESC LIMIT 5`),
-    hogql(`SELECT event, count() FROM events WHERE event IN ('cv_download','hire_click','upwork_click','book_call','demo_launch','ask_cv_question','lead_submit','achievement_unlocked') AND timestamp > ${since} GROUP BY event ORDER BY count() DESC`),
+    hogql(`SELECT count(DISTINCT person_id), count() FROM events WHERE event = '$pageview' AND ${HOST} AND timestamp > ${since}`),
+    hogql(`SELECT properties.$referring_domain AS r, count(DISTINCT person_id) AS c FROM events WHERE event = '$pageview' AND ${HOST} AND timestamp > ${since} GROUP BY r ORDER BY c DESC LIMIT 5`),
+    hogql(`SELECT event, count() FROM events WHERE event IN ('cv_download','hire_click','upwork_click','book_call','demo_launch','ask_cv_question','lead_submit','achievement_unlocked') AND ${HOST} AND timestamp > ${since} GROUP BY event ORDER BY count() DESC`),
   ]);
   const db = adminDb();
   let leads: { name: string | null; email: string; budget: string | null; created_at: string }[] = [];

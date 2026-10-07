@@ -52,7 +52,9 @@ pnpm dev
 | Admin and studio | `ADMIN_PASSWORD` | `/admin` returns 404 |
 | Upwork link, booking link | `NEXT_PUBLIC_UPWORK_URL`, `NEXT_PUBLIC_BOOKING_URL` | placeholder Upwork URL, mailto |
 
-**Telegram setup:**
+**Telegram setup (one command):** create a bot with @BotFather, send it any message, then run `bash scripts/telegram-setup.sh <BOT_TOKEN>` and redeploy.
+
+**Telegram setup (manual):**
 1. Create a bot with @BotFather.
 2. Message the bot.
 3. Get your chat id from @userinfobot.
@@ -70,6 +72,10 @@ curl "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook?url=https://www
 ## Link → video (Phase 5)
 
 Run `/link-to-video https://xerk.io/work/alto` in Claude Code. It scrapes the page, writes a script from real numbers, renders a branded video with HyperFrames, attaches it to the project and schedules it through Postiz (post.xerk.io) after you confirm. See `.claude/skills/link-to-video/SKILL.md` and `docs/postiz.md`.
+
+## Demos
+
+The interactive demos are self-contained pages in `public/demos/` (`alto.html` is a reconnect-storm simulator, `agent.html` is an AI agent and MCP trace playground). The case studies load them through `embedUrl`. They follow the site theme via `?theme=`.
 
 ## Content rules
 
