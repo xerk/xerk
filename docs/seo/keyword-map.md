@@ -102,6 +102,15 @@ Checked with firecrawl_search (web index, top 20). This is a proxy for Google, r
 | ahmed mamdouh xerk | 6 (stale title) |
 | every other keyword checked (14) | not in top 20 |
 
+## Audit baseline
+
+On-page audit (`src/lib/seo-audit.ts`), 2026-10-08, stored in `seo_audits`:
+
+- Production before this branch: 40 pages, average 91.
+- This branch on a local server: 42 pages (two new hire pages), average 97.
+
+What's left is mostly blog titles that don't carry their mapped keyword and a few thin pages (/now, /uses, /work/mall-of-arabia). Post titles are Ahmed's; the dashboard lists them as suggestions rather than changing them.
+
 ## What needs Ahmed
 
 - Google Search Console: request indexing for /, /hire, /hire/nestjs-developer, /hire/ai-agent-developer and the case studies; resubmit the sitemap. For real Google positions in the dashboard, create a service account with access to the property and set `GSC_SERVICE_ACCOUNT_JSON` and `GSC_SITE_URL`.
