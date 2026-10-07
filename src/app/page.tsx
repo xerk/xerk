@@ -1,6 +1,6 @@
 import { AchievementGrid, BentoGrid, BentoTile, Button, CTABar, GitHubHeatmap, Marquee, PlayerCard, PostCard, QuestLog, Section, SkillTree, SocialLinks, StatusPill } from "@/components/xerk/ui";
 import { AskMyCV, HeroScene, LevelSelect, Terminal } from "@/components/xerk/client";
-import { achievements, bookingUrl, experience, github, profile, skillTree, socials, stats, ticker } from "@/data/profile";
+import { achievements, bookingUrl, experience, github, profile, skillTree, socials, stats, ticker, upworkHref } from "@/data/profile";
 import { projects } from "@/data/projects";
 import { MOTD, terminalCommands } from "@/data/terminal";
 import { getPosts } from "@/lib/posts";
@@ -77,7 +77,7 @@ export default async function Home() {
         <section className="xk-section">
           <CTABar tone="accent" eyebrow="Co-op mode" title="Ready player two?" text="Freelance or contract — real-time systems, AI agents, full-stack products. I reply within one working day.">
             <Button variant="primary" icon="calendar-dots" href={bookingUrl} track="book_call">Book a call</Button>
-            <Button brand="upwork" iconRight="arrow-up-right" href={socials[0].href} track="upwork_click">Hire on Upwork</Button>
+            <Button brand="upwork" iconRight="arrow-up-right" href={upworkHref} track="upwork_click">Hire on Upwork</Button>
           </CTABar>
         </section>
       </div>

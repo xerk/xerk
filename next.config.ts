@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
     ];
   },
   skipTrailingSlashRedirect: true,
+  // content/ and the Geist TTFs are read at request time (ISR, llms-full.txt, /og)
+  outputFileTracingIncludes: { "/**": ["./content/**/*"], "/og": ["./node_modules/geist/dist/fonts/**/*.ttf"] },
   async redirects() {
     return [{ source: "/resume", destination: "/cv", permanent: true }];
   },

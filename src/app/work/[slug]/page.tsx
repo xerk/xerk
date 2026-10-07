@@ -3,7 +3,7 @@ import { Badge, Button, CaseStudyHeader, Callout, CTABar, FAQ, KeyTakeaways, Met
 import { Icon } from "@/components/xerk/icon";
 import { ArtifactEmbed, HeroScene } from "@/components/xerk/client";
 import { getProject, projects } from "@/data/projects";
-import { SITE_URL, profile, socials } from "@/data/profile";
+import { SITE_URL, profile, socials, upworkHref } from "@/data/profile";
 import { pageMeta, JsonLd, breadcrumbJsonLd, faqJsonLd } from "@/lib/seo";
 import { pad2 } from "@/lib/utils";
 
@@ -73,7 +73,7 @@ export default async function CaseStudy({ params }: PageProps<"/work/[slug]">) {
           {p.faq.length > 0 && <section><h2 id="faq" className="xk-prose" style={{ font: "600 28px/34px var(--font-sans)", letterSpacing: "-0.02em", margin: "0 0 16px" }}>FAQ</h2><FAQ items={p.faq} /></section>}
           <CTABar tone="accent" title={p.ai ? "Want an AI agent like this?" : "Need something like this?"} text={`I'm ${profile.name} — ${profile.years}+ years building systems like ${p.title}. Scoped in one call.`}>
             <Button variant="primary" iconRight="arrow-right" href="/hire" track="hire_click">Start a mission</Button>
-            <Button brand="upwork" iconRight="arrow-up-right" href={socials[0].href} track="upwork_click">Hire on Upwork</Button>
+            <Button brand="upwork" iconRight="arrow-up-right" href={upworkHref} track="upwork_click">Hire on Upwork</Button>
           </CTABar>
           <RelatedProjects items={related.map((r) => ({ slug: r.slug, title: r.title, summary: `Stage ${r.code} · ${r.world}`, image: r.image, code: r.code }))} />
         </article>

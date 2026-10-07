@@ -25,7 +25,7 @@ export function personJsonLd() {
     image: `${SITE_URL}${profile.avatar}`,
     email: `mailto:${profile.email}`,
     address: { "@type": "PostalAddress", addressLocality: "Cairo", addressCountry: "EG" },
-    sameAs: socials.map((s) => s.href).concat(["https://github.com/xerk"]),
+    sameAs: [...new Set(socials.map((s) => s.href).concat(["https://github.com/xerk"]))],
     worksFor: { "@type": "Organization", name: experience[0].company },
     alumniOf: [{ "@type": "CollegeOrUniversity", name: profile.education.school }],
     knowsAbout: Object.values(skills).flat().slice(0, 40),

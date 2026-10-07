@@ -26,8 +26,12 @@ export const profile = {
 
 export type Social = { brand: "upwork" | "linkedin" | "github" | "x" | "telegram"; label: string; href: string; handle?: string };
 
+/** Real Upwork profile URL (set NEXT_PUBLIC_UPWORK_URL). Until it's set, Upwork links fall back to /hire and Upwork is left out of sameAs. */
+export const upworkUrl = process.env.NEXT_PUBLIC_UPWORK_URL || null;
+export const upworkHref = upworkUrl || "/hire";
+
 export const socials: Social[] = [
-  { brand: "upwork", label: "Upwork", href: process.env.NEXT_PUBLIC_UPWORK_URL || "https://www.upwork.com/freelancers/~xerk", handle: "Hire me" },
+  ...(upworkUrl ? [{ brand: "upwork" as const, label: "Upwork", href: upworkUrl, handle: "Hire me" }] : []),
   { brand: "linkedin", label: "LinkedIn", href: "https://dub.sh/xerk-linkedin", handle: "Ahmed Mamdouh" },
   { brand: "github", label: "GitHub", href: "https://github.com/xerk", handle: "xerk" },
   { brand: "x", label: "X", href: "https://dub.sh/xerk-x", handle: "@xerk" },
@@ -165,3 +169,5 @@ export const hireFaq = [
 ];
 
 export const github = { user: "xerk", total: 5559, activeDays: 268, bestStreak: 20, publicRepos: 48 };
+
+export const socialHref = (brand: Social["brand"]) => socials.find((s) => s.brand === brand)?.href || "/hire";

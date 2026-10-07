@@ -748,3 +748,5 @@ a.xk-card:hover .xk-readmore .xk-icon { transform: translateX(4px); }
 .xk-cv dt { color: var(--ink-muted); }
 .xk-cv dd { margin: 0; }
 @media print { .xk-header, .xk-hud, .xk-dock-wrap, .xk-footer, .xk-toast-wrap, .xk-noprint { display: none !important; } body { background: #fff; color: #000; } }
+
+@media (max-width: 899px) { body { padding-bottom: 84px; } }
