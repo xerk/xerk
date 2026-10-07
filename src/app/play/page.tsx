@@ -23,9 +23,7 @@ export default async function Play() {
           <h1 data-split="">My CV, as a game</h1>
           <p>Same facts as the CV, more buttons. Pick a stage, try the terminal, or unlock the side quests from the trophy in the top bar.</p>
         </header>
-      </div>
-      <Marquee items={ticker} />
-      <div className="xk-container">
+        <div className="xk-mq-wrap"><Marquee items={ticker} /></div>
         <Section id="player" eyebrow="01 / Player" title="Player 1 has entered the game" text={`${profile.years}+ years across five teams. Every number here comes from my CV or GitHub.`}>
           <div className="xk-two-lr">
             <PlayerCard name={profile.name} level={profile.years} className="Senior full-stack · AI engineer" avatar={profile.avatar} status="Online · open to co-op missions" xp={{ label: `Season ${now.getFullYear()}`, value: season, text: `${now.toLocaleString("en-US", { month: "short" })} · ${season}%` }} stats={stats} loadout={LOADOUT} />

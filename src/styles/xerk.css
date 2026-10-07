@@ -835,3 +835,7 @@ button.xk-hud-ach:hover { background: var(--accent-soft); }
 .xk-play-hint { margin: var(--space-6) 0 0; text-align: center; font-size: 14px; color: var(--ink-muted); }
 .xk-play-hint a { color: var(--accent-text); }
 .xk-hud.is-thin .xk-hud-row { display: none; }
+
+.xk-mq-wrap { padding: 0 var(--space-6); }
+.xk-mq-wrap .xk-mq { border: 1px solid var(--border); border-radius: var(--radius-lg); }
+@media (max-width: 640px) { .xk-mq-wrap { padding: 0 var(--space-4); } }
