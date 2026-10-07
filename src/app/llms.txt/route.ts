@@ -39,7 +39,11 @@ ${posts.map((p) => `- [${p.title}](${SITE_URL}/blog/${p.slug}) (${p.publishedAt}
 
 ## Optional
 - [Full text of the site for LLMs](${SITE_URL}/llms-full.txt)
+- [All case studies](${SITE_URL}/work)
+- [All blog posts](${SITE_URL}/blog)
 - [AI engineering overview](${SITE_URL}/ai)
+- [What I'm working on now](${SITE_URL}/now)
+- [The CV as a game](${SITE_URL}/play)
 - [Tools and stack](${SITE_URL}/uses)
 - [RSS](${SITE_URL}/rss.xml)
 `;

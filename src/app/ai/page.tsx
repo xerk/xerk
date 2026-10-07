@@ -10,7 +10,7 @@ const faq = [
   { q: "Can he add AI to an existing product?", a: "Yes. Typical work: an agent with tool calls into your APIs, RAG over your docs and data, guardrails, evals and cost tracking." },
 ];
 
-export const metadata = pageMeta({ title: "AI engineering: production agents, MCP servers and RAG", description: "AI work by Ahmed Mamdouh: a production agent on the Anthropic and OpenAI APIs with guardrails, an MCP server for tool access, and RAG with Qdrant and evals.", path: "/ai" });
+export const metadata = pageMeta({ title: "AI engineering: agents, MCP servers and RAG", description: "AI work by Ahmed Mamdouh: a production agent on the Anthropic and OpenAI APIs with guardrails, an MCP server for tool access, and RAG with Qdrant and evals.", path: "/ai" });
 
 export default async function AIPage() {
   const { aiStack } = await getSite();

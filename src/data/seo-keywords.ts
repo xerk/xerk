@@ -57,7 +57,7 @@ export const SEO_KEYWORDS: SeoKeyword[] = [
   { keyword: "websocket reconnect storm", intent: "informational", target_path: "/blog/scaling-100k-websocket-connections-the-reconnect-storm", priority: 1, difficulty: "low", strategy: "existing", notes: "Low competition, exact match with the post." },
   { keyword: "mcp stateless", intent: "informational", target_path: "/blog/mcp-went-stateless-and-that-matters", priority: 2, difficulty: "high", strategy: "existing", notes: "Netlify, AWS, Google, Cloudflare blogs own it. Aim for AI citations, not #1." },
   { keyword: "ai agents in production what breaks", intent: "informational", target_path: "/blog/what-actually-breaks-when-ai-agents-go-to-production", priority: 2, difficulty: "medium", strategy: "existing", notes: "Good AI-assistant citation candidate." },
-  { keyword: "rag retrieval quality chunking evals", intent: "informational", target_path: "/blog/in-rag-retrieval-is-the-product", priority: 2, difficulty: "medium", strategy: "existing", notes: "" },
+  { keyword: "rag retrieval chunking evals", intent: "informational", target_path: "/blog/in-rag-retrieval-is-the-product", priority: 2, difficulty: "medium", strategy: "existing", notes: "" },
   { keyword: "at least once delivery idempotency key", intent: "informational", target_path: "/blog/at-least-once-delivery-means-at-least-once", priority: 2, difficulty: "medium", strategy: "existing", notes: "" },
   { keyword: "node.js graceful shutdown sigterm kubernetes", intent: "informational", target_path: "/blog/handle-sigterm-or-every-deploy-is-a-small-outage", priority: 2, difficulty: "high", strategy: "existing", notes: "RisingStack, dev.to, devopscube rank. Not in the top 20." },
   { keyword: "split monolith into microservices p95 latency", intent: "informational", target_path: "/blog/splitting-a-monolith-what-it-actually-bought-us", priority: 3, difficulty: "medium", strategy: "existing", notes: "" },
@@ -78,6 +78,6 @@ export const AI_PROMPTS: { prompt: string; expect: string; target_path: string }
 ];
 
 /** Best keyword per path, for the on-page audit's keyword check. */
-export function keywordForPath(path: string, list: Pick<SeoKeyword, "keyword" | "target_path" | "priority">[] = SEO_KEYWORDS): string | undefined {
+export function keywordForPath(path: string, list: { keyword: string; target_path: string; priority: number }[] = SEO_KEYWORDS): string | undefined {
   return list.filter((k) => k.target_path === path).sort((a, b) => a.priority - b.priority)[0]?.keyword;
 }

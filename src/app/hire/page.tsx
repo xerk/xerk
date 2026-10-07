@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Button, FAQ, PlatformProof, ProcessSteps, Section, ServiceCard, SocialLinks, SpotlightCard, StatusPill } from "@/components/xerk/ui";
 import { AskMyCV, ContactForm } from "@/components/xerk/client";
 import { Icon } from "@/components/xerk/icon";
@@ -22,6 +23,7 @@ export default async function Hire() {
         <div className="xk-hero-actions"><Button variant="primary" size="lg" icon="calendar-dots" href={bookingUrl} track="book_call">Book a 15-min call</Button><Button size="lg" brand="upwork" iconRight="arrow-up-right" href={upworkHref} track="upwork_click">Hire on Upwork</Button></div>
       </header>
       <section className="xk-section" style={{ paddingTop: 0 }}>
+        <p className="xk-play-hint" style={{ textAlign: "left", margin: "0 0 16px" }}>Proof first: <Link href="/work/realtime-device-platform">a backend holding 100K+ connections</Link>, <Link href="/work/ai-agent-mcp">a production AI agent and MCP server</Link>, <Link href="/work/zerocash">the Zerocash e-wallet</Link>, or <Link href="/work">all case studies</Link>.</p>
         <PlatformProof items={[{ brand: "upwork", value: "Upwork", label: "Hire with escrow & reviews", href: upworkHref }, { brand: "linkedin", value: "LinkedIn", label: "History & recommendations", href: socialHref("linkedin") }, { brand: "github", value: "GitHub", label: "5,559 contributions / yr", href: socialHref("github") }]} />
       </section>
       <Section eyebrow="01 / Services" title="Ways to work together">

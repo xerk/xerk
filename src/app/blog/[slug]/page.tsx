@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: PageProps<"/blog/[slug]">) {
   const { slug } = await params;
   const p = await getPost(slug);
   if (!p) return {};
-  return pageMeta({ title: p.title, description: p.summary, path: `/blog/${p.slug}`, type: "article", publishedTime: p.publishedAt, image: `/og?title=${encodeURIComponent(p.title)}&kind=Blog` });
+  return pageMeta({ title: p.title, absolute: p.title.length > 48, description: p.summary, path: `/blog/${p.slug}`, type: "article", publishedTime: p.publishedAt, image: `/og?title=${encodeURIComponent(p.title)}&kind=Blog` });
 }
 
 export default async function PostPage({ params }: PageProps<"/blog/[slug]">) {
