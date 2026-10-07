@@ -861,3 +861,15 @@ button.xk-hud-ach:hover { background: var(--accent-soft); }
 }
 
 .xk-level-visual video { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+
+/* GitHub star button (header) */
+.xk-ghstar { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 4px 0 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); color: var(--ink); font: 500 13px var(--font-sans); text-decoration: none; transition: border-color var(--duration-fast), background-color var(--duration-fast); }
+.xk-ghstar:hover { border-color: var(--border-strong); background: var(--surface-raised); }
+.xk-ghstar > .xk-icon { width: 17px; height: 17px; }
+.xk-ghstar-count { display: inline-flex; align-items: center; gap: 4px; height: 26px; padding: 0 8px; border-radius: 7px; background: var(--surface-raised); font: 600 12px var(--font-mono); }
+.xk-ghstar-count .xk-icon { width: 12px; height: 12px; color: var(--warning); }
+.xk-ghstar:hover .xk-ghstar-count .xk-icon { color: var(--accent-text); }
+@media (max-width: 720px) { .xk-ghstar-label { display: none; } .xk-ghstar { padding: 0 4px 0 9px; } }
+@media (max-width: 380px) { .xk-ghstar { display: none; } }
+
+.xk-cover:has(img)::before, .xk-cover:has(img)::after { display: none; }

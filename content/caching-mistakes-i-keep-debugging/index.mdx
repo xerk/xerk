@@ -4,6 +4,7 @@ publishedAt: "2026-09-04"
 summary: "Before adding a cache, decide what invalidates it, measure first, set a TTL, and cache the expensive part instead of the whole result."
 tags: ["caching", "redis", "performance", "system-design"]
 source: "linkedin"
+image: "/blog/caching-mistakes-i-keep-debugging/cover.webp"
 ---
 
 Before you add a cache, answer one question: what invalidates it? Every caching bug I have debugged came down to skipping that question, or to one of the three mistakes below.

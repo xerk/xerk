@@ -19,3 +19,19 @@ export async function getContributions(): Promise<{ weeks: number[][]; total: nu
   }
   return { weeks: snapshot as number[][], total: github.total };
 }
+
+export const SITE_REPO = process.env.NEXT_PUBLIC_SITE_REPO || "xerk/xerk";
+
+/** Star count for the site's repo, cached for an hour. Returns null if GitHub is unreachable. */
+export async function getRepoStars(repo = SITE_REPO): Promise<number | null> {
+  try {
+    const res = await fetch(`https://api.github.com/repos/${repo}`, {
+      headers: process.env.GITHUB_TOKEN ? { Authorization: `bearer ${process.env.GITHUB_TOKEN}` } : {},
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return null;
+    return (await res.json()).stargazers_count ?? null;
+  } catch {
+    return null;
+  }
+}

@@ -4,6 +4,8 @@ import { CommandPalette, ScrollHUD, SearchTrigger, ThemeToggle, type PaletteItem
 import { profile, socials, bookingUrl, upworkHref } from "@/data/profile";
 import { projects } from "@/data/projects";
 import { getPosts } from "@/lib/posts";
+import { getRepoStars, SITE_REPO } from "@/lib/github";
+import { Icon } from "./icon";
 
 export const NAV = [
   { label: "Work", href: "/work" },
@@ -14,7 +16,8 @@ export const NAV = [
   { label: "Play", href: "/play" },
 ];
 
-export function SiteHeader() {
+export async function SiteHeader() {
+  const stars = await getRepoStars();
   return (
     <div className="xk-sticky">
       <header className="xk-header">
@@ -23,6 +26,9 @@ export function SiteHeader() {
           {NAV.map((l) => <Link key={l.href} href={l.href}>{l.label}</Link>)}
         </nav>
         <div className="xk-header-actions">
+          <a className="xk-ghstar" href={`https://github.com/${SITE_REPO}`} target="_blank" rel="noopener" data-track="github_click" aria-label={`Star ${SITE_REPO} on GitHub${stars != null ? `, ${stars} stars` : ""}`}>
+            <Icon brand="github" /><span className="xk-ghstar-label">Star</span>{stars != null && <span className="xk-ghstar-count"><Icon name="star-fill" />{stars}</span>}
+          </a>
           <SearchTrigger />
           <ThemeToggle />
           <Button variant="primary" size="sm" href="/hire" track="hire_click">Hire me</Button>

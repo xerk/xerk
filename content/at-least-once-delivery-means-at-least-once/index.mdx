@@ -4,6 +4,7 @@ publishedAt: "2026-09-01"
 summary: "Every queue consumer eventually runs twice. Give each one an idempotency key from the message and check it before doing the work."
 tags: ["nodejs", "distributed-systems", "queues", "redis", "backend"]
 source: "linkedin"
+image: "/blog/at-least-once-delivery-means-at-least-once/cover.webp"
 ---
 
 The worst bug I ever shipped ran perfectly. It was a queue consumer that wasn't idempotent, and the fix is the same every time: give every consumer an idempotency key and check it before doing any work.

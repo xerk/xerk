@@ -67,7 +67,8 @@ export const getPosts = cache(async (): Promise<PostMeta[]> => {
   const files = fs.existsSync(DIR) ? fs.readdirSync(DIR).map(fromFile).filter((p): p is Omit<Post, "html"> => !!p) : [];
   const db = await fromDb();
   const bySlug = new Map<string, Omit<Post, "html">>();
-  [...files, ...db].forEach((p) => bySlug.set(p.slug, p));
+  // Repo files are the source of truth; Supabase adds posts that only exist there (e.g. written in the dashboard).
+  [...db, ...files].forEach((p) => bySlug.set(p.slug, p));
   return [...bySlug.values()]
     .map(({ markdown: _m, headings: _h, ...meta }) => meta)
     .sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
