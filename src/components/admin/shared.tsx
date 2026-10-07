@@ -28,13 +28,14 @@ const NAV = [
   { href: "/profile", label: "Profile", icon: "user-circle" },
   { href: "/experience", label: "Experience", icon: "briefcase" },
   { href: "/site", label: "Site data", icon: "sliders" },
+  { href: "/seo", label: "SEO", icon: "magnifying-glass" },
   { href: "/leads", label: "Leads", icon: "envelope-simple" },
   { href: "/studio", label: "Studio", icon: "film-strip" },
 ];
 
 /** Sidebar grouping is presentational only: anything not listed lands in "Content". */
-const GROUP_OF: Record<string, string> = { Overview: "", Posts: "Content", Projects: "Content", Media: "Content", Profile: "Content", Experience: "Content", Leads: "Inbox", "Site data": "System", Studio: "System" };
-const GROUP_ORDER = ["", "Content", "Inbox", "System"];
+const GROUP_OF: Record<string, string> = { Overview: "", Posts: "Content", Projects: "Content", Media: "Content", Profile: "Content", Experience: "Content", Leads: "Inbox", "Site data": "System", SEO: "Growth", Studio: "System" };
+const GROUP_ORDER = ["", "Content", "Inbox", "Growth", "System"];
 
 export function AdminNav({ email }: { email: string }) {
   const path = usePathname();
