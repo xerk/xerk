@@ -35,7 +35,7 @@ export default function AIPage() {
       </Section>
       <Section eyebrow="02 / Stack" title="The AI stack I use"><AIStack items={aiStack} /></Section>
       <Section eyebrow="03 / Stages" title="AI and real-time case studies">
-        <div className="xk-grid" style={{ padding: 0 }}>{ai.map((p) => <ProjectCard key={p.slug} slug={p.slug} title={p.title} eyebrow={`${p.code} · ${p.period}`} summary={p.summary} image={p.image} big={p.big} bigLabel={p.bigLabel} stack={p.stack} ai={p.ai} />)}</div>
+        <div className="xk-grid" style={{ padding: 0 }}>{ai.map((p) => <ProjectCard key={p.slug} slug={p.slug} title={p.title} eyebrow={`${p.code} · ${p.period}`} summary={p.summary} image={p.image} video={p.video} hasVideo={!!p.video} big={p.big} bigLabel={p.bigLabel} stack={p.stack} ai={p.ai} />)}</div>
       </Section>
       <section className="xk-section"><CTABar tone="accent" title="Add an AI agent to your product" text="Tool use, RAG on your data, guardrails and evals — scoped in one call."><Button variant="primary" href="/hire" iconRight="arrow-right" track="hire_click">Start a mission</Button></CTABar></section>
     </div>

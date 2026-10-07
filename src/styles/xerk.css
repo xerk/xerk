@@ -859,3 +859,5 @@ button.xk-hud-ach:hover { background: var(--accent-soft); }
   .xk-project .xk-readmore { padding-top: var(--space-2); }
   .xk-media-flags .xk-badge { font-size: 11px; }
 }
+
+.xk-level-visual video { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }

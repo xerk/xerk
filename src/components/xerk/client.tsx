@@ -20,6 +20,22 @@ export function MotionRoot() {
     return () => { cancelAnimationFrame(id); clean(); };
   }, [pathname]);
   useEffect(() => {
+    // Preview clips: play while on screen, restart on hover, pause when off screen. Reduced motion = hover only.
+    const still = reduced();
+    const vids = () => Array.from(document.querySelectorAll<HTMLVideoElement>("video[data-autoplay]"));
+    const io = new IntersectionObserver((es) => es.forEach((e) => {
+      const v = e.target as HTMLVideoElement;
+      if (e.isIntersecting && !still) { v.preload = "auto"; v.play().catch(() => {}); } else v.pause();
+    }), { threshold: 0.5 });
+    const seen = new WeakSet<Element>();
+    const scan = () => vids().forEach((v) => { if (!seen.has(v)) { seen.add(v); io.observe(v); } });
+    scan();
+    const mo = new MutationObserver(scan); mo.observe(document.body, { childList: true, subtree: true });
+    const over = (e: PointerEvent) => { const card = (e.target as HTMLElement)?.closest?.("a, .xk-level-detail"); const v = card?.querySelector?.("video[data-autoplay]") as HTMLVideoElement | null; if (v && v.paused) { v.preload = "auto"; v.currentTime = 0; v.play().catch(() => {}); } };
+    document.addEventListener("pointerover", over, { passive: true });
+    return () => { io.disconnect(); mo.disconnect(); document.removeEventListener("pointerover", over); };
+  }, [pathname]);
+  useEffect(() => {
     // Spotlight cards follow the pointer; clicks on [data-track] become analytics events.
     const move = (e: PointerEvent) => {
       const el = (e.target as HTMLElement)?.closest?.(".xk-spot") as HTMLElement | null;
@@ -337,7 +353,7 @@ function mountNetwork(T: typeof import("three"), el: HTMLDivElement, opts: { nod
 }
 
 /* ---------- Level select ---------- */
-export type Level = { slug: string; code: string; title: string; world: string; period: string; summary: string; boss: string; image?: string; big?: string; bigLabel?: string; stack: string[]; ai?: boolean; embedUrl?: string };
+export type Level = { slug: string; code: string; title: string; world: string; period: string; summary: string; boss: string; image?: string; video?: string; big?: string; bigLabel?: string; stack: string[]; ai?: boolean; embedUrl?: string };
 
 export function LevelSelect({ levels }: { levels: Level[] }) {
   const [sel, setSel] = useState(0);
@@ -357,7 +373,7 @@ export function LevelSelect({ levels }: { levels: Level[] }) {
         ))}
       </div>
       <div className="xk-level-detail" key={sel}>
-        <div className="xk-level-visual">{cur.image ? <img src={cur.image} alt={`${cur.title} screenshot`} /> : <div className="xk-level-poster"><span>{cur.big}</span><em>{cur.bigLabel}</em></div>}</div>
+        <div className="xk-level-visual">{cur.video ? <video src={cur.video} poster={cur.image} muted loop playsInline preload="none" data-autoplay="" /> : cur.image ? <img src={cur.image} alt={`${cur.title} screenshot`} /> : <div className="xk-level-poster"><span>{cur.big}</span><em>{cur.bigLabel}</em></div>}</div>
         <div className="xk-level-info">
           <div className="xk-level-meta"><span className="xk-label">Stage {cur.code} · {cur.period}</span>{cur.ai && <Badge tone="agent">AI</Badge>}</div>
           <h3>{cur.title}</h3>

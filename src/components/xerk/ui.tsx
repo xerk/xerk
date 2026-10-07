@@ -146,7 +146,7 @@ export function ProjectCard(p: { slug: string; title: string; eyebrow?: string; 
   return (
     <Link href={`/work/${p.slug}`} className={cx("xk-card", "xk-project", p.wide && "xk-project-wide", p.featured && "xk-card-featured")} data-reveal="">
       <div className="xk-media">
-        {p.video ? <video src={p.video} poster={p.image} autoPlay muted loop playsInline /> : p.image ? <img src={p.image} alt={`${p.title} screenshot`} loading="lazy" /> : <div className="xk-level-poster"><span>{p.big}</span><em>{p.bigLabel}</em></div>}
+        {p.video ? <video src={p.video} poster={p.image} muted loop playsInline preload="none" data-autoplay="" aria-label={`${p.title} preview`} /> : p.image ? <img src={p.image} alt={`${p.title} screenshot`} loading="lazy" /> : <div className="xk-level-poster"><span>{p.big}</span><em>{p.bigLabel}</em></div>}
         {(p.interactive || p.hasVideo) && <div className="xk-media-flags">{p.interactive && <Badge tone="accent" icon="cursor-click">Interactive demo</Badge>}{p.hasVideo && <Badge icon="play">Video</Badge>}</div>}
       </div>
       <div className="xk-card-body">

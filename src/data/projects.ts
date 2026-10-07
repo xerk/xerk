@@ -36,6 +36,7 @@ export const projects: Project[] = [
   {
     slug: "realtime-device-platform",
     image: "/projects/realtime-device-platform/cover.webp",
+    video: "/projects/realtime-device-platform/preview.mp4",
     screens: [{ src: "/projects/realtime-device-platform/screen-1.webp", alt: "Reconnect storm simulator, dark theme" }, { src: "/projects/realtime-device-platform/screen-2.webp", alt: "Reconnect storm simulator, light theme" }],
     code: "1-1",
     title: "Real-time device platform",
@@ -67,6 +68,7 @@ export const projects: Project[] = [
   {
     slug: "ai-agent-mcp",
     image: "/projects/ai-agent-mcp/cover.webp",
+    video: "/projects/ai-agent-mcp/preview.mp4",
     screens: [{ src: "/projects/ai-agent-mcp/screen-1.webp", alt: "Agent trace playground, dark theme" }, { src: "/projects/ai-agent-mcp/screen-2.webp", alt: "Agent trace playground, light theme" }],
     code: "1-2",
     title: "AI agent + MCP server",
@@ -127,6 +129,7 @@ export const projects: Project[] = [
   {
     slug: "sweepsouth",
     image: "/projects/sweepsouth/cover.webp",
+    video: "/projects/sweepsouth/preview.mp4",
     screens: [{ src: "/projects/sweepsouth/screen-1.webp", alt: "SweepSouth website on desktop" }, { src: "/projects/sweepsouth/screen-2.webp", alt: "SweepSouth website on mobile" }],
     code: "2-2",
     title: "SweepSouth",
@@ -152,6 +155,7 @@ export const projects: Project[] = [
   {
     slug: "uptimerobot",
     image: "/projects/uptimerobot/cover.webp",
+    video: "/projects/uptimerobot/preview.mp4",
     screens: [{ src: "/projects/uptimerobot/screen-1.webp", alt: "UptimeRobot website on desktop" }, { src: "/projects/uptimerobot/screen-2.webp", alt: "UptimeRobot website on mobile" }],
     code: "3-1",
     title: "UptimeRobot",
