@@ -1,6 +1,6 @@
 ---
 name: seo-growth
-description: Re-run SEO and AI-search (GEO) work for xerk.io - keyword research, rank and AI-citation checks, the on-page audit - then propose and ship humanized content fixes and refresh the /seo dashboard data. Use when Ahmed says /seo-growth, "improve SEO", "check rankings", or "why doesn't ChatGPT know me".
+description: Re-run SEO and AI-search (GEO) work for xerk.io (keyword research, rank and AI-citation checks, the on-page audit), then propose and ship humanized content fixes and refresh the /seo dashboard data. Use when Ahmed says /seo-growth, "improve SEO", "check rankings", or "why doesn't ChatGPT know me".
 ---
 
 # seo-growth

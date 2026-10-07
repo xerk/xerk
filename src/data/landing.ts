@@ -51,7 +51,7 @@ export const LANDINGS: Landing[] = [
       { title: "APIs that clients like", text: "REST or schema-first GraphQL. At UptimeRobot the GraphQL API cut client network overhead by about 35%." },
       { title: "Monolith to services", text: "Splitting along the slow paths, on Docker and Kubernetes (AWS EKS), with CI/CD in Jenkins or GitHub Actions." },
       { title: "Queues and background work", text: "Retry, deduplication and idempotency keys, like the alerting pipeline I built on AWS ECS and Lambda." },
-      { title: "Existing codebases", text: "Most of my work has been inside codebases someone else started. I read first, profile second, and change the boring parts that are actually slow." },
+      { title: "Existing codebases", text: "Most of my work has been inside codebases someone else started. I read first, profile second, and change the boring parts that are slow." },
       { title: "Full-stack when needed", text: "Next.js or React on the front, plus Angular and Vue from SweepSouth and Schoolver, so one person owns the contract between the two." },
     ],
     stack: ["NestJS", "TypeScript", "Node.js", "Socket.io", "GraphQL", "PostgreSQL", "MongoDB", "Redis", "Docker", "Kubernetes", "AWS"],
