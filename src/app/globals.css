@@ -19,7 +19,9 @@
   --font-mono: var(--font-mono);
 }
 
+html, body { overflow-x: clip; max-width: 100%; }
 html { scroll-behavior: smooth; }
+img, video, canvas, iframe { max-width: 100%; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 ::selection { background: var(--accent); color: var(--on-accent); }
 .xk-container { max-width: 1200px; margin: 0 auto; }

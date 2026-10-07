@@ -20,7 +20,7 @@ export default function WorkPage() {
         <LevelSelect levels={projects} />
       </section>
       <section className="xk-section" data-hud="All stages">
-        <div className="xk-grid" style={{ padding: 0, gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))" }}>
+        <div className="xk-projects">
           {projects.map((p) => <ProjectCard key={p.slug} slug={p.slug} title={p.title} eyebrow={`${p.code} · ${p.period}`} summary={p.summary} image={p.image} big={p.big} bigLabel={p.bigLabel} stack={p.stack} ai={p.ai} interactive={!!p.embedUrl} hasVideo={!!p.video} featured={p.featured} />)}
         </div>
       </section>

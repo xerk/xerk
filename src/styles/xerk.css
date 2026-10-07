@@ -848,3 +848,14 @@ button.xk-hud-ach:hover { background: var(--accent-soft); }
 .xk-quest-summary { margin: 8px 0 0; font-size: 14px; line-height: 22px; color: var(--ink-muted); max-width: 680px; }
 
 .xk-cs-cover { display: block; width: 100%; height: auto; border-radius: var(--radius-lg); border: 1px solid var(--border); }
+
+/* Projects grid: 2 columns on desktop, 1 on phones */
+.xk-projects { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+@media (max-width: 760px) {
+  .xk-projects { grid-template-columns: 1fr; gap: var(--space-3); }
+  .xk-project .xk-card-body { padding: var(--space-4); }
+  .xk-project .xk-card-title { font-size: 19px; line-height: 26px; }
+  .xk-project .xk-card-text { -webkit-line-clamp: 3; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+  .xk-project .xk-readmore { padding-top: var(--space-2); }
+  .xk-media-flags .xk-badge { font-size: 11px; }
+}

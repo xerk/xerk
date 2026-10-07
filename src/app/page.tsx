@@ -47,7 +47,7 @@ export default async function Home() {
           </div>
         </Section>
         <Section id="work" eyebrow="Work" title="Selected projects" scramble={false} action={<Button variant="ghost" iconRight="arrow-right" href="/work">All projects</Button>}>
-          <div className="xk-grid" style={{ padding: 0, gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
+          <div className="xk-projects">
             <ProjectCard wide featured slug={featured.slug} title={featured.title} eyebrow={featured.period} summary={featured.summary} image={featured.image} big={featured.big} bigLabel={featured.bigLabel} stack={featured.stack} ai={featured.ai} interactive={!!featured.embedUrl} />
             {rest.slice(0, 2).map((p) => <ProjectCard key={p.slug} slug={p.slug} title={p.title} eyebrow={p.period} summary={p.summary} image={p.image} big={p.big} bigLabel={p.bigLabel} stack={p.stack} ai={p.ai} interactive={!!p.embedUrl} />)}
           </div>
