@@ -1,5 +1,5 @@
 import { AchievementGrid, BentoGrid, BentoTile, Button, CTABar, GitHubHeatmap, Marquee, PlayerCard, QuestLog, Section, SkillTree, SocialLinks, StatusPill } from "@/components/xerk/ui";
-import { AskMyCV, HeroScene, LevelSelect, QuestList, Terminal } from "@/components/xerk/client";
+import { AskMyCV, HeroScene, LevelSelect, Terminal } from "@/components/xerk/client";
 import { achievements, bookingUrl, experience, github, profile, skillTree, socials, stats, ticker, upworkHref } from "@/data/profile";
 import { projects } from "@/data/projects";
 import { MOTD, terminalCommands } from "@/data/terminal";
@@ -56,9 +56,6 @@ export default async function Home() {
         </Section>
         <Section id="achievements" eyebrow="03 / Achievements" title="Achievements unlocked" text="Eight from real work. The ninth is the project we do together.">
           <AchievementGrid items={achievements} />
-        </Section>
-        <Section id="quests-side" eyebrow="03b / Side quests" title="Your turn" text="Explore the site and unlock these. Each one tells you where to go next.">
-          <div className="xk-sq-card"><QuestList /></div>
         </Section>
         <Section id="skills" eyebrow="04 / Skill tree" title="Every skill has a receipt">
           <SkillTree root="Full-stack core" rootNote="TypeScript · SQL · Python" branches={skillTree} />
