@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { Button, CTABar, ExperienceList, ProjectCard, Section, SocialLinks, StatusPill } from "@/components/xerk/ui";
+import { BentoGrid, BentoTile, Button, CTABar, ExperienceList, PlayerCard, ProjectCard, Section, SocialLinks, StatusPill } from "@/components/xerk/ui";
 import { HeroScene } from "@/components/xerk/client";
 import { BlogCard } from "@/components/xerk/blog";
-import { bookingUrl, experience, profile, socials, upworkHref, SITE_URL } from "@/data/profile";
+import { bookingUrl, experience, profile, socials, stats, upworkHref, SITE_URL } from "@/data/profile";
 import { projects } from "@/data/projects";
 import { getPosts } from "@/lib/posts";
 import { formatDate } from "@/lib/utils";
@@ -10,8 +10,12 @@ import { JsonLd } from "@/lib/seo";
 
 export const revalidate = 3600;
 
+const LOADOUT = [{ brand: "nestjs", label: "NestJS" }, { brand: "nextdotjs", label: "Next.js" }, { brand: "claude", label: "Claude" }, { brand: "graphql", label: "GraphQL" }, { brand: "kubernetes", label: "Kubernetes" }, { brand: "amazonwebservices", label: "AWS" }];
+
 export default async function Home() {
   const posts = await getPosts();
+  const now = new Date();
+  const season = Math.round(((now.getMonth() + now.getDate() / 31) / 12) * 100);
   const [featured, ...rest] = projects;
   return (
     <>
@@ -31,6 +35,17 @@ export default async function Home() {
           <div className="xk-gamehero-scene"><HeroScene /></div>
         </section>
 
+        <Section id="player" eyebrow="Player" title="Player 1 has entered the game" text={`${profile.years}+ years across five teams. Every number here comes from my CV or GitHub.`}>
+          <div className="xk-two-lr">
+            <PlayerCard name={profile.name} level={profile.years} className="Senior full-stack · AI engineer" avatar={profile.avatar} status="Online · open to co-op missions" xp={{ label: `Season ${now.getFullYear()}`, value: season, text: `${now.toLocaleString("en-US", { month: "short" })} · ${season}%` }} stats={stats} loadout={LOADOUT} />
+            <BentoGrid>
+              <BentoTile span={2} tone="accent" icon="broadcast" eyebrow="Real-time" value="100K+" title="Concurrent device connections" />
+              <BentoTile span={2} tone="agent" icon="robot" eyebrow="AI" value="MCP" title="Agent + tool server in production" />
+              <BentoTile span={2} icon="users-three" eyebrow="UptimeRobot" value="2.1M+" title="Users served" />
+              <BentoTile span={2} icon="lightning" eyebrow="Microservices" value="−40%" title="p95 latency" />
+            </BentoGrid>
+          </div>
+        </Section>
         <Section id="work" eyebrow="Work" title="Selected projects" scramble={false} action={<Button variant="ghost" iconRight="arrow-right" href="/work">All projects</Button>}>
           <div className="xk-grid" style={{ padding: 0, gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
             <ProjectCard wide featured slug={featured.slug} title={featured.title} eyebrow={featured.period} summary={featured.summary} image={featured.image} big={featured.big} bigLabel={featured.bigLabel} stack={featured.stack} ai={featured.ai} interactive={!!featured.embedUrl} />
