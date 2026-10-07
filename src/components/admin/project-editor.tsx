@@ -2,281 +2,394 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import type { Project } from "@/data/projects";
 import { deleteProject, importDemo, saveProject } from "@/app/[console]/actions";
 import { Icon } from "@/components/xerk/icon";
 import { useAdminHref } from "@/components/admin/base";
-import Link from "next/link";
-import { Chip, PageHeader, TagPreview } from "./ui";
-import { ConfirmButton, MediaField, StatusText, slugify, uploadFile, useAction, type Status } from "./shared";
+import { cx } from "@/lib/utils";
+import { Chip } from "./ui";
+import { slugify } from "./shared";
+import { Sheet, SheetFooter, useConfirm, useToast } from "./sheet";
+import { MultiUploader, Uploader } from "./uploader";
+import { AreaField, ChipInput, Disclosure, Kbd, LinesField, SaveState, SlugField, Switch, Tabs, TextField, type SaveStatus, useSaveShortcut, useUnsavedGuard } from "./form";
 
-type SectionForm = { id: string; title: string; body: string };
+type Section = { id: string; title: string; body: string };
+type Faq = { q: string; a: string };
+type Metric = { value: string; label: string; hint: string };
 type Form = {
   slug: string; code: string; title: string; world: string; company: string; period: string; role: string;
-  summary: string; answer: string; takeaways: string; boss: string; big: string; bigLabel: string;
+  summary: string; answer: string; takeaways: string[]; boss: string; big: string; bigLabel: string;
   image: string; video: string; embedUrl: string; url: string; ai: boolean; featured: boolean;
-  stack: string; metrics: string; sections: SectionForm[]; faq: { q: string; a: string }[]; screens: { src: string; alt: string }[];
+  stack: string[]; metrics: Metric[]; sections: Section[]; faq: Faq[]; screens: { src: string; alt: string }[];
   updated: string;
 };
 
 function toForm(p: Project): Form {
   return {
     slug: p.slug, code: p.code, title: p.title, world: p.world || "", company: p.company || "", period: p.period || "", role: p.role || "",
-    summary: p.summary || "", answer: p.answer || "", takeaways: (p.takeaways || []).join("\n"), boss: p.boss || "", big: p.big || "", bigLabel: p.bigLabel || "",
+    summary: p.summary || "", answer: p.answer || "", takeaways: p.takeaways || [], boss: p.boss || "", big: p.big || "", bigLabel: p.bigLabel || "",
     image: p.image || "", video: p.video || "", embedUrl: p.embedUrl || "", url: p.url || "", ai: !!p.ai, featured: !!p.featured,
-    stack: (p.stack || []).join(", "), metrics: (p.metrics || []).map((m) => [m.value, m.label, m.hint].filter((x) => x !== undefined).join(" | ")).join("\n"),
+    stack: p.stack || [], metrics: (p.metrics || []).map((m) => ({ value: m.value, label: m.label, hint: m.hint || "" })),
     sections: (p.sections || []).map((s) => ({ id: s.id, title: s.title, body: s.body.join("\n\n") })), faq: p.faq || [], screens: p.screens || [], updated: p.updated || "",
   };
 }
 
-function toProject(f: Form): Project {
+function toProject(f: Form, fallbackCode: string): Project {
   const opt = (s: string) => s.trim() || undefined;
+  const screens = f.screens.filter((s) => s.src.trim());
   return {
-    slug: f.slug.trim(), code: f.code.trim(), title: f.title.trim(), world: f.world.trim(), company: f.company.trim(), period: f.period.trim(), role: f.role.trim(),
-    summary: f.summary.trim(), answer: f.answer.trim(), takeaways: f.takeaways.split("\n").map((t) => t.trim()).filter(Boolean), boss: f.boss.trim(),
+    slug: f.slug.trim() || slugify(f.title), code: f.code.trim() || fallbackCode, title: f.title.trim(), world: f.world.trim(), company: f.company.trim(), period: f.period.trim(), role: f.role.trim(),
+    summary: f.summary.trim(), answer: f.answer.trim(), takeaways: f.takeaways, boss: f.boss.trim(),
     big: opt(f.big), bigLabel: opt(f.bigLabel), image: opt(f.image), video: opt(f.video), embedUrl: opt(f.embedUrl), url: opt(f.url),
     ai: f.ai || undefined, featured: f.featured || undefined,
-    screens: f.screens.filter((s) => s.src.trim()).length ? f.screens.filter((s) => s.src.trim()).map((s) => ({ src: s.src.trim(), alt: s.alt.trim() })) : undefined,
-    stack: f.stack.split(",").map((s) => s.trim()).filter(Boolean),
-    metrics: f.metrics.split("\n").map((l) => l.split("|").map((x) => x.trim())).filter((r) => r[0]).map(([value, label = "", hint]) => ({ value, label, ...(hint ? { hint } : {}) })),
+    screens: screens.length ? screens.map((s) => ({ src: s.src.trim(), alt: s.alt.trim() })) : undefined,
+    stack: f.stack,
+    metrics: f.metrics.filter((m) => m.value.trim()).map((m) => ({ value: m.value.trim(), label: m.label.trim(), ...(m.hint.trim() ? { hint: m.hint.trim() } : {}) })),
     sections: f.sections.filter((s) => s.title.trim() || s.body.trim()).map((s) => ({ id: s.id.trim() || slugify(s.title), title: s.title.trim(), body: s.body.split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean) })),
     faq: f.faq.filter((q) => q.q.trim()).map((q) => ({ q: q.q.trim(), a: q.a.trim() })),
     updated: f.updated,
   };
 }
 
-const Text = ({ label, value, onChange, hint, placeholder, mono }: { label: string; value: string; onChange: (v: string) => void; hint?: string; placeholder?: string; mono?: boolean }) => (
-  <label className="xk-field"><span>{label}</span><input className={mono ? "is-mono" : undefined} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />{hint && <span className="xk-field-hint">{hint}</span>}</label>
-);
-const Area = ({ label, value, onChange, hint, rows = 3, placeholder, mono }: { label: string; value: string; onChange: (v: string) => void; hint?: string; rows?: number; placeholder?: string; mono?: boolean }) => (
-  <label className="xk-field"><span>{label}</span><textarea className={mono ? "is-mono" : undefined} rows={rows} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />{hint && <span className="xk-field-hint">{hint}</span>}</label>
-);
+const TABS = [{ id: "basics", label: "Basics" }, { id: "story", label: "Story" }, { id: "media", label: "Media" }, { id: "seo", label: "SEO & FAQ" }] as const;
+type TabId = (typeof TABS)[number]["id"];
+const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const move = <T,>(list: T[], i: number, d: number) => { const n = [...list]; const j = i + d; if (j < 0 || j >= n.length) return n; [n[i], n[j]] = [n[j], n[i]]; return n; };
 
-export function ProjectEditor({ initial, isNew, published: initialPublished, inDb }: { initial: Project; isNew: boolean; published: boolean; inDb: boolean }) {
+export function ProjectEditor({ initial, isNew, published: initialPublished, inDb: initialInDb, allStack = [] }: { initial: Project; isNew: boolean; published: boolean; inDb: boolean; allStack?: string[] }) {
   const router = useRouter();
   const ah = useAdminHref();
+  const toast = useToast();
+  const [confirm, confirmNode] = useConfirm();
   const [f, setF] = useState<Form>(() => toForm(initial));
   const [published, setPublished] = useState(initialPublished);
   const [savedSlug, setSavedSlug] = useState<string | undefined>(isNew ? undefined : initial.slug);
-  const [slugTouched, setSlugTouched] = useState(!isNew);
-  const [dirty, setDirty] = useState(false);
-  const { status, pending, exec } = useAction();
-  const [demo, setDemo] = useState<Status>({ kind: "idle" });
-  const demoInput = useRef<HTMLInputElement>(null);
-  const screensInput = useRef<HTMLInputElement>(null);
-  const [screensState, setScreensState] = useState<Status>({ kind: "idle" });
+  const [inDb, setInDb] = useState(initialInDb);
+  const [slugAuto, setSlugAuto] = useState(isNew || !initial.slug);
+  const [tab, setTab] = useState<TabId>("basics");
+  const [status, setStatus] = useState<SaveStatus>({ state: "clean" });
+  const [section, setSection] = useState<{ i: number; v: Section } | null>(null);
+  const [faq, setFaq] = useState<{ i: number; v: Faq } | null>(null);
+  const [titleError, setTitleError] = useState("");
+  const version = useRef(0);
+  const saving = useRef(false);
+  const fallbackCode = initial.code || "1-1";
+  useUnsavedGuard(status.state === "dirty" || status.state === "error");
 
   const set = <K extends keyof Form>(k: K, v: Form[K]) => {
-    setDirty(true);
-    setF((p) => ({ ...p, [k]: v, ...(k === "title" && !slugTouched ? { slug: slugify(String(v)) } : {}) }));
+    version.current++;
+    setStatus({ state: "dirty" });
+    if (k === "title") setTitleError("");
+    setF((p) => ({ ...p, [k]: v, ...(k === "title" && slugAuto ? { slug: slugify(String(v)) } : {}) }));
   };
 
-  useEffect(() => {
-    if (!dirty) return;
-    const on = (e: BeforeUnloadEvent) => { e.preventDefault(); };
-    window.addEventListener("beforeunload", on);
-    return () => window.removeEventListener("beforeunload", on);
-  }, [dirty]);
+  const save = async (override?: Partial<Form>, nextPublished = published) => {
+    if (saving.current) return false;
+    const form = { ...f, ...override };
+    if (!form.title.trim()) { setTab("basics"); setTitleError("A title is the only thing needed to save."); return false; }
+    const project = toProject(form, fallbackCode);
+    if (!SLUG_RE.test(project.slug)) { setTab("seo"); toast.error("The URL needs letters or numbers", "Edit it under SEO & FAQ."); return false; }
+    saving.current = true;
+    const v = version.current;
+    setStatus({ state: "saving" });
+    const r = await saveProject({ originalSlug: savedSlug, project, published: nextPublished }).catch((e) => ({ ok: false as const, error: String(e) }));
+    saving.current = false;
+    if (!r.ok || !r.data) { setStatus({ state: "error", error: r.ok ? "" : r.error }); toast.error("Couldn't save", r.ok ? undefined : r.error); return false; }
+    setInDb(true);
+    setF((p) => ({ ...p, slug: project.slug, code: project.code }));
+    setStatus(version.current === v ? { state: "saved", at: Date.now() } : { state: "dirty" });
+    toast.ok(isNew && !savedSlug ? "Project created" : "Saved", nextPublished ? `Live at /work/${project.slug}` : "Hidden from the site");
+    if (r.data.slug !== savedSlug) { setSavedSlug(r.data.slug); router.replace(ah(`/projects/${r.data.slug}`)); } else router.refresh();
+    return true;
+  };
+  useSaveShortcut(() => save());
 
-  const folder = `projects/${f.slug || "untitled"}`;
-  const needSlug = f.slug ? undefined : "Add a title or slug first";
+  const togglePublished = async (v: boolean) => {
+    setPublished(v);
+    if (inDb && savedSlug) { const ok = await save(undefined, v); if (!ok) setPublished(!v); }
+    else { version.current++; setStatus({ state: "dirty" }); }
+  };
 
-  const save = async () => {
-    const r = await exec(() => saveProject({ originalSlug: savedSlug, project: toProject(f), published }));
-    if (r.ok && r.data) {
-      setDirty(false);
-      if (r.data.slug !== savedSlug) { setSavedSlug(r.data.slug); router.replace(ah(`/projects/${r.data.slug}`)); } else router.refresh();
-    }
+  /** Apply a sheet edit, then save right away when the project already exists (one action, not two). */
+  const applyAndSave = async (patch: Partial<Form>) => {
+    version.current++;
+    setF((p) => ({ ...p, ...patch }));
+    if (inDb && savedSlug) return save(patch);
+    setStatus({ state: "dirty" });
+    return true;
   };
 
   const remove = async () => {
     if (!savedSlug) return;
-    const r = await exec(() => deleteProject(savedSlug), "Deleting…");
-    if (r.ok) { setDirty(false); router.push(ah("/projects")); }
+    if (!(await confirm({ title: `Delete “${f.title || savedSlug}”?`, body: "It disappears from /work and the level select. This can't be undone.", confirmLabel: "Delete", danger: true }))) return;
+    const r = await deleteProject(savedSlug);
+    if (!r.ok) { toast.error("Couldn't delete", r.error); return; }
+    setStatus({ state: "clean" });
+    toast.ok("Project deleted");
+    router.push(ah("/projects"));
   };
 
-  const uploadDemo = async (file?: File) => {
-    if (!file) return;
-    if (!/\.html?$/i.test(file.name)) { setDemo({ kind: "error", text: "Pick an .html file" }); return; }
-    setDemo({ kind: "busy", text: "Uploading demo…" });
-    try {
-      const { path } = await uploadFile(folder, file, "demo");
-      const r = await importDemo(f.slug, path);
-      if (!r.ok || !r.data) throw new Error(r.ok ? "Import failed" : r.error);
-      set("embedUrl", r.data.embedUrl);
-      setDemo({ kind: "ok", text: `Demo stored, served at ${r.data.embedUrl}. Save the project to use it.` });
-    } catch (e) {
-      setDemo({ kind: "error", text: e instanceof Error ? e.message : "Upload failed" });
-    }
-    if (demoInput.current) demoInput.current.value = "";
+  const folder = `projects/${f.slug || "untitled"}`;
+  const needSlug = f.slug ? undefined : "Add a title first";
+  const counts: Record<TabId, number> = {
+    basics: 0,
+    story: f.sections.length + f.metrics.length,
+    media: [f.image, f.video, f.embedUrl].filter(Boolean).length + f.screens.length,
+    seo: f.faq.length,
   };
-
-  const uploadScreens = async (files?: FileList | null) => {
-    if (!files?.length) return;
-    const list = Array.from(files);
-    setScreensState({ kind: "busy", text: `Uploading ${list.length} image${list.length > 1 ? "s" : ""}…` });
-    try {
-      const added: { src: string; alt: string }[] = [];
-      for (const file of list) {
-        const { publicUrl } = await uploadFile(`${folder}/screens`, file);
-        added.push({ src: publicUrl, alt: `${f.title || "Project"} screenshot` });
-      }
-      set("screens", [...f.screens, ...added]);
-      setScreensState({ kind: "ok", text: "Uploaded" });
-    } catch (e) {
-      setScreensState({ kind: "error", text: e instanceof Error ? e.message : "Upload failed" });
-    }
-    if (screensInput.current) screensInput.current.value = "";
-  };
-
-  const move = <T,>(list: T[], i: number, d: number) => { const n = [...list]; const j = i + d; if (j < 0 || j >= n.length) return n; [n[i], n[j]] = [n[j], n[i]]; return n; };
 
   return (
-    <div className="xk-admin-stack">
-      <PageHeader
-        eyebrow={<><Link href={ah("/projects")} className="xk-admin-crumb">Projects</Link> / {!savedSlug ? "New" : `Stage ${f.code}`}</>}
-        title={f.title || "Untitled project"}
-        meta={<>
-          <Chip dot tone={published ? "accent" : "warning"}>{published ? "live" : "hidden"}</Chip>
-          {f.featured && <Chip icon="star">featured</Chip>}
-          {f.ai && <Chip tone="agent" icon="sparkle">ai</Chip>}
+    <div className="xk-editor">
+      <div className="xk-editor-top">
+        <div className="xk-editor-top-start">
+          <Link href={ah("/projects")} className="xk-iconbtn-sm" aria-label="Back to projects" title="Back to projects"><Icon name="arrow-left" /></Link>
+          <span className="xk-editor-crumb"><Link href={ah("/projects")} className="xk-admin-crumb">Projects</Link><span aria-hidden>/</span><b>{f.title || "Untitled"}</b></span>
+          <SaveState status={status} />
           {savedSlug && !inDb && <Chip dot tone="agent" title="Saving copies it to Supabase">static data</Chip>}
-          {f.slug && <Chip outline>/work/{f.slug}</Chip>}
-        </>}
-        actions={savedSlug && published ? <a className="xk-btn xk-btn-secondary xk-btn-sm" href={`/work/${savedSlug}`} target="_blank" rel="noopener"><Icon name="arrow-square-out" />View on site</a> : undefined}
-      />
-
-      <section className="xk-admin-panel">
-        <div className="xk-admin-panel-head"><div><h2>Basics</h2><p>Identity, where it sits in the level select, and the story in brief.</p></div></div>
-        <Text label="Title" value={f.title} onChange={(v) => set("title", v)} />
-        <div className="xk-field-row is-3">
-          <label className="xk-field"><span>Slug</span><span className="xk-admin-affix"><span>/work/</span><input className="is-mono" value={f.slug} onChange={(e) => { setSlugTouched(true); set("slug", slugify(e.target.value) + (e.target.value.endsWith("-") ? "-" : "")); }} /></span></label>
-          <Text label="Code" value={f.code} onChange={(v) => set("code", v)} placeholder="1-7" mono hint="Stage number in the level select" />
-          <Text label="World" value={f.world} onChange={(v) => set("world", v)} placeholder="Enterprise · AI" />
         </div>
-        <div className="xk-field-row is-3">
-          <Text label="Company" value={f.company} onChange={(v) => set("company", v)} />
-          <Text label="Period" value={f.period} onChange={(v) => set("period", v)} placeholder="2024 — Now" />
-          <Text label="Role" value={f.role} onChange={(v) => set("role", v)} />
-        </div>
-        <Area label="Summary" value={f.summary} onChange={(v) => set("summary", v)} rows={2} />
-        <Area label="Answer (TL;DR)" value={f.answer} onChange={(v) => set("answer", v)} rows={2} hint="One answer-first sentence: used in the TL;DR box, meta description and llms.txt" />
-        <Area label="Takeaways" value={f.takeaways} onChange={(v) => set("takeaways", v)} rows={3} hint="One per line" />
-        <div className="xk-field-row is-3">
-          <Text label="Boss" value={f.boss} onChange={(v) => set("boss", v)} placeholder="100,000 sockets that can't drop" />
-          <Text label="Big number" value={f.big} onChange={(v) => set("big", v)} placeholder="100K+" />
-          <Text label="Big number label" value={f.bigLabel} onChange={(v) => set("bigLabel", v)} placeholder="concurrent devices" />
-        </div>
-        <label className="xk-field"><span>Stack</span><input value={f.stack} onChange={(e) => set("stack", e.target.value)} /><TagPreview value={f.stack} /><span className="xk-field-hint">Comma separated</span></label>
-        <Area label="Metrics" value={f.metrics} onChange={(v) => set("metrics", v)} rows={3} mono hint="One per line: value | label | hint (hint optional)" placeholder="100K+ | Concurrent connections" />
-        <div className="xk-field-row">
-          <Text label="Live site URL (optional)" value={f.url} onChange={(v) => set("url", v)} placeholder="https://…" />
-          <div className="xk-field"><span>Flags</span>
-            <div className="xk-admin-switches">
-              <label className="xk-switch"><input type="checkbox" checked={published} onChange={(e) => { setDirty(true); setPublished(e.target.checked); }} />Published</label>
-              <label className="xk-switch"><input type="checkbox" checked={f.featured} onChange={(e) => set("featured", e.target.checked)} />Featured</label>
-              <label className="xk-switch"><input type="checkbox" checked={f.ai} onChange={(e) => set("ai", e.target.checked)} />AI project</label>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="xk-admin-panel">
-        <div className="xk-admin-panel-head"><div><h2>Media</h2><p>Cover, preview loop, interactive demo and screenshots. Uploads go to media/projects/&lt;slug&gt;/.</p></div></div>
-        <div className="xk-field-row">
-          <MediaField label="Cover image" value={f.image} onChange={(v) => set("image", v)} folder={folder} fixedName="cover" disabledReason={needSlug} hint="media/projects/<slug>/cover.*" />
-          <MediaField label="Preview video" kind="video" accept="video/mp4,video/webm" value={f.video} onChange={(v) => set("video", v)} folder={folder} fixedName="preview" disabledReason={needSlug} hint="Short muted loop (mp4). media/projects/<slug>/preview.*" />
-        </div>
-        <div className="xk-field xk-admin-upload">
-          <span>Interactive demo</span>
-          <div className="xk-admin-upload-row">
-            <input type="text" value={f.embedUrl} onChange={(e) => set("embedUrl", e.target.value)} placeholder="https://claude.site/… or /demos/… or upload an .html file" />
-            <input ref={demoInput} type="file" accept=".html,.htm,text/html" hidden onChange={(e) => uploadDemo(e.target.files?.[0])} />
-            <button type="button" className="xk-btn xk-btn-secondary xk-btn-sm" disabled={!!needSlug || demo.kind === "busy"} onClick={() => demoInput.current?.click()}><Icon name="upload-simple" />{demo.kind === "busy" ? "Uploading…" : "Upload .html"}</button>
-            {f.embedUrl && <a className="xk-btn xk-btn-ghost xk-btn-sm" href={f.embedUrl} target="_blank" rel="noopener"><Icon name="arrow-square-out" />Open</a>}
-            {f.embedUrl && <button type="button" className="xk-btn xk-btn-ghost xk-btn-sm" onClick={() => set("embedUrl", "")}>Clear</button>}
-          </div>
-          <span className="xk-field-hint">Embed URL, or upload a self-contained demo/artifact HTML. Uploaded demos are served from /demos/&lt;slug&gt; in a sandbox.</span>
-          <StatusText status={demo} />
-        </div>
-        <div className="xk-field">
-          <span>Screens</span>
-          <div className="xk-order is-plain">
-            {f.screens.map((s, i) => (
-              <div key={i} className="xk-order-item is-screen">
-                <img src={s.src} alt="" />
-                <input value={s.alt} onChange={(e) => set("screens", f.screens.map((x, k) => (k === i ? { ...x, alt: e.target.value } : x)))} placeholder="Alt text" aria-label={`Alt text for screen ${i + 1}`} className="xk-admin-input" />
-                <div className="xk-admin-actions">
-                  <button type="button" className="xk-iconbtn-sm" aria-label="Move up" disabled={i === 0} onClick={() => set("screens", move(f.screens, i, -1))}><Icon name="arrow-up" /></button>
-                  <button type="button" className="xk-iconbtn-sm" aria-label="Move down" disabled={i === f.screens.length - 1} onClick={() => set("screens", move(f.screens, i, 1))}><Icon name="arrow-down" /></button>
-                  <button type="button" className="xk-iconbtn-sm is-danger" aria-label="Remove" onClick={() => set("screens", f.screens.filter((_, k) => k !== i))}><Icon name="trash" /></button>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="xk-admin-upload-row">
-            <input ref={screensInput} type="file" accept="image/*" multiple hidden onChange={(e) => uploadScreens(e.target.files)} />
-            <button type="button" className="xk-btn xk-btn-secondary xk-btn-sm" disabled={!!needSlug || screensState.kind === "busy"} onClick={() => screensInput.current?.click()}><Icon name="plus" />Upload screens</button>
-            <StatusText status={screensState} />
-          </div>
-        </div>
-      </section>
-
-      <section className="xk-admin-panel">
-        <div className="xk-admin-panel-head"><div><h2>Sections</h2><p>The case study body. Paragraphs are separated by a blank line.</p></div></div>
-        <div className="xk-repeat">
-          {f.sections.map((s, i) => (
-            <div key={i} className="xk-repeat-item">
-              <div className="xk-repeat-head">
-                <span className="xk-repeat-index"><b>{String(i + 1).padStart(2, "0")}</b>Section</span>
-                <div className="xk-admin-actions">
-                  <button type="button" className="xk-iconbtn-sm" aria-label="Move up" disabled={i === 0} onClick={() => set("sections", move(f.sections, i, -1))}><Icon name="arrow-up" /></button>
-                  <button type="button" className="xk-iconbtn-sm" aria-label="Move down" disabled={i === f.sections.length - 1} onClick={() => set("sections", move(f.sections, i, 1))}><Icon name="arrow-down" /></button>
-                  <button type="button" className="xk-iconbtn-sm is-danger" aria-label="Remove section" onClick={() => set("sections", f.sections.filter((_, k) => k !== i))}><Icon name="trash" /></button>
-                </div>
-              </div>
-              <div className="xk-field-row">
-                <Text label="Title" value={s.title} onChange={(v) => set("sections", f.sections.map((x, k) => (k === i ? { ...x, title: v } : x)))} />
-                <Text label="Anchor id" value={s.id} onChange={(v) => set("sections", f.sections.map((x, k) => (k === i ? { ...x, id: slugify(v) } : x)))} mono hint={`#${s.id || slugify(s.title) || "…"} · "approach" adds the AI callout on AI projects`} />
-              </div>
-              <Area label="Body" value={s.body} onChange={(v) => set("sections", f.sections.map((x, k) => (k === i ? { ...x, body: v } : x)))} rows={5} hint="Paragraphs separated by a blank line" />
-            </div>
-          ))}
-          <div className="xk-repeat-add"><button type="button" className="xk-btn xk-btn-secondary xk-btn-sm" onClick={() => set("sections", [...f.sections, { id: "", title: "", body: "" }])}><Icon name="plus" />Add section</button></div>
-        </div>
-      </section>
-
-      <section className="xk-admin-panel">
-        <div className="xk-admin-panel-head"><div><h2>FAQ</h2><p>Shown at the end of the case study and as FAQ structured data.</p></div></div>
-        <div className="xk-repeat">
-          {f.faq.map((q, i) => (
-            <div key={i} className="xk-repeat-item">
-              <div className="xk-repeat-head">
-                <span className="xk-repeat-index"><b>{String(i + 1).padStart(2, "0")}</b>Question</span>
-                <div className="xk-admin-actions">
-                  <button type="button" className="xk-iconbtn-sm" aria-label="Move up" disabled={i === 0} onClick={() => set("faq", move(f.faq, i, -1))}><Icon name="arrow-up" /></button>
-                  <button type="button" className="xk-iconbtn-sm" aria-label="Move down" disabled={i === f.faq.length - 1} onClick={() => set("faq", move(f.faq, i, 1))}><Icon name="arrow-down" /></button>
-                  <button type="button" className="xk-iconbtn-sm is-danger" aria-label="Remove question" onClick={() => set("faq", f.faq.filter((_, k) => k !== i))}><Icon name="trash" /></button>
-                </div>
-              </div>
-              <Text label="Question" value={q.q} onChange={(v) => set("faq", f.faq.map((x, k) => (k === i ? { ...x, q: v } : x)))} />
-              <Area label="Answer" value={q.a} onChange={(v) => set("faq", f.faq.map((x, k) => (k === i ? { ...x, a: v } : x)))} rows={2} />
-            </div>
-          ))}
-          <div className="xk-repeat-add"><button type="button" className="xk-btn xk-btn-secondary xk-btn-sm" onClick={() => set("faq", [...f.faq, { q: "", a: "" }])}><Icon name="plus" />Add question</button></div>
-        </div>
-      </section>
-
-      <div className="xk-admin-bar">
-        <div className="xk-admin-actions">
-          <button type="button" className="xk-btn xk-btn-primary xk-btn-sm" disabled={pending} onClick={save}><Icon name="check" />{savedSlug ? "Save project" : "Create project"}</button>
-          {savedSlug && inDb && <ConfirmButton label="Delete" question="Delete this project?" onConfirm={remove} disabled={pending} />}
-        </div>
-        <div className="xk-admin-actions">
-          {dirty && status.kind !== "busy" && <span className="xk-admin-msg is-dirty">Unsaved changes</span>}
-          <StatusText status={status} />
+        <div className="xk-editor-top-end">
+          <label className="xk-switch xk-editor-live" title={published ? "Visible on the site" : "Hidden from the site"}><input type="checkbox" role="switch" checked={published} onChange={(e) => togglePublished(e.target.checked)} />{published ? "Live" : "Hidden"}</label>
+          {savedSlug && published && inDb && <a className="xk-btn xk-btn-ghost xk-btn-sm xk-hide-sm" href={`/work/${savedSlug}`} target="_blank" rel="noopener"><Icon name="arrow-square-out" />View</a>}
+          <button type="button" className="xk-btn xk-btn-primary xk-btn-sm" disabled={status.state === "saving"} onClick={() => save()} title="Save (Ctrl/⌘+S)"><Icon name="check" />{savedSlug ? "Save" : "Create"}</button>
         </div>
       </div>
+
+      <div className="xk-editor-main is-wide">
+        <textarea className="xk-editor-title" rows={1} value={f.title} onChange={(e) => set("title", e.target.value.replace(/\n/g, " "))} placeholder="Project title" aria-label="Title" aria-invalid={!!titleError} autoFocus={isNew} />
+        {titleError ? <span className="xk-field-error" role="alert"><Icon name="warning-circle" />{titleError}</span> : <p className="xk-editor-hint">Only the title is required. Fill the rest whenever you like; empty fields are simply left off the page. <span className="xk-hide-sm"><Kbd k="S" /> saves.</span></p>}
+
+        <div className="xk-editor-modebar">
+          <Tabs label="Project sections" value={tab} onChange={setTab} items={TABS.map((t) => ({ id: t.id, label: t.label, badge: counts[t.id] ? <span className="xk-admin-count">{counts[t.id]}</span> : undefined }))} />
+          {savedSlug && inDb && <button type="button" className="xk-linkbtn xk-danger-link" onClick={remove}>Delete project</button>}
+        </div>
+
+        {tab === "basics" && (
+          <section className="xk-editor-section" aria-label="Basics">
+            <AreaField label="Summary" value={f.summary} onChange={(v) => set("summary", v)} rows={2} count={200} placeholder="What it is and why it mattered, in a sentence or two" hint="Shown on cards and the case study intro" />
+            <ChipInput label="Stack" value={f.stack} onChange={(v) => set("stack", v)} suggestions={allStack} placeholder="Node.js, Postgres… press Enter" />
+            <div className="xk-field-row is-3">
+              <TextField label="Company" value={f.company} onChange={(v) => set("company", v)} placeholder="Acme" />
+              <TextField label="Role" value={f.role} onChange={(v) => set("role", v)} placeholder="Tech lead" />
+              <TextField label="Period" value={f.period} onChange={(v) => set("period", v)} placeholder="2024 — Now" />
+            </div>
+            <div className="xk-switch-group">
+              <Switch label="Featured" hint="Pinned on the home page" checked={f.featured} onChange={(v) => set("featured", v)} />
+              <Switch label="AI project" hint="Adds the AI badge and approach callout" checked={f.ai} onChange={(v) => set("ai", v)} />
+            </div>
+            <Disclosure title="Level select & links" summary={[f.code, f.world].filter(Boolean).join(" · ") || "optional"}>
+              <div className="xk-field-row">
+                <TextField label="Stage code" value={f.code} onChange={(v) => set("code", v)} placeholder={fallbackCode} mono hint="Position in the level select, e.g. 1-7" />
+                <TextField label="World" value={f.world} onChange={(v) => set("world", v)} placeholder="Enterprise · AI" />
+              </div>
+              <TextField label="Live site URL" type="url" value={f.url} onChange={(v) => set("url", v)} placeholder="https://…" />
+            </Disclosure>
+          </section>
+        )}
+
+        {tab === "story" && (
+          <>
+            <section className="xk-editor-section" aria-label="Headline numbers">
+              <header><h2>The hook</h2><p>The challenge in one line and the number people remember.</p></header>
+              <TextField label="Boss (the hard problem)" value={f.boss} onChange={(v) => set("boss", v)} placeholder="100,000 sockets that can't drop" />
+              <div className="xk-field-row">
+                <TextField label="Big number" value={f.big} onChange={(v) => set("big", v)} placeholder="100K+" />
+                <TextField label="Label" value={f.bigLabel} onChange={(v) => set("bigLabel", v)} placeholder="concurrent devices" />
+              </div>
+              <div className="xk-field">
+                <span>Metrics</span>
+                <div className="xk-metrics">
+                  {f.metrics.map((m, i) => (
+                    <div key={i} className="xk-metric-row">
+                      <input className="xk-admin-input is-mono" value={m.value} onChange={(e) => set("metrics", f.metrics.map((x, k) => (k === i ? { ...x, value: e.target.value } : x)))} placeholder="45%" aria-label={`Metric ${i + 1} value`} />
+                      <input className="xk-admin-input" value={m.label} onChange={(e) => set("metrics", f.metrics.map((x, k) => (k === i ? { ...x, label: e.target.value } : x)))} placeholder="faster p95" aria-label={`Metric ${i + 1} label`} />
+                      <input className="xk-admin-input" value={m.hint} onChange={(e) => set("metrics", f.metrics.map((x, k) => (k === i ? { ...x, hint: e.target.value } : x)))} placeholder="Hint (optional)" aria-label={`Metric ${i + 1} hint`} />
+                      <button type="button" className="xk-iconbtn-sm is-danger" aria-label={`Remove metric ${i + 1}`} onClick={() => set("metrics", f.metrics.filter((_, k) => k !== i))}><Icon name="trash" /></button>
+                    </div>
+                  ))}
+                  <button type="button" className="xk-btn xk-btn-secondary xk-btn-sm" style={{ alignSelf: "flex-start" }} onClick={() => set("metrics", [...f.metrics, { value: "", label: "", hint: "" }])}><Icon name="plus" />Add metric</button>
+                </div>
+              </div>
+              <LinesField label="Takeaways" value={f.takeaways} onChange={(v) => set("takeaways", v)} rows={3} hint="One per line" placeholder={"Reconnects are the real load test\nBackpressure beats bigger boxes"} />
+            </section>
+            <section className="xk-editor-section" aria-label="Sections">
+              <header><h2>Case study</h2><p>The body of /work/{f.slug || "…"}, one section at a time.</p></header>
+              <ul className="xk-list">
+                {f.sections.length === 0 && <li className="xk-list-empty">No sections yet. A good default: The problem, Approach, Results.</li>}
+                {f.sections.map((s, i) => (
+                  <li key={i} className="xk-list-item">
+                    <button type="button" className="xk-list-row" onClick={() => setSection({ i, v: s })}>
+                      <span className="xk-list-num">{String(i + 1).padStart(2, "0")}</span>
+                      <span className="xk-list-main"><strong>{s.title || "Untitled section"}</strong><span className="xk-list-text">{s.body.trim() ? s.body.slice(0, 220) : "Empty. Click to write it."}</span></span>
+                      <span className="xk-list-side"><Icon name="caret-right" /></span>
+                    </button>
+                    <span className="xk-list-tools">
+                      <button type="button" className="xk-iconbtn-sm" aria-label="Move up" disabled={i === 0} onClick={() => set("sections", move(f.sections, i, -1))}><Icon name="arrow-up" /></button>
+                      <button type="button" className="xk-iconbtn-sm" aria-label="Move down" disabled={i === f.sections.length - 1} onClick={() => set("sections", move(f.sections, i, 1))}><Icon name="arrow-down" /></button>
+                    </span>
+                  </li>
+                ))}
+                <li><button type="button" className="xk-list-add" onClick={() => setSection({ i: -1, v: { id: "", title: "", body: "" } })}><Icon name="plus-circle" />Add section</button></li>
+              </ul>
+            </section>
+          </>
+        )}
+
+        {tab === "media" && (
+          <section className="xk-editor-section" aria-label="Media">
+            <div className="xk-field-row">
+              <Uploader label="Cover image" value={f.image} onChange={(v) => set("image", v)} folder={folder} fixedName="cover" disabledReason={needSlug} hint="Cards, the case study hero and social previews" />
+              <Uploader label="Preview loop" kind="video" value={f.video} onChange={(v) => set("video", v)} folder={folder} fixedName="preview" disabledReason={needSlug} hint="Short muted MP4 that plays on hover" />
+            </div>
+            <MultiUploader label="Screens" value={f.screens} onChange={(v) => set("screens", v)} folder={`${folder}/screens`} disabledReason={needSlug} defaultAlt={`${f.title || "Project"} screenshot`} hint="Drag to reorder. Alt text helps screen readers and SEO." />
+            <Disclosure title="Interactive demo" summary={f.embedUrl ? "attached" : "optional"} defaultOpen={!!f.embedUrl}>
+              <Uploader
+                label="Demo"
+                kind="html"
+                value={f.embedUrl}
+                onChange={(v) => set("embedUrl", v)}
+                folder={folder}
+                fixedName="demo"
+                disabledReason={needSlug}
+                aspect="doc"
+                onUploaded={async (path) => {
+                  const r = await importDemo(f.slug, path);
+                  if (!r.ok || !r.data) throw new Error(r.ok ? "Import failed" : r.error);
+                  toast.ok("Demo stored", `Served at ${r.data.embedUrl}. Save the project to use it.`);
+                  return r.data.embedUrl;
+                }}
+                hint="Upload a self-contained .html (served sandboxed from /demos/<slug>) or paste an embed URL"
+              />
+            </Disclosure>
+          </section>
+        )}
+
+        {tab === "seo" && (
+          <>
+            <section className="xk-editor-section" aria-label="Search">
+              <header><h2>Search & AI answers</h2><p>How the page shows up in Google, link previews and llms.txt.</p></header>
+              <SlugField prefix="/work/" value={f.slug} auto={slugAuto} onEdit={(v) => { setSlugAuto(false); set("slug", slugify(v) + (v.endsWith("-") ? "-" : "")); }} />
+              <AreaField label="Answer (TL;DR)" value={f.answer} onChange={(v) => set("answer", v)} rows={2} count={160} placeholder="Answer-first: what was built and the result" hint="Used in the TL;DR box, the meta description and llms.txt" />
+            </section>
+            <section className="xk-editor-section" aria-label="FAQ">
+              <header><h2>FAQ</h2><p>Shown at the end of the case study and as FAQ structured data.</p></header>
+              <ul className="xk-list">
+                {f.faq.length === 0 && <li className="xk-list-empty">No questions yet.</li>}
+                {f.faq.map((q, i) => (
+                  <li key={i} className="xk-list-item">
+                    <button type="button" className="xk-list-row" onClick={() => setFaq({ i, v: q })}>
+                      <span className="xk-list-num">Q{i + 1}</span>
+                      <span className="xk-list-main"><strong>{q.q || "Untitled question"}</strong><span className="xk-list-text">{q.a || "No answer yet"}</span></span>
+                      <span className="xk-list-side"><Icon name="caret-right" /></span>
+                    </button>
+                    <span className="xk-list-tools">
+                      <button type="button" className="xk-iconbtn-sm" aria-label="Move up" disabled={i === 0} onClick={() => set("faq", move(f.faq, i, -1))}><Icon name="arrow-up" /></button>
+                      <button type="button" className="xk-iconbtn-sm" aria-label="Move down" disabled={i === f.faq.length - 1} onClick={() => set("faq", move(f.faq, i, 1))}><Icon name="arrow-down" /></button>
+                    </span>
+                  </li>
+                ))}
+                <li><button type="button" className="xk-list-add" onClick={() => setFaq({ i: -1, v: { q: "", a: "" } })}><Icon name="plus-circle" />Add question</button></li>
+              </ul>
+            </section>
+          </>
+        )}
+      </div>
+
+      <ItemSheet
+        open={!!section}
+        title={section && section.i >= 0 ? "Edit section" : "New section"}
+        initial={section?.v}
+        canSave={(v) => !!(v.title.trim() || v.body.trim())}
+        onClose={() => setSection(null)}
+        onDelete={section && section.i >= 0 ? () => { const i = section.i; setSection(null); applyAndSave({ sections: f.sections.filter((_, k) => k !== i) }); } : undefined}
+        onSave={async (v) => { const i = section!.i; const next = i >= 0 ? f.sections.map((x, k) => (k === i ? v : x)) : [...f.sections, v]; if (await applyAndSave({ sections: next })) setSection(null); }}
+        render={(v, setV) => (
+          <>
+            <TextField label="Title" value={v.title} onChange={(t) => setV({ ...v, title: t })} placeholder="The problem" autoFocus />
+            <AreaField label="Body" value={v.body} onChange={(t) => setV({ ...v, body: t })} rows={12} placeholder="Write it like you'd explain it to a peer. Leave a blank line between paragraphs." hint="Paragraphs are separated by a blank line" />
+            <Disclosure title="Anchor link" summary={`#${v.id || slugify(v.title) || "…"}`}>
+              <TextField label="Anchor id" value={v.id} onChange={(t) => setV({ ...v, id: slugify(t) })} mono placeholder={slugify(v.title) || "approach"} hint={'Defaults to the title. "approach" adds the AI callout on AI projects.'} />
+            </Disclosure>
+          </>
+        )}
+      />
+      <ItemSheet
+        open={!!faq}
+        title={faq && faq.i >= 0 ? "Edit question" : "New question"}
+        initial={faq?.v}
+        canSave={(v) => !!v.q.trim()}
+        onClose={() => setFaq(null)}
+        onDelete={faq && faq.i >= 0 ? () => { const i = faq.i; setFaq(null); applyAndSave({ faq: f.faq.filter((_, k) => k !== i) }); } : undefined}
+        onSave={async (v) => { const i = faq!.i; const next = i >= 0 ? f.faq.map((x, k) => (k === i ? v : x)) : [...f.faq, v]; if (await applyAndSave({ faq: next })) setFaq(null); }}
+        render={(v, setV) => (
+          <>
+            <TextField label="Question" value={v.q} onChange={(t) => setV({ ...v, q: t })} placeholder="How did you keep reconnects from melting the cluster?" autoFocus />
+            <AreaField label="Answer" value={v.a} onChange={(t) => setV({ ...v, a: t })} rows={6} placeholder="Two or three plain sentences." />
+          </>
+        )}
+      />
+      {confirmNode}
     </div>
+  );
+}
+
+/** Generic sheet for editing one item of a list with its own draft state and dirty guard. */
+function ItemSheet<T extends object>({ open, title, initial, onClose, onSave, onDelete, render, canSave }: { open: boolean; title: string; initial?: T; onClose: () => void; onSave: (v: T) => Promise<void> | void; onDelete?: () => void; render: (v: T, set: (v: T) => void) => React.ReactNode; canSave: (v: T) => boolean }) {
+  const [v, setV] = useState<T | undefined>(initial);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => { if (open) setV(initial); }, [open, initial]);
+  const dirty = !!v && !!initial && JSON.stringify(v) !== JSON.stringify(initial);
+  const submit = async () => { if (!v || !canSave(v)) return; setBusy(true); await onSave(v); setBusy(false); };
+  return (
+    <Sheet open={open} onClose={onClose} title={title} size="lg" dirty={dirty && !busy}
+      footer={<SheetFooter start={onDelete && <button type="button" className="xk-btn xk-btn-danger xk-btn-sm" onClick={onDelete}><Icon name="trash" />Remove</button>}>
+        <button type="button" className="xk-btn xk-btn-ghost xk-btn-sm" onClick={onClose}>Cancel</button>
+        <button type="button" className="xk-btn xk-btn-primary xk-btn-sm" disabled={busy || !v || !canSave(v)} onClick={submit}>{busy ? "Saving…" : "Save"}</button>
+      </SheetFooter>}>
+      <form className="xk-sheet-section" onSubmit={(e) => { e.preventDefault(); submit(); }}>{v && render(v, setV)}</form>
+    </Sheet>
+  );
+}
+
+/* ---------- Quick create ---------- */
+
+export function NewProjectSheet({ open, onClose, nextCode }: { open: boolean; onClose: () => void; nextCode: string }) {
+  const router = useRouter();
+  const ah = useAdminHref();
+  const toast = useToast();
+  const [title, setTitle] = useState("");
+  const [summary, setSummary] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  useEffect(() => { if (open) { setTitle(""); setSummary(""); setError(""); } }, [open]);
+  const slug = slugify(title);
+  const create = async () => {
+    if (!title.trim()) { setError("Give it a title. You can change it later."); return; }
+    if (!slug) { setError("The title needs some letters or numbers."); return; }
+    setBusy(true);
+    const base: Project = { slug, code: nextCode, title: title.trim(), world: "", company: "", period: "", role: "", summary: summary.trim(), answer: "", takeaways: [], boss: "", stack: [], metrics: [], sections: [{ id: "problem", title: "The problem", body: [] }, { id: "approach", title: "Approach", body: [] }, { id: "results", title: "Results", body: [] }], faq: [], updated: "" };
+    let r: Awaited<ReturnType<typeof saveProject>> | null = null;
+    for (const s of [slug, `${slug}-2`, `${slug}-${Date.now().toString(36).slice(-4)}`]) {
+      r = await saveProject({ project: { ...base, slug: s }, published: false });
+      if (r.ok || !/already exists/.test(r.error)) break;
+    }
+    setBusy(false);
+    if (!r?.ok || !r.data) { setError(r && !r.ok ? r.error : "Couldn't create it"); return; }
+    toast.ok("Project created", "Hidden until you switch it live.");
+    onClose();
+    router.push(ah(`/projects/${r.data.slug}`));
+  };
+  return (
+    <Sheet open={open} onClose={onClose} size="sm" title="New project" description="A title is enough to start. It stays hidden until you switch it live." dirty={!!(title.trim() || summary.trim()) && !busy}
+      footer={<><button type="button" className="xk-btn xk-btn-ghost xk-btn-sm" onClick={onClose}>Cancel</button><button type="button" className="xk-btn xk-btn-primary xk-btn-sm" disabled={busy} onClick={create}>{busy ? "Creating…" : <>Create<Icon name="arrow-right" /></>}</button></>}>
+      <form className="xk-sheet-section" onSubmit={(e) => { e.preventDefault(); create(); }}>
+        <label className={cx("xk-field", error && "has-error")}>
+          <span>Title</span>
+          <input value={title} onChange={(e) => { setTitle(e.target.value); setError(""); }} placeholder="Realtime device platform" data-autofocus autoComplete="off" />
+          {error ? <span className="xk-field-error" role="alert"><Icon name="warning-circle" />{error}</span> : <span className="xk-field-hint">URL: /work/{slug || "…"} · stage {nextCode}</span>}
+        </label>
+        <AreaField label="Summary (optional)" value={summary} onChange={setSummary} rows={3} placeholder="One or two sentences" />
+      </form>
+    </Sheet>
   );
 }

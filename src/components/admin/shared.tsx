@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
+import { useEffect, useState, useTransition, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon } from "@/components/xerk/icon";
 import { LogoMark } from "@/components/xerk/ui";
 import { ThemeToggle } from "@/components/xerk/client";
-import { createClient } from "@/lib/supabase/client";
-import { createUploadUrl, type ActionResult } from "@/app/[console]/actions";
+import type { ActionResult } from "@/app/[console]/actions";
+import { Uploader, uploadWithProgress, type UploadKind } from "./uploader";
 import { cx } from "@/lib/utils";
 import { useAdminHref } from "./base";
 
@@ -133,45 +133,13 @@ export function ConfirmButton({ label, confirmLabel = "Yes, delete", question = 
 
 /** Upload a file straight from the browser to the `media` bucket via a signed URL from a server action. */
 export async function uploadFile(folder: string, file: File, fixedName?: string): Promise<{ path: string; publicUrl: string }> {
-  const r = await createUploadUrl(folder, file.name, fixedName);
-  if (!r.ok || !r.data) throw new Error(r.ok ? "No upload URL" : r.error);
-  const { error } = await createClient().storage.from("media").uploadToSignedUrl(r.data.path, r.data.token, file, { contentType: file.type || undefined, upsert: true });
-  if (error) throw new Error(error.message);
-  return { path: r.data.path, publicUrl: r.data.publicUrl };
+  return uploadWithProgress(folder, file, { fixedName });
 }
 
-/** URL input + upload button + preview. Used for covers, videos and screens. */
-export function MediaField({ label, value, onChange, folder, fixedName, accept = "image/*", kind = "image", hint, disabledReason }: { label: string; value: string; onChange: (url: string) => void; folder: string; fixedName?: string; accept?: string; kind?: "image" | "video"; hint?: string; disabledReason?: string }) {
-  const input = useRef<HTMLInputElement>(null);
-  const [state, setState] = useState<Status>({ kind: "idle" });
-  const pick = async (file?: File) => {
-    if (!file) return;
-    setState({ kind: "busy", text: `Uploading ${file.name}…` });
-    try {
-      const { publicUrl } = await uploadFile(folder, file, fixedName);
-      onChange(publicUrl);
-      setState({ kind: "ok", text: "Uploaded" });
-    } catch (e) {
-      setState({ kind: "error", text: e instanceof Error ? e.message : "Upload failed" });
-    }
-    if (input.current) input.current.value = "";
-  };
-  const isVideoFile = /\.(mp4|webm|mov)(\?|$)/i.test(value);
-  return (
-    <div className="xk-field xk-admin-upload">
-      <span>{label}</span>
-      <div className="xk-admin-upload-row">
-        <input type="text" value={value} onChange={(e) => onChange(e.target.value)} placeholder={kind === "video" ? "https://… (YouTube, Vimeo, .mp4) or upload" : "https://… or /path, or upload"} />
-        <input ref={input} type="file" accept={accept} hidden onChange={(e) => pick(e.target.files?.[0])} />
-        <button type="button" className="xk-btn xk-btn-secondary xk-btn-sm" disabled={!!disabledReason || state.kind === "busy"} title={disabledReason} onClick={() => input.current?.click()}>{state.kind === "busy" ? "Uploading…" : "Upload"}</button>
-        {value && <button type="button" className="xk-btn xk-btn-ghost xk-btn-sm" onClick={() => onChange("")}>Clear</button>}
-      </div>
-      {(hint || disabledReason) && <span className="xk-field-hint">{disabledReason || hint}</span>}
-      <StatusText status={state} />
-      {value && kind === "image" && <img src={value} alt="" className="xk-admin-thumb" />}
-      {value && kind === "video" && isVideoFile && <video src={value} className="xk-admin-thumb" muted controls playsInline preload="metadata" />}
-    </div>
-  );
+/** Back-compat wrapper: prefer <Uploader> from ./uploader. */
+export function MediaField({ label, value, onChange, folder, fixedName, accept, kind = "image", hint, disabledReason }: { label: string; value: string; onChange: (url: string) => void; folder: string; fixedName?: string; accept?: string; kind?: "image" | "video"; hint?: string; disabledReason?: string }) {
+  const k: UploadKind = accept?.includes("pdf") ? "pdf" : kind;
+  return <Uploader label={label} value={value} onChange={onChange} folder={folder} fixedName={fixedName} kind={k} hint={hint} disabledReason={disabledReason} />;
 }
 
 export function slugify(s: string) {

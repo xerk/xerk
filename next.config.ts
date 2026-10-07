@@ -14,7 +14,8 @@ const nextConfig: NextConfig = {
   },
   skipTrailingSlashRedirect: true,
   // content/ and the Geist TTFs are read at request time (ISR, llms-full.txt, /og)
-  outputFileTracingIncludes: { "/**": ["./content/**/*"], "/og": ["./node_modules/geist/dist/fonts/**/*.ttf"] },
+  // The dashboard's media library lists /public at request time, so ship it with the admin routes only.
+  outputFileTracingIncludes: { "/**": ["./content/**/*"], "/og": ["./node_modules/geist/dist/fonts/**/*.ttf"], "/\\[console\\]/**": ["./public/**/*"] },
   async redirects() {
     return [
       { source: "/resume", destination: "/cv", permanent: true },

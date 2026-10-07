@@ -248,7 +248,7 @@ function safeName(name: string) {
  * Signed upload URL so the browser uploads straight to Supabase Storage (bypasses the 4.5 MB Vercel body limit).
  * `fixedName` (e.g. "cover", "preview", "demo") gives a stable path that's overwritten on re-upload.
  */
-export async function createUploadUrl(folder: string, fileName: string, fixedName?: string): Promise<ActionResult<{ path: string; token: string; publicUrl: string }>> {
+export async function createUploadUrl(folder: string, fileName: string, fixedName?: string): Promise<ActionResult<{ path: string; token: string; publicUrl: string; signedUrl: string }>> {
   return run(async () => {
     const { db } = await requireAdmin();
     const dir = folder.replace(/^\/+|\/+$/g, "");
@@ -261,7 +261,113 @@ export async function createUploadUrl(folder: string, fileName: string, fixedNam
     if (error || !data) throw new Error(error?.message || "Could not create an upload URL.");
     const publicUrl = db.storage.from(MEDIA_BUCKET).getPublicUrl(filePath).data.publicUrl;
     // Cache-bust fixed names so a re-uploaded cover shows up right away.
-    return { path: filePath, token: data.token, publicUrl: fixedName ? `${publicUrl}?v=${Date.now().toString(36)}` : publicUrl };
+    return { path: filePath, token: data.token, signedUrl: data.signedUrl, publicUrl: fixedName ? `${publicUrl}?v=${Date.now().toString(36)}` : publicUrl };
+  });
+}
+
+export type MediaKind = "image" | "video" | "doc" | "other";
+export type MediaItem = {
+  /** Storage key ("posts/x/cover.webp") or repo path ("/projects/x/cover.webp"). */
+  path: string;
+  url: string;
+  name: string;
+  source: "storage" | "repo";
+  kind: MediaKind;
+  size: number;
+  type: string;
+  updated: string;
+  /** Where the file is referenced: "Post: my-post", "Project: alto", "Site: profile"… */
+  usedBy: string[];
+};
+
+const EXT_KIND: [RegExp, MediaKind, string][] = [
+  [/\.(png)$/i, "image", "image/png"], [/\.(jpe?g)$/i, "image", "image/jpeg"], [/\.(webp)$/i, "image", "image/webp"], [/\.(gif)$/i, "image", "image/gif"],
+  [/\.(avif)$/i, "image", "image/avif"], [/\.(svg)$/i, "image", "image/svg+xml"], [/\.(ico)$/i, "image", "image/x-icon"],
+  [/\.(mp4)$/i, "video", "video/mp4"], [/\.(webm)$/i, "video", "video/webm"], [/\.(mov)$/i, "video", "video/quicktime"],
+  [/\.(pdf)$/i, "doc", "application/pdf"], [/\.(html?)$/i, "doc", "text/html"], [/\.(txt|md|json|csv)$/i, "doc", "text/plain"],
+];
+function kindOf(name: string, mime = ""): { kind: MediaKind; type: string } {
+  for (const [re, kind, type] of EXT_KIND) if (re.test(name)) return { kind, type: mime || type };
+  if (mime.startsWith("image/")) return { kind: "image", type: mime };
+  if (mime.startsWith("video/")) return { kind: "video", type: mime };
+  return { kind: mime === "application/pdf" ? "doc" : "other", type: mime };
+}
+
+type Db = NonNullable<ReturnType<typeof adminDb>>;
+
+/** Storage list() isn't recursive: walk folders (entries without an id are folders). */
+async function walkStorage(db: Db, prefix = "", depth = 0): Promise<MediaItem[]> {
+  if (depth > 6) return [];
+  const { data, error } = await db.storage.from(MEDIA_BUCKET).list(prefix, { limit: 1000 });
+  if (error || !data) return [];
+  const out: MediaItem[] = [];
+  const folders: string[] = [];
+  for (const e of data) {
+    const p = prefix ? `${prefix}/${e.name}` : e.name;
+    if (!e.id) { folders.push(p); continue; }
+    if (e.name === ".emptyFolderPlaceholder") continue;
+    const meta = (e.metadata || {}) as { size?: number; mimetype?: string };
+    out.push({ path: p, name: e.name, url: db.storage.from(MEDIA_BUCKET).getPublicUrl(p).data.publicUrl, source: "storage", ...kindOf(e.name, meta.mimetype), size: meta.size || 0, updated: e.updated_at || e.created_at || "", usedBy: [] });
+  }
+  const nested = await Promise.all(folders.map((f) => walkStorage(db, f, depth + 1)));
+  return [...out, ...nested.flat()];
+}
+
+/** Images, videos and docs committed under /public (served as-is by the site; read-only here). */
+function walkPublic(): MediaItem[] {
+  const root = path.join(process.cwd(), "public");
+  const out: MediaItem[] = [];
+  const visit = (dir: string, depth: number) => {
+    if (depth > 6) return;
+    let entries: fs.Dirent[];
+    try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
+    for (const e of entries) {
+      if (e.name.startsWith(".")) continue;
+      const abs = path.join(dir, e.name);
+      if (e.isDirectory()) { visit(abs, depth + 1); continue; }
+      const k = kindOf(e.name);
+      if (k.kind === "other" || /\.(txt|json|csv|md)$/i.test(e.name)) continue;
+      const rel = "/" + path.relative(root, abs).split(path.sep).join("/");
+      const st = fs.statSync(abs);
+      out.push({ path: rel, name: e.name, url: rel, source: "repo", ...k, size: st.size, updated: st.mtime.toISOString(), usedBy: [] });
+    }
+  };
+  visit(root, 0);
+  return out;
+}
+
+/** Text blobs that may reference media, labelled for "used by". */
+async function mediaCorpus(db: Db): Promise<[string, string][]> {
+  const out: [string, string][] = [];
+  const [posts, projects, content] = await Promise.all([
+    db.from("posts").select("slug,title,cover_url,video_url,body_md"),
+    db.from("projects").select("slug,title,data,video_url,embed_url"),
+    db.from("site_content").select("key,value"),
+  ]);
+  for (const p of posts.data || []) out.push([`Post · ${p.title || p.slug}`, [p.cover_url, p.video_url, p.body_md].join("\n")]);
+  for (const p of projects.data || []) out.push([`Project · ${p.title || p.slug}`, JSON.stringify([p.data, p.video_url, p.embed_url])]);
+  for (const c of content.data || []) out.push([`Site · ${c.key}`, JSON.stringify(c.value)]);
+  const dir = path.join(process.cwd(), "content");
+  try {
+    for (const slug of fs.readdirSync(dir)) {
+      const f = path.join(dir, slug, "index.mdx");
+      if (fs.existsSync(f) && !(posts.data || []).some((p) => p.slug === slug)) out.push([`Post file · ${slug}`, fs.readFileSync(f, "utf8")]);
+    }
+  } catch { /* no content dir */ }
+  return out;
+}
+
+/** Everything the site can show: the media bucket (all folders) plus images/videos/docs committed under /public. */
+export async function listMedia(): Promise<ActionResult<MediaItem[]>> {
+  return run(async () => {
+    const { db } = await requireAdmin();
+    const [stored, corpus] = await Promise.all([walkStorage(db), mediaCorpus(db).catch(() => [] as [string, string][])]);
+    const all = [...stored, ...walkPublic()];
+    for (const m of all) {
+      const needle = m.source === "storage" ? `/${MEDIA_BUCKET}/${m.path}` : m.path;
+      m.usedBy = corpus.filter(([, text]) => text.includes(needle)).map(([label]) => label);
+    }
+    return all.sort((a, b) => (a.source === b.source ? b.updated.localeCompare(a.updated) : a.source === "storage" ? -1 : 1));
   });
 }
 

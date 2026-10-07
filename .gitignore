@@ -40,3 +40,4 @@ studio/*/
 !studio/README.md
 .env
 .env*
+.claude/worktrees/

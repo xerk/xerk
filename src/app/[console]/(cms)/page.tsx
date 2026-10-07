@@ -59,7 +59,7 @@ export default async function Overview({ searchParams }: { searchParams: Promise
         <div className="xk-dash-head-tools">
           <LiveBadge live={d.live} generatedAt={d.generatedAt} />
           <RangeTabs value={range} ranges={Object.entries(RANGES).map(([key, r]) => ({ key, label: key }))} />
-          <Link className="xk-btn xk-btn-primary xk-btn-sm" href={adminHref("/posts/new")}><Icon name="plus" />New post</Link>
+          <Link className="xk-btn xk-btn-primary xk-btn-sm" href={adminHref("/posts?new")}><Icon name="plus" />New post</Link>
         </div>
       </header>
 

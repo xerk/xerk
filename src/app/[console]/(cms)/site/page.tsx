@@ -1,4 +1,4 @@
-import { JsonSectionEditor } from "@/components/admin/content-editors";
+import { SiteDataEditor } from "@/components/admin/content-editors";
 import { getSite, readContentRows, type ContentKey } from "@/lib/content";
 
 export const metadata = { title: "Site data" };
@@ -19,18 +19,5 @@ const SECTIONS: { key: Exclude<ContentKey, "profile" | "socials" | "experience">
 
 export default async function SitePage() {
   const [site, rows] = await Promise.all([getSite(), readContentRows()]);
-  return (
-    <>
-      <div className="xk-admin-head">
-        <div>
-          <span className="xk-label">Content</span>
-          <h1>Site data</h1>
-          <p className="xk-muted">Everything else the site shows. Edit as JSON; it&rsquo;s checked before saving, and Reset brings back the built-in version.</p>
-        </div>
-      </div>
-      <div className="xk-admin-stack">
-        {SECTIONS.map((s) => <JsonSectionEditor key={s.key} sectionKey={s.key} label={s.label} help={s.help} initial={site[s.key]} updatedAt={rows[s.key]?.updated_at} />)}
-      </div>
-    </>
-  );
+  return <SiteDataEditor sections={SECTIONS.map((s) => ({ ...s, value: site[s.key], updatedAt: rows[s.key]?.updated_at }))} />;
 }
