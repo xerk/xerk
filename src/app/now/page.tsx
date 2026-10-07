@@ -3,7 +3,7 @@ import { getSite } from "@/lib/content";
 import { getPosts } from "@/lib/posts";
 import { pageMeta } from "@/lib/seo";
 
-export const metadata = pageMeta({ title: "What I'm working on now", description: "What Ahmed Mamdouh is focused on right now: AI agents, MCP servers and real-time systems — and availability for new projects.", path: "/now" });
+export const metadata = pageMeta({ title: "What I'm working on now", description: "What Ahmed Mamdouh is focused on right now: AI agents, MCP servers and real-time systems, and availability for new projects.", path: "/now" });
 
 export default async function Now() {
   const { experience, profile } = await getSite();

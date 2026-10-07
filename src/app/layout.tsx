@@ -13,13 +13,13 @@ export async function generateMetadata(): Promise<Metadata> {
   const { profile } = await getSite();
   return {
   metadataBase: new URL(SITE_URL),
-  title: { default: `${profile.name} — ${profile.title}`, template: `%s | ${profile.name}` },
-  description: profile.description,
+  title: { default: `${profile.name} (xerk): ${profile.title} in Cairo`, template: `%s | ${profile.name}` },
+  description: profile.metaDescription || profile.description,
   applicationName: "xerk.io",
   authors: [{ name: profile.name, url: SITE_URL }],
   creator: profile.name,
   keywords: ["Senior Full-Stack Engineer", "AI Engineer", "NestJS", "Node.js", "Next.js", "TypeScript", "AI agents", "MCP server", "RAG", "Real-time systems", "WebSockets", "Laravel", "Freelance developer Egypt", "Upwork full-stack developer", "Ahmed Mamdouh", "xerk"],
-  openGraph: { type: "website", siteName: "xerk.io", locale: "en_US", images: [{ url: "/og?kind=Profile", width: 1200, height: 630 }] },
+  openGraph: { type: "website", siteName: "xerk.io", locale: "en_US", url: "/", title: `${profile.name} (xerk): ${profile.title}`, description: profile.metaDescription || profile.description, images: [{ url: "/og?kind=Profile", width: 1200, height: 630, alt: `${profile.name}, ${profile.title}` }] },
   twitter: { card: "summary_large_image", creator: "@xerk" },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
   alternates: { canonical: "/", types: { "application/rss+xml": "/rss.xml" } },

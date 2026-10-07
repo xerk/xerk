@@ -22,7 +22,7 @@ export default async function Home() {
   const [featured, ...rest] = projects;
   return (
     <>
-      <JsonLd data={{ "@context": "https://schema.org", "@type": "ProfilePage", url: SITE_URL, mainEntity: { "@id": `${SITE_URL}/#person` } }} />
+      <JsonLd data={{ "@context": "https://schema.org", "@type": "ProfilePage", "@id": `${SITE_URL}/#profilepage`, url: SITE_URL, name: `${profile.name} (xerk)`, inLanguage: "en", isPartOf: { "@id": `${SITE_URL}/#website` }, mainEntity: { "@id": `${SITE_URL}/#person` }, dateModified: posts[0]?.publishedAt }} />
       <div className="xk-container">
         <section className="xk-gamehero">
           <div className="xk-gamehero-copy">
@@ -69,7 +69,7 @@ export default async function Home() {
             <Button variant="primary" icon="calendar-dots" href={bookingUrl} track="book_call">Book a call</Button>
             <Button brand="upwork" iconRight="arrow-up-right" href={upworkHref} track="upwork_click">Hire on Upwork</Button>
           </CTABar>
-          <p className="xk-play-hint">Want the fun version? <Link href="/play">Play the CV as a game</Link>, with a terminal, achievements and Ask my CV.</p>
+          <p className="xk-play-hint">Hiring for something specific? See <Link href="/hire/nestjs-developer">NestJS development</Link> or <Link href="/hire/ai-agent-developer">AI agents and MCP servers</Link>. Want the fun version? <Link href="/play">Play the CV as a game</Link>, with a terminal, achievements and Ask my CV.</p>
         </section>
       </div>
     </>

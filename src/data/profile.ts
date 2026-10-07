@@ -12,6 +12,9 @@ export const profile = {
     "I'm a senior full-stack and AI engineer. I've spent 10+ years building products in TypeScript, NestJS and Next.js, and lately I build real-time backends that hold 100K+ connections and LLM agents that run in production.",
   description:
     "Ahmed Mamdouh is a senior full-stack and AI engineer in Cairo, Egypt, with 10+ years of production work in TypeScript, Node.js, NestJS, React and Next.js. He has built real-time platforms with 100K+ concurrent connections, fintech transaction systems, and AI agents, MCP servers and RAG pipelines that run in production.",
+  /** Home <meta name="description">: the description above is too long for search snippets (keep this under ~158 chars). */
+  metaDescription:
+    "Ahmed Mamdouh (xerk), senior full-stack and AI engineer in Cairo. 10+ years of TypeScript, NestJS and Next.js: real-time systems, AI agents, MCP and RAG.",
   location: "Cairo, Egypt",
   timezone: "UTC+3",
   years: 10,
